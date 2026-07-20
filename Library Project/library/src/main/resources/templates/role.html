@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مدیریت نقش‌ها</title>
+
+    <style>
+        body { font-family: Tahoma, sans-serif; direction: rtl; text-align: right; margin: 20px; }
+        .container { max-width: 1250px; margin: auto; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { padding: 12px; border: 1px solid #aaa; text-align: right; }
+        th { background-color: #f4f4f4; }
+
+        /* Modal Styles */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
+        .modal-content { background-color: #fefefe; margin: 5% auto; padding: 25px; border: 1px solid #888; width: 52%; border-radius: 8px; }
+        .close { color: #aaa; float: right; font-size: 32px; font-weight: bold; cursor: pointer; }
+        .close:hover { color: black; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 6px; font-weight: bold; }
+        input, select { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 5px; }
+        button { padding: 12px 22px; margin: 6px 4px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>مدیریت اطلاعات نقش‌ها</h1>
+
+    <div th:if="${message}" style="padding:12px; background:#d4edda; color:#155724; border-radius:5px; margin:15px 0;" th:text="${message}"></div>
+
+    <button onclick="openCreateModal()" style="background:#28a745; color:white; padding:12px 24px;">
+        + ثبت نقش جدید
+    </button>
+
+    <hr>
+
+    <h2>لیست نقش‌های ثبت شده</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>شناسه</th>
+            <th>عنوان نقش (انگلیسی)</th>
+            <th>عنوان نقش (فارسی)</th>
+            <th>تاریخ ایجاد</th>
+            <th>ساعت ایجاد</th>
+            <th>ایجاد کننده</th>
+            <th>عملیات</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="r : ${roles}" th:if="${roles != null and not #lists.isEmpty(roles)}"
+            th:data-id="${r.roleId}"
+            th:data-englishtitle="${r.englishRoleTitle}"
+            th:data-farsititle="${r.farsiRoleTitle}">
+
+            <td th:text="${r.roleId}"></td>
+            <td th:text="${r.englishRoleTitle}"></td>
+            <td th:text="${r.farsiRoleTitle}"></td>
+            <td th:text="${#temporals.format(r.createdDate, 'yyyy-MM-dd')}"></td>
+            <td th:text="${#temporals.format(r.createdTime, 'HH:mm:ss')}"></td>
+            <td th:text="${r.createdBy}"></td>
+            <td>
+                <button onclick="openEditModal(this)"
+                        style="background:#ffc107; color:black; padding:8px 16px;">
+                    ✏️ ویرایش
+                </button>
+            </td>
+        </tr>
+        <tr th:if="${roles == null or #lists.isEmpty(roles)}">
+            <td colspan="7" style="text-align:center; color:#888; padding:20px;">
+                هنوز هیچ نقشی ثبت نشده است.
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal -->
+<div id="roleModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h2 id="modalTitle">ثبت نقش جدید</h2>
+
+        <form id="roleForm" th:action="@{/role/saveRole}" method="post" th:object="${roleDto}">
+            <input type="hidden" id="roleId" th:field="*{roleId}" />
+
+            <div class="form-group">
+                <label>عنوان نقش (انگلیسی):</label>
+                <input type="text" id="englishRoleTitle" th:field="*{englishRoleTitle}" required />
+            </div>
+            <div class="form-group">
+                <label>عنوان نقش (فارسی):</label>
+                <input type="text" id="farsiRoleTitle" th:field="*{farsiRoleTitle}" required />
+            </div>
+
+            <div style="margin-top: 20px;">
+                <button type="submit" id="submitBtn" style="background:#28a745; color:white;">ذخیره</button>
+                <button type="button" onclick="closeModal()" style="background:#dc3545; color:white;">انصراف</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openCreateModal() {
+        document.getElementById("modalTitle").textContent = "ثبت نقش جدید";
+        document.getElementById("submitBtn").textContent = "ذخیره";
+        document.getElementById("roleForm").reset();
+        document.getElementById("roleId").value = "";
+        document.getElementById("roleModal").style.display = "block";
+    }
+
+    function openEditModal(btn) {
+        const row = btn.closest('tr');
+
+        document.getElementById("modalTitle").textContent = "ویرایش نقش";
+        document.getElementById("submitBtn").textContent = "به‌روزرسانی";
+
+        document.getElementById("roleId").value = row.dataset.id;
+        document.getElementById("englishRoleTitle").value = row.dataset.englishtitle;
+        document.getElementById("farsiRoleTitle").value = row.dataset.farsititle;
+
+        document.getElementById("roleModal").style.display = "block";
+    }
+
+    function closeModal() {
+        document.getElementById("roleModal").style.display = "none";
+    }
+</script>
+
+</body>
+</html>
