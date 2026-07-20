@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مدیریت کاربران</title>
+
+    <style>
+        body { font-family: Tahoma, sans-serif; direction: rtl; text-align: right; margin: 20px; }
+        .container { max-width: 1250px; margin: auto; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { padding: 12px; border: 1px solid #aaa; text-align: right; }
+        th { background-color: #f4f4f4; }
+
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
+        .modal-content { background-color: #fefefe; margin: 5% auto; padding: 25px; border: 1px solid #888; width: 60%; border-radius: 8px; max-height: 80%; overflow-y: auto; }
+        .close { color: #aaa; float: right; font-size: 32px; font-weight: bold; cursor: pointer; }
+        .close:hover { color: black; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 6px; font-weight: bold; }
+        input, select { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 5px; }
+        button { padding: 12px 22px; margin: 6px 4px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+
+        .search-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .search-container input {
+            flex: 1;
+        }
+        .search-container button {
+            padding: 10px 20px;
+            white-space: nowrap;
+        }
+
+        .person-select-btn {
+            background: #17a2b8;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+        .person-select-btn:hover {
+            background: #138496;
+        }
+
+        .person-row {
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .person-row:hover {
+            background-color: #e9ecef;
+        }
+
+        .person-info {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 5px;
+            border-right: 3px solid #28a745;
+        }
+        .person-info span {
+            margin-left: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>مدیریت کاربران</h1>
+
+    <div th:if="${message}" style="padding:12px; background:#d4edda; color:#155724; border-radius:5px; margin:15px 0;" th:text="${message}"></div>
+
+    <button onclick="openCreateModal()" style="background:#28a745; color:white; padding:12px 24px;">
+        + ثبت کاربر جدید
+    </button>
+
+    <hr>
+
+    <h2>لیست کاربران ثبت شده</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>شناسه</th>
+            <th>نام</th>
+            <th>نام خانوادگی</th>
+            <th>کد ملی</th>
+            <th>نام کاربری</th>
+            <th>ایمیل</th>
+            <th>تاریخ ایجاد</th>
+            <th>ساعت ایجاد</th>
+            <th>ایجاد کننده</th>
+            <th>عملیات</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="u : ${users}" th:if="${users != null and not #lists.isEmpty(users)}"
+            th:data-id="${u.userId}"
+            th:data-personid="${u.personId}"
+            th:data-username="${u.userName}"
+            th:data-email="${u.userEmail}"
+            th:data-person-firstname="${u.personFirstName}"
+            th:data-person-lastname="${u.personLastName}"
+            th:data-person-nationalcode="${u.personNationalCode}">
+
+            <td th:text="${u.userId}"></td>
+            <td th:text="${u.personFirstName}"></td>
+            <td th:text="${u.personLastName}"></td>
+            <td th:text="${u.personNationalCode}"></td>
+            <td th:text="${u.userName}"></td>
+            <td th:text="${u.userEmail}"></td>
+            <td th:text="${#temporals.format(u.userCreatedDate, 'yyyy-MM-dd')}"></td>
+            <td th:text="${#temporals.format(u.userCreatedTime, 'HH:mm:ss')}"></td>
+            <td th:text="${u.userCreatedBy}"></td>
+            <td>
+                <button onclick="openEditModal(this)"
+                        style="background:#ffc107; color:black; padding:8px 16px;">
+                    ✏️ ویرایش
+                </button>
+            </td>
+        </tr>
+        <tr th:if="${users == null or #lists.isEmpty(users)}">
+            <td colspan="10" style="text-align:center; color:#888; padding:20px;">
+                هنوز هیچ کاربری ثبت نشده است.
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal ثبت/ویرایش کاربر -->
+<div id="userModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h2 id="modalTitle">ثبت کاربر جدید</h2>
+
+        <form id="userForm" th:action="@{/user/saveUser}" method="post" th:object="${userDto}">
+            <input type="hidden" id="userId" th:field="*{userId}" />
+
+            <div class="form-group">
+                <label>نام کاربری:</label>
+                <input type="text" id="username" th:field="*{username}" required />
+            </div>
+            <div class="form-group">
+                <label>گذرواژه:</label>
+                <input type="password" id="password" th:field="*{password}" required />
+            </div>
+            <div class="form-group">
+                <label>ایمیل:</label>
+                <input type="email" id="email" th:field="*{email}" required />
+            </div>
+
+            <div class="form-group">
+                <label>شناسه شخص:</label>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <input type="number" id="personId" th:field="*{person}" required style="flex: 1;" />
+                    <button type="button" onclick="openPersonSearch()" style="background:#17a2b8; color:white; padding:10px 20px; white-space:nowrap;">
+                        🔍 جستجو
+                    </button>
+                </div>
+                <div id="selectedPersonInfo" style="display:none;" class="person-info">
+                    <span><strong>نام:</strong> <span id="selectedFirstName"></span></span>
+                    <span><strong>نام خانوادگی:</strong> <span id="selectedLastName"></span></span>
+                    <span><strong>کد ملی:</strong> <span id="selectedNationalCode"></span></span>
+                </div>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <button type="submit" id="submitBtn" style="background:#28a745; color:white;">ذخیره</button>
+                <button type="button" onclick="closeModal()" style="background:#dc3545; color:white;">انصراف</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal جستجوی شخص -->
+<div id="personSearchModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closePersonSearch()">&times;</span>
+        <h2>جستجوی شخص</h2>
+
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="جستجو بر اساس نام، نام خانوادگی یا کد ملی..." />
+            <button onclick="searchPersons()" style="background:#007bff; color:white;">جستجو</button>
+            <button onclick="clearSearch()" style="background:#6c757d; color:white;">پاک کردن</button>
+        </div>
+
+        <div id="searchResults">
+            <table>
+                <thead>
+                <tr>
+                    <th>شناسه</th>
+                    <th>نام</th>
+                    <th>نام خانوادگی</th>
+                    <th>کد ملی</th>
+                    <th>انتخاب</th>
+                </tr>
+                </thead>
+                <tbody id="personTableBody">
+                <!-- اطلاعات اشخاص با جاوااسکریپت پر می‌شود -->
+                </tbody>
+            </table>
+        </div>
+
+        <div style="margin-top: 20px;">
+            <button onclick="closePersonSearch()" style="background:#dc3545; color:white;">بستن</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let allPersons = [];
+
+    function loadPersons() {
+        console.log('Loading persons from API...');
+
+        fetch('/user/findAllPeople')   // ← اینجا را اصلاح کن
+            .then(response => {
+                console.log('Response status:', response.status);
+                if (!response.ok) {
+                    throw new Error('HTTP error! status: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Data received:', data);
+                console.log('Number of persons:', data.length);
+                allPersons = data;
+                displayPersons(allPersons);
+            })
+            .catch(error => {
+                console.error('Error details:', error);
+                const tbody = document.getElementById('personTableBody');
+                tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" style="text-align:center; color:#dc3545; padding:20px;">
+                        خطا در دریافت اطلاعات: ${error.message}
+                    </td>
+                </tr>
+            `;
+            });
+    }
+
+    function displayPersons(persons) {
+        const tbody = document.getElementById('personTableBody');
+        if (!persons || persons.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" style="text-align:center; color:#888; padding:20px;">
+                        هیچ شخصی یافت نشد.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        let html = '';
+        persons.forEach(person => {
+            html += `
+                <tr class="person-row" onclick="selectPerson('${person.personId}', '${person.firstName || ''}', '${person.lastName || ''}', '${person.nationalCode || ''}')">
+                    <td>${person.personId}</td>
+                    <td>${person.firstName || ''}</td>
+                    <td>${person.lastName || ''}</td>
+                    <td>${person.nationalCode || ''}</td>
+                    <td>
+                        <button style="background:#28a745; color:white; padding:6px 12px; border:none; border-radius:4px; cursor:pointer;">
+                            انتخاب
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+        tbody.innerHTML = html;
+    }
+
+    function searchPersons() {
+        const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+        if (!searchTerm) {
+            displayPersons(allPersons);
+            return;
+        }
+
+        const filtered = allPersons.filter(person => {
+            const firstName = (person.firstName || '').toLowerCase();
+            const lastName = (person.lastName || '').toLowerCase();
+            const nationalCode = (person.nationalCode || '').toLowerCase();
+            return firstName.includes(searchTerm) ||
+                lastName.includes(searchTerm) ||
+                nationalCode.includes(searchTerm);
+        });
+        displayPersons(filtered);
+    }
+
+    function clearSearch() {
+        document.getElementById('searchInput').value = '';
+        displayPersons(allPersons);
+    }
+
+    function selectPerson(id, firstName, lastName, nationalCode) {
+        document.getElementById('personId').value = id;
+
+        document.getElementById('selectedPersonInfo').style.display = 'block';
+        document.getElementById('selectedFirstName').textContent = firstName || 'نامشخص';
+        document.getElementById('selectedLastName').textContent = lastName || 'نامشخص';
+        document.getElementById('selectedNationalCode').textContent = nationalCode || 'نامشخص';
+
+        closePersonSearch();
+    }
+
+    function openPersonSearch() {
+        document.getElementById('personSearchModal').style.display = 'block';
+        loadPersons();
+        document.getElementById('searchInput').value = '';
+    }
+
+    function closePersonSearch() {
+        document.getElementById('personSearchModal').style.display = 'none';
+    }
+
+    function openCreateModal() {
+        document.getElementById("modalTitle").textContent = "ثبت کاربر جدید";
+        document.getElementById("submitBtn").textContent = "ذخیره";
+        document.getElementById("userForm").reset();
+        document.getElementById("userId").value = "";
+        document.getElementById("personId").value = "";
+        document.getElementById("selectedPersonInfo").style.display = "none";
+        document.getElementById("userModal").style.display = "block";
+    }
+
+    function openEditModal(btn) {
+        const row = btn.closest('tr');
+
+        document.getElementById("modalTitle").textContent = "ویرایش کاربر";
+        document.getElementById("submitBtn").textContent = "به‌روزرسانی";
+
+        document.getElementById("userId").value = row.dataset.id;
+        document.getElementById("username").value = row.dataset.username;
+        document.getElementById("email").value = row.dataset.email;
+        document.getElementById("personId").value = row.dataset.personid;
+
+        const firstName = row.dataset.personFirstname || '';
+        const lastName = row.dataset.personLastname || '';
+        const nationalCode = row.dataset.personNationalcode || '';
+
+        if (firstName || lastName || nationalCode) {
+            document.getElementById("selectedPersonInfo").style.display = 'block';
+            document.getElementById("selectedFirstName").textContent = firstName || 'نامشخص';
+            document.getElementById("selectedLastName").textContent = lastName || 'نامشخص';
+            document.getElementById("selectedNationalCode").textContent = nationalCode || 'نامشخص';
+        } else {
+            document.getElementById("selectedPersonInfo").style.display = "none";
+        }
+
+        document.getElementById("userModal").style.display = "block";
+    }
+
+    function closeModal() {
+        document.getElementById("userModal").style.display = "none";
+    }
+
+    window.onclick = function(event) {
+        const userModal = document.getElementById("userModal");
+        const personSearchModal = document.getElementById("personSearchModal");
+
+        if (event.target == userModal) {
+            closeModal();
+        }
+        if (event.target == personSearchModal) {
+            closePersonSearch();
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('keyup', function(event) {
+                if (event.key === 'Enter') {
+                    searchPersons();
+                }
+            });
+        }
+    });
+</script>
+
+</body>
+</html>
