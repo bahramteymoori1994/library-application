@@ -7,6 +7,8 @@ import org.hibernate.validator.constraints.Length;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity(name = "userEntity")
 @Table(name = "user_person")
@@ -48,10 +50,16 @@ public class User {
     @JoinColumn(name = "PERSON_ID", referencedColumnName = "PERSON_ID")
     private Person person;
 
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+    @JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "USER_ID", referencedColumnName = "USER_ID",
+    foreignKey = @ForeignKey(name = "FK_USER_ID")), inverseJoinColumns = @JoinColumn(name = "ROLE_ID",
+    referencedColumnName = "ROLE_ID"), inverseForeignKey = @ForeignKey(name = "FK_ROLE_ID"))
+    private List<Role> roles = new ArrayList<>();
+
     public User() {
     }
 
-    public User(Long userId, String username, String password, String email, LocalDate createdDate, LocalTime createdTime, String createdBy, Person person) {
+    public User(Long userId, String username, String password, String email, LocalDate createdDate, LocalTime createdTime, String createdBy, Person person, List<Role> roles) {
         this.userId = userId;
         this.username = username;
         this.password = password;
@@ -60,6 +68,7 @@ public class User {
         this.createdTime = createdTime;
         this.createdBy = createdBy;
         this.person = person;
+        this.roles = roles;
     }
 
     public Long getUserId() {
@@ -134,6 +143,15 @@ public class User {
         return this;
     }
 
+    public List<Role> getRoles() {
+        return roles;
+    }
+
+    public User setRoles(List<Role> roles) {
+        this.roles = roles;
+        return this;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -142,9 +160,10 @@ public class User {
                 ", password='" + password + '\'' +
                 ", email='" + email + '\'' +
                 ", createdDate=" + createdDate +
-                ", createdTime='" + createdTime + '\'' +
+                ", createdTime=" + createdTime +
                 ", createdBy='" + createdBy + '\'' +
                 ", person=" + person +
+                ", roles=" + roles +
                 '}';
     }
 }

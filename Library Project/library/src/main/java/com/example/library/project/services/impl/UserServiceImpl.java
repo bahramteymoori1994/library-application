@@ -3,12 +3,16 @@ package com.example.library.project.services.impl;
 import com.example.library.project.dto.requests.UserRequestDto;
 import com.example.library.project.dto.responses.UserResponseDto;
 import com.example.library.project.dto.views.UserViewResponseDto;
+import com.example.library.project.model.entities.Role;
 import com.example.library.project.model.entities.User;
 import com.example.library.project.model.views.UserView;
+import com.example.library.project.repositories.RoleRepository;
 import com.example.library.project.repositories.UserRepository;
 import com.example.library.project.services.interfaces.UserService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -18,87 +22,108 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository; // اضافه کردن RoleRepository
 
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository) {
         this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
     }
 
     @Override
+    @Transactional
     public UserResponseDto save(UserRequestDto userRequestDto) throws Exception {
 
-        UserResponseDto userResponseDto = new UserResponseDto();
+        if (userRequestDto == null) {
+            throw new Exception("User request object is null");
+        }
+
         User user = new User();
 
+        // تنظیم تاریخ و زمان
         userRequestDto
                 .setCreatedDate(LocalDate.now())
                 .setCreatedTime(LocalTime.now())
                 .setCreatedBy("admin");
 
-        if( userRequestDto == null ){
-            throw new Exception("User request object is null");
-        }
-
+        // کپی properties
         BeanUtils.copyProperties(userRequestDto, user);
+
+        // بارگذاری نقش‌ها از دیتابیس بر اساس IDها
+        if (userRequestDto.getRoleIds() != null && !userRequestDto.getRoleIds().isEmpty()) {
+            List<Role> roles = roleRepository.findAllById(userRequestDto.getRoleIds());
+            user.setRoles(roles);
+        }
 
         User userSaved = userRepository.saveAndFlush(user);
 
-        if( userSaved == null ){
+        if (userSaved == null) {
             throw new Exception("User saved object is null");
         }
 
+        UserResponseDto userResponseDto = new UserResponseDto();
         BeanUtils.copyProperties(userSaved, userResponseDto);
+        userResponseDto.setRoles(userSaved.getRoles());
+
         return userResponseDto;
     }
 
     @Override
+    @Transactional
     public UserResponseDto update(UserRequestDto userRequestDto) throws Exception {
 
-        UserResponseDto userResponseDto = new UserResponseDto();
-        User user = new User();
-
-        if( userRequestDto == null ){
+        if (userRequestDto == null) {
             throw new Exception("User request object is null");
         }
 
-        userResponseDto
-                .setCreatedDate(LocalDate.now())
-                .setCreatedTime(LocalTime.now())
-                .setCreatedBy("admin");
+        // بررسی وجود کاربر
+        User existingUser = userRepository.findById(userRequestDto.getUserId())
+                .orElseThrow(() -> new Exception("User not found with id: " + userRequestDto.getUserId()));
 
-        BeanUtils.copyProperties(userRequestDto, user);
+        // به‌روزرسانی فیلدها
+        existingUser.setUsername(userRequestDto.getUsername());
+        existingUser.setPassword(userRequestDto.getPassword());
+        existingUser.setEmail(userRequestDto.getEmail());
+        existingUser.setPerson(userRequestDto.getPerson());
 
-        User userUpdated = userRepository.save(user);
-
-        if( userUpdated == null ){
-            throw new Exception("User saved object is null");
+        // به‌روزرسانی نقش‌ها
+        if (userRequestDto.getRoleIds() != null) {
+            List<Role> roles = roleRepository.findAllById(userRequestDto.getRoleIds());
+            existingUser.setRoles(roles);
         }
 
+        User userUpdated = userRepository.save(existingUser);
+
+        UserResponseDto userResponseDto = new UserResponseDto();
         BeanUtils.copyProperties(userUpdated, userResponseDto);
+        userResponseDto.setRoles(userUpdated.getRoles());
+
         return userResponseDto;
     }
 
     @Override
     public UserResponseDto findById(Long id) {
-
         UserResponseDto userResponseDto = new UserResponseDto();
         User findUserById = userRepository.findById(id).orElse(null);
 
-        BeanUtils.copyProperties(findUserById, userResponseDto);
+        if (findUserById != null) {
+            BeanUtils.copyProperties(findUserById, userResponseDto);
+            userResponseDto.setRoles(findUserById.getRoles());
+        }
+
         return userResponseDto;
     }
 
     @Override
     public List<UserResponseDto> findAll() {
-
         List<UserResponseDto> userResponseDtoList = new ArrayList<>();
         List<User> userList = userRepository.findAll();
 
-        userList.stream()
-                .forEach(user -> {
-                    UserResponseDto userResponseDto = new UserResponseDto();
-                    BeanUtils.copyProperties(user, userResponseDto);
-                    userResponseDtoList.add(userResponseDto);
-                });
+        userList.forEach(user -> {
+            UserResponseDto userResponseDto = new UserResponseDto();
+            BeanUtils.copyProperties(user, userResponseDto);
+            userResponseDto.setRoles(user.getRoles());
+            userResponseDtoList.add(userResponseDto);
+        });
 
         return userResponseDtoList;
     }
@@ -106,20 +131,29 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserViewResponseDto> findUsersView() {
         List<UserView> userList = userRepository.findUsersView();
-
-        System.out.println("=== DEBUG: تعداد رکوردهای UserView = " + userList.size());
-
-        if (!userList.isEmpty()) {
-            System.out.println("نمونه اولین رکورد: " + userList.get(0).getPersonFirstName() + " " +
-                    userList.get(0).getPersonLastName());
-        }
-
         List<UserViewResponseDto> userResponseDtoList = new ArrayList<>();
+
         for (UserView user : userList) {
             UserViewResponseDto dto = new UserViewResponseDto();
             BeanUtils.copyProperties(user, dto);
+
+            // پردازش rolesFarsi به لیست
+            if (user.getRolesFarsi() != null && !user.getRolesFarsi().isEmpty()) {
+                // اگر rolesFarsi به صورت comma-separated است
+                String[] rolesArray = user.getRolesFarsi().split(",");
+                List<String> rolesList = new ArrayList<>();
+                for (String role : rolesArray) {
+                    String trimmedRole = role.trim();
+                    if (!trimmedRole.isEmpty()) {
+                        rolesList.add(trimmedRole);
+                    }
+                }
+                dto.setRolesList(rolesList);
+            }
+
             userResponseDtoList.add(dto);
         }
+
         return userResponseDtoList;
     }
 }

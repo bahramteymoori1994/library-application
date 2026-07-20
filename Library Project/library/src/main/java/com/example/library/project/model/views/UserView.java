@@ -4,64 +4,74 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import org.hibernate.annotations.Immutable;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 @Getter
 @Entity
 @Immutable
 @Table(name = "user_view", schema = "test")
 public class UserView {
+
     @Id
-    @NotNull
-    @Column(name = "user_id", nullable = false)
+    @Column(name = "user_id")
     private Long userId;
 
-    @Column(name = "person_id", nullable = false)
-    @NotNull
+    @Column(name = "person_id")
     private Long personId;
 
-    @Size(max = 50)
-    @NotNull
-    @Column(name = "person_first_name", nullable = false, length = 50)
+    @Column(name = "person_first_name")
     private String personFirstName;
 
-    @Size(max = 50)
-    @NotNull
-    @Column(name = "person_last_name", nullable = false, length = 50)
+    @Column(name = "person_last_name")
     private String personLastName;
 
-    @Size(max = 10)
-    @NotNull
-    @Column(name = "person_national_code", nullable = false, length = 10)
+    @Column(name = "person_national_code")
     private String personNationalCode;
 
-    @Size(max = 50)
-    @NotNull
-    @Column(name = "user_name", nullable = false, length = 50)
+    @Column(name = "user_name")
     private String userName;
 
-    @Size(max = 100)
-    @NotNull
-    @Column(name = "user_email", nullable = false, length = 100)
-    private String userEmail;
+    @Column(name = "email")
+    private String email;
 
-    @NotNull
-    @Column(name = "user_created_date", nullable = false)
+    @Column(name = "user_created_date")
     private LocalDate userCreatedDate;
 
-    @NotNull
-    @Column(name = "user_created_time", nullable = false)
+    @Column(name = "user_created_time")
     private LocalTime userCreatedTime;
 
-    @Size(max = 50)
-    @NotNull
-    @Column(name = "user_created_by", nullable = false, length = 50)
+    @Column(name = "user_created_by")
     private String userCreatedBy;
+
+    @Column(name = "roles_farsi")
+    private String rolesFarsi;
+
+//    @Column(name = "role_ids")
+//    private List<Long> roleIds;
+//
+//    @Column(name = "roles_list")
+//    private List<String> rolesList;
+
+    public UserView() {
+    }
+
+    public UserView(Long userId, Long personId, String personFirstName, String personLastName, String personNationalCode, String userName, String email, LocalDate userCreatedDate, LocalTime userCreatedTime, String userCreatedBy, String rolesFarsi) {
+        this.userId = userId;
+        this.personId = personId;
+        this.personFirstName = personFirstName;
+        this.personLastName = personLastName;
+        this.personNationalCode = personNationalCode;
+        this.userName = userName;
+        this.email = email;
+        this.userCreatedDate = userCreatedDate;
+        this.userCreatedTime = userCreatedTime;
+        this.userCreatedBy = userCreatedBy;
+        this.rolesFarsi = rolesFarsi;
+    }
 
     public Long getUserId() {
         return userId;
@@ -69,6 +79,15 @@ public class UserView {
 
     public UserView setUserId(Long userId) {
         this.userId = userId;
+        return this;
+    }
+
+    public Long getPersonId() {
+        return personId;
+    }
+
+    public UserView setPersonId(Long personId) {
+        this.personId = personId;
         return this;
     }
 
@@ -108,12 +127,12 @@ public class UserView {
         return this;
     }
 
-    public String getUserEmail() {
-        return userEmail;
+    public String getEmail() {
+        return email;
     }
 
-    public UserView setUserEmail(String userEmail) {
-        this.userEmail = userEmail;
+    public UserView setEmail(String email) {
+        this.email = email;
         return this;
     }
 
@@ -144,12 +163,12 @@ public class UserView {
         return this;
     }
 
-    public Long getPersonId() {
-        return personId;
+    public String getRolesFarsi() {
+        return rolesFarsi;
     }
 
-    public UserView setPersonId(Long personId) {
-        this.personId = personId;
+    public UserView setRolesFarsi(String rolesFarsi) {
+        this.rolesFarsi = rolesFarsi;
         return this;
     }
 }

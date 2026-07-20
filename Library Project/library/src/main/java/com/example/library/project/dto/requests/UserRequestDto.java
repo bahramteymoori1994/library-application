@@ -1,10 +1,11 @@
 package com.example.library.project.dto.requests;
 
 import com.example.library.project.model.entities.Person;
-import jakarta.persistence.*;
-
+import com.example.library.project.model.entities.Role;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class UserRequestDto {
 
@@ -17,20 +18,16 @@ public class UserRequestDto {
     private String createdBy;
     private Person person;
 
+    // تغییر: استفاده از List<Long> برای دریافت ID نقش‌ها
+    private List<Long> roleIds = new ArrayList<>();
+
+    // فیلد برای نمایش در ویو
+    private List<Role> roles = new ArrayList<>();
+
     public UserRequestDto() {
     }
 
-    public UserRequestDto(Long userId, String username, String password, String email, LocalDate createdDate, LocalTime createdTime, String createdBy, Person person) {
-        this.userId = userId;
-        this.username = username;
-        this.password = password;
-        this.email = email;
-        this.createdDate = createdDate;
-        this.createdTime = createdTime;
-        this.createdBy = createdBy;
-        this.person = person;
-    }
-
+    // Getters and Setters
     public Long getUserId() {
         return userId;
     }
@@ -103,6 +100,24 @@ public class UserRequestDto {
         return this;
     }
 
+    public List<Long> getRoleIds() {
+        return roleIds;
+    }
+
+    public UserRequestDto setRoleIds(List<Long> roleIds) {
+        this.roleIds = roleIds;
+        return this;
+    }
+
+    public List<Role> getRoles() {
+        return roles;
+    }
+
+    public UserRequestDto setRoles(List<Role> roles) {
+        this.roles = roles;
+        return this;
+    }
+
     @Override
     public String toString() {
         return "UserRequestDto{" +
@@ -111,9 +126,11 @@ public class UserRequestDto {
                 ", password='" + password + '\'' +
                 ", email='" + email + '\'' +
                 ", createdDate=" + createdDate +
-                ", createdTime='" + createdTime + '\'' +
+                ", createdTime=" + createdTime +
                 ", createdBy='" + createdBy + '\'' +
                 ", person=" + person +
+                ", roleIds=" + roleIds +
+                ", roles=" + roles +
                 '}';
     }
 }

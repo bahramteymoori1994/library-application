@@ -1,10 +1,11 @@
 package com.example.library.project.dto.responses;
 
-import com.example.library.project.dto.requests.UserRequestDto;
 import com.example.library.project.model.entities.Person;
-
+import com.example.library.project.model.entities.Role;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class UserResponseDto {
 
@@ -16,11 +17,12 @@ public class UserResponseDto {
     private LocalTime createdTime;
     private String createdBy;
     private Person person;
+    private List<Role> roles = new ArrayList<>();
 
     public UserResponseDto() {
     }
 
-    public UserResponseDto(Long userId, String username, String password, String email, LocalDate createdDate, LocalTime createdTime, String createdBy, Person person) {
+    public UserResponseDto(Long userId, String username, String password, String email, LocalDate createdDate, LocalTime createdTime, String createdBy, Person person, List<Role> roles) {
         this.userId = userId;
         this.username = username;
         this.password = password;
@@ -29,6 +31,7 @@ public class UserResponseDto {
         this.createdTime = createdTime;
         this.createdBy = createdBy;
         this.person = person;
+        this.roles = roles;
     }
 
     public Long getUserId() {
@@ -103,6 +106,15 @@ public class UserResponseDto {
         return this;
     }
 
+    public List<Role> getRoles() {
+        return roles;
+    }
+
+    public UserResponseDto setRoles(List<Role> roles) {
+        this.roles = roles;
+        return this;
+    }
+
     @Override
     public String toString() {
         return "UserResponseDto{" +
@@ -111,9 +123,10 @@ public class UserResponseDto {
                 ", password='" + password + '\'' +
                 ", email='" + email + '\'' +
                 ", createdDate=" + createdDate +
-                ", createdTime='" + createdTime + '\'' +
+                ", createdTime=" + createdTime +
                 ", createdBy='" + createdBy + '\'' +
                 ", person=" + person +
+                ", roles=" + roles +
                 '}';
     }
 }

@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class RoleServiceImpl implements RoleService {
@@ -95,5 +96,23 @@ public class RoleServiceImpl implements RoleService {
                 });
 
         return roleResponseDtoList;
+    }
+
+    @Override
+    public List<RoleResponseDto> searchRoles(String term) {
+        List<Role> roles;
+
+        if (term == null || term.trim().isEmpty()) {
+            roles = roleRepository.findAll();
+        } else {
+            roles = roleRepository.findByEnglishRoleTitleContainingIgnoreCaseOrFarsiRoleTitleContainingIgnoreCase(
+                    term.trim(), term.trim());
+        }
+
+        return roles.stream().map(role -> {
+            RoleResponseDto dto = new RoleResponseDto();
+            BeanUtils.copyProperties(role, dto);
+            return dto;
+        }).collect(Collectors.toList());
     }
 }
