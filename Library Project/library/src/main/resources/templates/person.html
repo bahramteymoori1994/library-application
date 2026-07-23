@@ -71,7 +71,7 @@
             <td th:text="${p.nationalCode}"></td>
             <td th:text="${p.fatherName}"></td>
             <td th:text="${#temporals.format(p.birthDate, 'yyyy-MM-dd')}"></td>
-            <td th:text="${p.gender == 'MALE'} ? 'مرد' : 'زن'"></td>
+            <td th:text="${p.gender == 'MALE'} ? 'زن' : 'مرد'"></td>
             <td th:text="${p.phoneNumber}"></td>
             <td th:text="${#temporals.format(p.createdDate, 'yyyy-MM-dd')}"></td>
             <td th:text="${#temporals.format(p.createdTime, 'HH:mm:ss')}"></td>

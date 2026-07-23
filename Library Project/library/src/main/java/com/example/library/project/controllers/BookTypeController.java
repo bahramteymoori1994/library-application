@@ -1,7 +1,6 @@
 package com.example.library.project.controllers;
 
 import com.example.library.project.dto.requests.BookTypeRequestDto;
-import com.example.library.project.dto.requests.PersonRequestDto;
 import com.example.library.project.dto.responses.BookTypeResponseDto;
 import com.example.library.project.services.interfaces.BookTypeService;
 import org.springframework.http.HttpStatus;
@@ -28,20 +27,20 @@ public class BookTypeController {
         List<BookTypeResponseDto> bookTypes = findAllBookTypes();
 
         model.addAttribute("bookTypes", bookTypes);
-        model.addAttribute("bookTypeDto", new PersonRequestDto());
+        model.addAttribute("bookTypeDto", new BookTypeRequestDto());
 
         return "bookType";
     }
 
-    @PostMapping("/savePerson")
-    public String savePerson(@ModelAttribute("bookTypeDto") BookTypeRequestDto bookTypeRequestDto, RedirectAttributes redirectAttributes) {
+    @PostMapping("/saveBookType")
+    public String saveBookType(@ModelAttribute("bookTypeDto") BookTypeRequestDto bookTypeRequestDto, RedirectAttributes redirectAttributes) {
         try {
             bookTypeService.save(bookTypeRequestDto);
             redirectAttributes.addFlashAttribute("message", "نوع کتاب با موفقیت ثبت شد.");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("message", "خطا در ثبت: " + e.getMessage());
         }
-        return "redirect:/person";
+        return "redirect:/bookType";
     }
 
 
@@ -51,14 +50,14 @@ public class BookTypeController {
         return bookTypeService.update(bookTypeRequestDto);
     }
 
-    @GetMapping("/findPersonById/{id}")
+    @GetMapping("/findBookTypeById/{id}")
     @ResponseStatus(value = HttpStatus.OK)
-    public BookTypeResponseDto findPersonById(@PathVariable Long id) throws Exception {
+    public BookTypeResponseDto findBookTypeById(@PathVariable Long id) throws Exception {
         return bookTypeService.findById(id);
     }
 
 
-    @GetMapping("/findAllPeople")
+    @GetMapping("/findAllBookTypes")
     @ResponseBody
     @ResponseStatus(value = HttpStatus.OK)
     public List<BookTypeResponseDto> findAllBookTypes(){

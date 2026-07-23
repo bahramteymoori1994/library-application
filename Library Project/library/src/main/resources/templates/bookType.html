@@ -1,10 +1,278 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fa" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مدیریت انواع کتاب</title>
+    <style>
+        body {
+            font-family: Tahoma, sans-serif;
+            direction: rtl;
+            text-align: right;
+            margin: 20px;
+        }
+        .container { max-width: 1350px; margin: auto; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { padding: 12px; border: 1px solid #aaa; text-align: right; }
+        th { background-color: #f4f4f4; }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 25px;
+            border: 1px solid #888;
+            width: 55%;
+            border-radius: 8px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 32px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover { color: black; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 6px; font-weight: bold; }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 12px 22px;
+            margin: 6px 4px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .conditional { display: none; }
+    </style>
 </head>
 <body>
+<div class="container">
+    <h1>مدیریت انواع کتاب</h1>
+    <div th:if="${message}" style="padding:12px; background:#d4edda; color:#155724; border-radius:5px; margin:15px 0;" th:text="${message}"></div>
 
+    <button onclick="openCreateModal()" style="background:#28a745; color:white; padding:12px 24px;">
+        + ثبت نوع کتاب جدید
+    </button>
+    <hr>
+    <h2>لیست انواع کتاب ثبت شده</h2>
+
+    <table>
+        <thead>
+        <tr>
+            <th>شناسه</th>
+            <th>موضوع</th>
+            <th>گروه سنی</th>
+            <th>زبان</th>
+            <th>وضعیت انتشار</th>
+            <th>سطح کتاب</th>
+            <th>دوره تاریخی</th>
+            <th>تاریخ ایجاد</th>
+            <th>ساعت ایجاد</th>
+            <th>ایجاد کننده</th>
+            <th>عملیات</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="bt : ${bookTypes}" th:if="${bookTypes != null and not #lists.isEmpty(bookTypes)}"
+            th:data-id="${bt.bookTypeId}"
+            th:data-subject="${bt.bookTypeSubject}"
+            th:data-agegroup="${bt.bookTypeAgeGroup}"
+            th:data-language="${bt.bookTypeLanguage}"
+            th:data-pubstatus="${bt.bookTypePublicationStatus}"
+            th:data-academiclevel="${bt.bookAcademicLevel}"
+            th:data-historical="${bt.historicalPeriodLevel}">
+            <td th:text="${bt.bookTypeId}"></td>
+            <td th:text="${bt.bookTypeSubject}"></td>
+            <td th:text="${bt.bookTypeAgeGroup}"></td>
+            <td th:text="${bt.bookTypeLanguage}"></td>
+            <td th:text="${bt.bookTypePublicationStatus}"></td>
+            <td th:text="${bt.bookAcademicLevel}"></td>
+            <td th:text="${bt.historicalPeriodLevel}"></td>
+            <td th:text="${#temporals.format(bt.createdDate, 'yyyy-MM-dd')}"></td>
+            <td th:text="${#temporals.format(bt.createdTime, 'HH:mm:ss')}"></td>
+            <td th:text="${bt.createdBy}"></td>
+            <td>
+                <button onclick="openEditModal(this)" style="background:#ffc107; color:black; padding:8px 16px;">
+                    ✏️ ویرایش
+                </button>
+            </td>
+        </tr>
+        <tr th:if="${bookTypes == null or #lists.isEmpty(bookTypes)}">
+            <td colspan="11" style="text-align:center; color:#888; padding:20px;">
+                هنوز هیچ نوع کتابی ثبت نشده است.
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal -->
+<div id="bookTypeModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h2 id="modalTitle">ثبت نوع کتاب جدید</h2>
+
+        <form id="bookTypeForm" th:action="@{/bookType/saveBookType}" method="post" th:object="${bookTypeDto}">
+            <input type="hidden" id="bookTypeId" th:field="*{bookTypeId}" />
+
+            <div class="form-group">
+                <label>موضوع:</label>
+                <select id="bookTypeSubject" th:field="*{bookTypeSubject}" required onchange="toggleConditionalFields()">
+                    <option value="">انتخاب کنید</option>
+                    <option value="LITERATURE">ادبیات</option>
+                    <option value="SCIENCE">علوم</option>
+                    <option value="HUMANITIES">علوم انسانی</option>
+                    <option value="ARTS">هنر</option>
+                    <option value="ENGINEERING">مهندسی</option>
+                    <option value="OTHERS">سایر</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>گروه سنی:</label>
+                <select id="bookTypeAgeGroup" th:field="*{bookTypeAgeGroup}" required>
+                    <option value="">انتخاب کنید</option>
+                    <option value="CHILDREN">کودکان</option>
+                    <option value="YOUNG_ADULT">جوانان</option>
+                    <option value="ADULT">بزرگسالان</option>
+                    <option value="ALL_AGES">همه سنین</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>زبان:</label>
+                <select id="bookTypeLanguage" th:field="*{bookTypeLanguage}" required>
+                    <option value="">انتخاب کنید</option>
+                    <option value="PERSIAN">فارسی</option>
+                    <option value="ENGLISH">انگلیسی</option>
+                    <option value="ARABIC">عربی</option>
+                    <option value="FRENCH">فرانسه</option>
+                    <option value="GERMAN">آلمانی</option>
+                    <option value="RUSSIAN">روسی</option>
+                    <option value="OTHERS">سایر</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>وضعیت انتشار:</label>
+                <select id="bookTypePublicationStatus" th:field="*{bookTypePublicationStatus}" required>
+                    <option value="">انتخاب کنید</option>
+                    <option value="PUBLISHED">منتشر شده</option>
+                    <option value="IN_PRESS">در حال چاپ</option>
+                    <option value="PRE_PRINT">پیش از چاپ</option>
+                    <option value="RE_PRINT">تجدید چاپ</option>
+                </select>
+            </div>
+
+            <!-- سطح تحصیلی (فقط علوم و مهندسی) -->
+            <div id="academicLevelGroup" class="form-group conditional">
+                <label>سطح تحصیلی:</label>
+                <select id="bookAcademicLevel" th:field="*{bookAcademicLevel}">
+                    <option value="">انتخاب کنید</option>
+                    <option value="BEGINNER">مبتدی</option>
+                    <option value="INTERMEDIATE">متوسط</option>
+                    <option value="ADVANCED">پیشرفته</option>
+                    <option value="REFERENCE">مرجع</option>
+                </select>
+            </div>
+
+            <!-- دوره تاریخی (فقط ادبیات) -->
+            <div id="historicalGroup" class="form-group conditional">
+                <label>دوره تاریخی:</label>
+                <select id="historicalPeriodLevel" th:field="*{historicalPeriodLevel}">
+                    <option value="">انتخاب کنید</option>
+                    <option value="ANCIENT">باستان</option>
+                    <option value="MEDIEVAL">قرون وسطی</option>
+                    <option value="MODERN">مدرن</option>
+                    <option value="CONTEMPORARY">معاصر</option>
+                </select>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <button type="submit" id="submitBtn" style="background:#28a745; color:white;">ذخیره</button>
+                <button type="button" onclick="closeModal()" style="background:#dc3545; color:white;">انصراف</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function toggleConditionalFields() {
+        const subject = document.getElementById("bookTypeSubject").value;
+        const academicGroup = document.getElementById("academicLevelGroup");
+        const historicalGroup = document.getElementById("historicalGroup");
+
+        // سطح تحصیلی فقط برای علوم و مهندسی
+        if (subject === "SCIENCE" || subject === "ENGINEERING") {
+            academicGroup.style.display = "block";
+        } else {
+            academicGroup.style.display = "none";
+            document.getElementById("bookAcademicLevel").value = "";
+        }
+
+        // دوره تاریخی فقط برای ادبیات
+        if (subject === "LITERATURE") {
+            historicalGroup.style.display = "block";
+        } else {
+            historicalGroup.style.display = "none";
+            document.getElementById("historicalPeriodLevel").value = "";
+        }
+    }
+
+    function openCreateModal() {
+        document.getElementById("modalTitle").textContent = "ثبت نوع کتاب جدید";
+        document.getElementById("submitBtn").textContent = "ذخیره";
+        document.getElementById("bookTypeForm").reset();
+        document.getElementById("bookTypeId").value = "";
+        document.getElementById("bookTypeModal").style.display = "block";
+        toggleConditionalFields(); // مخفی کردن اولیه
+    }
+
+    function openEditModal(btn) {
+        const row = btn.closest('tr');
+        document.getElementById("modalTitle").textContent = "ویرایش نوع کتاب";
+        document.getElementById("submitBtn").textContent = "به‌روزرسانی";
+
+        document.getElementById("bookTypeId").value = row.dataset.id;
+        document.getElementById("bookTypeSubject").value = row.dataset.subject;
+        document.getElementById("bookTypeAgeGroup").value = row.dataset.agegroup;
+        document.getElementById("bookTypeLanguage").value = row.dataset.language;
+        document.getElementById("bookTypePublicationStatus").value = row.dataset.pubstatus;
+
+        // تنظیم مقادیر conditional
+        document.getElementById("bookAcademicLevel").value = row.dataset.academiclevel || "";
+        document.getElementById("historicalPeriodLevel").value = row.dataset.historical || "";
+
+        document.getElementById("bookTypeModal").style.display = "block";
+
+        // نمایش/مخفی کردن فیلدها بر اساس موضوع
+        setTimeout(toggleConditionalFields, 50);
+    }
+
+    function closeModal() {
+        document.getElementById("bookTypeModal").style.display = "none";
+    }
+
+    // برای اطمینان از اجرای صحیح هنگام لود
+    document.addEventListener('DOMContentLoaded', function() {
+        // اگر نیاز به رفتار خاصی هنگام لود صفحه بود
+    });
+</script>
 </body>
 </html>
