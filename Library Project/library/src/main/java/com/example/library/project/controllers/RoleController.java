@@ -40,7 +40,7 @@ public class RoleController {
     }
 
     @GetMapping("/findRoleById/{id}")
-    public RoleResponseDto findRoleById(@PathVariable Long id){
+    public RoleResponseDto findRoleById(@PathVariable Long id) throws Exception {
         return roleService.findById(id);
     }
 

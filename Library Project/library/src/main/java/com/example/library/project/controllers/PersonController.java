@@ -52,7 +52,7 @@ public class PersonController {
 
     @GetMapping("/findPersonById/{id}")
     @ResponseStatus(value = HttpStatus.OK)
-    public PersonResponseDto findPersonById(@PathVariable Long id){
+    public PersonResponseDto findPersonById(@PathVariable Long id) throws Exception {
         return personService.findById(id);
     }
 
