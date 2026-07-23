@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مدیریت انواع نویسنده</title>
+    <style>
+        body {
+            font-family: Tahoma, sans-serif;
+            direction: rtl;
+            text-align: right;
+            margin: 20px;
+        }
+        .container { max-width: 1350px; margin: auto; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { padding: 12px; border: 1px solid #aaa; text-align: right; }
+        th { background-color: #f4f4f4; }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 25px;
+            border: 1px solid #888;
+            width: 58%;
+            border-radius: 8px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 32px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover { color: black; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 6px; font-weight: bold; }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 12px 22px;
+            margin: 6px 4px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .conditional { display: none; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>مدیریت انواع نویسنده</h1>
+    <div th:if="${message}" style="padding:12px; background:#d4edda; color:#155724; border-radius:5px; margin:15px 0;" th:text="${message}"></div>
+
+    <button onclick="openCreateModal()" style="background:#28a745; color:white; padding:12px 24px;">
+        + ثبت نوع نویسنده جدید
+    </button>
+    <hr>
+    <h2>لیست انواع نویسنده ثبت شده</h2>
+
+    <table>
+        <thead>
+        <tr>
+            <th>شناسه</th>
+            <th>تخصص نویسنده</th>
+            <th>نقش نویسنده</th>
+            <th>سبک نوشتاری</th>
+            <th>تخصص هنری</th>
+            <th>تخصص مهندسی</th>
+            <th>تخصص علوم انسانی</th>
+            <th>دوره تاریخی</th>
+            <th>تاریخ ایجاد</th>
+            <th>ساعت ایجاد</th>
+            <th>ایجاد کننده</th>
+            <th>عملیات</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="at : ${authorTypes}" th:if="${authorTypes != null and not #lists.isEmpty(authorTypes)}"
+            th:data-id="${at.authorTypeId}"
+            th:data-author-expertise="${at.authorExpertise}"
+            th:data-author-role="${at.authorTypeRole}"
+            th:data-writing-style="${at.authorWritingStyle}"
+            th:data-art-expertise="${at.artExpertise}"
+            th:data-engineering-expertise="${at.engineeringExpertise}"
+            th:data-humanities-expertise="${at.humanitiesExpertise}"
+            th:data-historical="${at.historicalPeriodLevel}">
+
+            <td th:text="${at.authorTypeId}"></td>
+            <td th:text="${at.authorExpertise}"></td>
+            <td th:text="${at.authorTypeRole}"></td>
+            <td th:text="${at.authorWritingStyle}"></td>
+            <td th:text="${at.artExpertise}"></td>
+            <td th:text="${at.engineeringExpertise}"></td>
+            <td th:text="${at.humanitiesExpertise}"></td>
+            <td th:text="${at.historicalPeriodLevel}"></td>
+            <td th:text="${#temporals.format(at.createdDate, 'yyyy-MM-dd')}"></td>
+            <td th:text="${#temporals.format(at.createdTime, 'HH:mm:ss')}"></td>
+            <td th:text="${at.createdBy}"></td>
+            <td>
+                <button onclick="openEditModal(this)" style="background:#ffc107; color:black; padding:8px 16px;">
+                    ✏️ ویرایش
+                </button>
+            </td>
+        </tr>
+        <tr th:if="${authorTypes == null or #lists.isEmpty(authorTypes)}">
+            <td colspan="12" style="text-align:center; color:#888; padding:20px;">
+                هنوز هیچ نوع نویسنده‌ای ثبت نشده است.
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal -->
+<div id="authorTypeModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">×</span>
+        <h2 id="modalTitle">ثبت نوع نویسنده جدید</h2>
+
+        <form id="authorTypeForm" th:action="@{/authorType/saveAuthorType}" method="post" th:object="${authorTypeDto}">
+            <input type="hidden" id="authorTypeId" th:field="*{authorTypeId}" />
+
+            <div class="form-group">
+                <label>تخصص نویسنده:</label>
+                <select id="authorExpertise" th:field="*{authorExpertise}" required onchange="toggleConditionalFields()">
+                    <option value="">انتخاب کنید</option>
+                    <option value="HUMANITIES">علوم انسانی</option>
+                    <option value="ENGINEERING">مهندسی</option>
+                    <option value="ARTS">هنر</option>
+                    <option value="LITERATURE">ادبیات</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>نقش نویسنده:</label>
+                <select id="authorTypeRole" th:field="*{authorTypeRole}" required>
+                    <option value="">انتخاب کنید</option>
+                    <option value="AUTHOR">نویسنده</option>
+                    <option value="CO_AUTHOR">نویسنده همکار</option>
+                    <option value="TRANSLATOR">مترجم</option>
+                    <option value="EDITOR">ویراستار</option>
+                    <option value="FOREWORD_WRITER">نویسنده مقدمه</option>
+                    <option value="COMPILER">گردآورنده</option>
+                    <option value="ILLUSTRATOR">تصویرگر</option>
+                    <option value="PROOF_READER">ویرایشگر فنی</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>سبک نوشتاری:</label>
+                <select id="authorWritingStyle" th:field="*{authorWritingStyle}">
+                    <option value="">انتخاب کنید</option>
+                    <option value="FICTION_WRITER">داستان‌نویس</option>
+                    <option value="NON_FICTION_WRITER">غیر داستانی</option>
+                    <option value="POET">شاعر</option>
+                    <option value="PLAYWRIGHT">نمایشنامه‌نویس</option>
+                    <option value="ESSAYIST">مقاله‌نویس</option>
+                    <option value="JOURNALIST">روزنامه‌نگار</option>
+                    <option value="BLOGGER">وبلاگ‌نویس</option>
+                    <option value="SCREEN_WRITER">فیلمنامه‌نویس</option>
+                </select>
+            </div>
+
+            <!-- تخصص هنری (فقط برای ARTS) -->
+            <div id="artGroup" class="form-group conditional">
+                <label>تخصص هنری:</label>
+                <select id="artExpertise" th:field="*{artExpertise}">
+                    <option value="">انتخاب کنید</option>
+                    <option value="PAINTER">نقاش</option>
+                    <option value="MUSICIAN">موسیقیدان</option>
+                    <option value="ARCHITECT">معمار</option>
+                    <option value="PHOTOGRAPHER">عکاس</option>
+                </select>
+            </div>
+
+            <!-- تخصص مهندسی (فقط برای ENGINEERING) -->
+            <div id="engineeringGroup" class="form-group conditional">
+                <label>تخصص مهندسی:</label>
+                <select id="engineeringExpertise" th:field="*{engineeringExpertise}">
+                    <option value="">انتخاب کنید</option>
+                    <option value="SCIENTIST">دانشمند</option>
+                    <option value="MATHEMATICIAN">ریاضیدان</option>
+                    <option value="ENGINEER">مهندس</option>
+                    <option value="PHYSICIAN">پزشک</option>
+                    <option value="PROGRAMMER">برنامه‌نویس</option>
+                </select>
+            </div>
+
+            <!-- تخصص علوم انسانی (فقط برای HUMANITIES) -->
+            <div id="humanitiesGroup" class="form-group conditional">
+                <label>تخصص علوم انسانی:</label>
+                <select id="humanitiesExpertise" th:field="*{humanitiesExpertise}">
+                    <option value="">انتخاب کنید</option>
+                    <option value="HISTORIAN">مورخ</option>
+                    <option value="PHILOSOPHER">فیلسوف</option>
+                    <option value="SOCIOLOGIST">جامعه‌شناس</option>
+                    <option value="PSYCHOLOGIST">روانشناس</option>
+                    <option value="LINGUIST">زبان‌شناس</option>
+                    <option value="RELIGIOUS_SCHOLAR">دانشمند دینی</option>
+                </select>
+            </div>
+
+            <!-- دوره تاریخی -->
+            <div id="historicalGroup" class="form-group conditional">
+                <label>دوره تاریخی:</label>
+                <select id="historicalPeriodLevel" th:field="*{historicalPeriodLevel}">
+                    <option value="">انتخاب کنید</option>
+                    <option value="ANCIENT">باستان</option>
+                    <option value="MEDIEVAL">قرون وسطی</option>
+                    <option value="MODERN">مدرن</option>
+                    <option value="CONTEMPORARY">معاصر</option>
+                </select>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <button type="submit" id="submitBtn" style="background:#28a745; color:white;">ذخیره</button>
+                <button type="button" onclick="closeModal()" style="background:#dc3545; color:white;">انصراف</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function toggleConditionalFields() {
+        const expertise = document.getElementById("authorExpertise").value;
+
+        const artGroup = document.getElementById("artGroup");
+        const engineeringGroup = document.getElementById("engineeringGroup");
+        const humanitiesGroup = document.getElementById("humanitiesGroup");
+        const historicalGroup = document.getElementById("historicalGroup");
+
+        // نمایش فیلدها بر اساس تخصص
+        artGroup.style.display = (expertise === "ARTS") ? "block" : "none";
+        engineeringGroup.style.display = (expertise === "ENGINEERING") ? "block" : "none";
+        humanitiesGroup.style.display = (expertise === "HUMANITIES") ? "block" : "none";
+        historicalGroup.style.display = (expertise === "LITERATURE") ? "block" : "none";
+
+        // پاک کردن مقادیر فیلدهای غیرفعال
+        if (expertise !== "ARTS") document.getElementById("artExpertise").value = "";
+        if (expertise !== "ENGINEERING") document.getElementById("engineeringExpertise").value = "";
+        if (expertise !== "HUMANITIES") document.getElementById("humanitiesExpertise").value = "";
+        if (expertise !== "LITERATURE") document.getElementById("historicalPeriodLevel").value = "";
+    }
+
+    function openCreateModal() {
+        document.getElementById("modalTitle").textContent = "ثبت نوع نویسنده جدید";
+        document.getElementById("submitBtn").textContent = "ذخیره";
+        document.getElementById("authorTypeForm").reset();
+        document.getElementById("authorTypeId").value = "";
+        document.getElementById("authorTypeModal").style.display = "block";
+        toggleConditionalFields();
+    }
+
+    function openEditModal(btn) {
+        const row = btn.closest('tr');
+        document.getElementById("modalTitle").textContent = "ویرایش نوع نویسنده";
+        document.getElementById("submitBtn").textContent = "به‌روزرسانی";
+
+        document.getElementById("authorTypeId").value = row.dataset.id;
+        document.getElementById("authorExpertise").value = row.dataset.authorExpertise || "";
+        document.getElementById("authorTypeRole").value = row.dataset.authorRole || "";
+        document.getElementById("authorWritingStyle").value = row.dataset.writingStyle || "";
+        document.getElementById("artExpertise").value = row.dataset.artExpertise || "";
+        document.getElementById("engineeringExpertise").value = row.dataset.engineeringExpertise || "";
+        document.getElementById("humanitiesExpertise").value = row.dataset.humanitiesExpertise || "";
+        document.getElementById("historicalPeriodLevel").value = row.dataset.historical || "";
+
+        document.getElementById("authorTypeModal").style.display = "block";
+        setTimeout(toggleConditionalFields, 50);
+    }
+
+    function closeModal() {
+        document.getElementById("authorTypeModal").style.display = "none";
+    }
+
+    // اجرای اولیه
+    document.addEventListener('DOMContentLoaded', function() {
+        // در صورت نیاز
+    });
+</script>
+</body>
+</html>

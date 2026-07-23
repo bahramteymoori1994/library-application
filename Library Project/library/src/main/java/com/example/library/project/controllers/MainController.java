@@ -40,4 +40,9 @@ public class MainController {
     public String bookTypes() {
         return "bookType";
     }
+
+    @GetMapping("/authorTypes")
+    public String authorTypes() {
+        return "authorType";
+    }
 }
