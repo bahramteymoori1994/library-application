@@ -2,7 +2,9 @@ package com.example.library.project.controllers;
 
 import com.example.library.project.dto.requests.PublisherRequestDto;
 import com.example.library.project.dto.responses.PublisherResponseDto;
+import com.example.library.project.dto.responses.PublisherTypeResponseDto;
 import com.example.library.project.services.interfaces.PublisherService;
+import com.example.library.project.services.interfaces.PublisherTypeService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -15,9 +17,11 @@ import java.util.List;
 public class PublisherController {
 
     private final PublisherService publisherService;
+    private final PublisherTypeService publisherTypeService;
 
-    public PublisherController(PublisherService publisherService) {
+    public PublisherController(PublisherService publisherService, PublisherTypeService publisherTypeService) {
         this.publisherService = publisherService;
+        this.publisherTypeService = publisherTypeService;
     }
 
     @GetMapping
@@ -55,5 +59,10 @@ public class PublisherController {
     @GetMapping("/findPublishers")
     public List<PublisherResponseDto> findAll() throws Exception {
         return publisherService.findAll();
+    }
+
+    @GetMapping("findAllPublisherTypes")
+    public List<PublisherTypeResponseDto> findAllPublisherTypes(){
+        return publisherTypeService.findAll();
     }
 }
