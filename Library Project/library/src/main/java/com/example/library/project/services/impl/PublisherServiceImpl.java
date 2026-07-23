@@ -2,7 +2,9 @@ package com.example.library.project.services.impl;
 
 import com.example.library.project.dto.requests.PublisherRequestDto;
 import com.example.library.project.dto.responses.PublisherResponseDto;
+import com.example.library.project.dto.views.PublisherViewResponseDto;
 import com.example.library.project.model.entities.Publisher;
+import com.example.library.project.model.views.PublisherView;
 import com.example.library.project.repositories.PublisherRepository;
 import com.example.library.project.services.interfaces.PublisherService;
 import org.springframework.beans.BeanUtils;
@@ -24,7 +26,7 @@ public class PublisherServiceImpl implements PublisherService {
     @Override
     public PublisherResponseDto save(PublisherRequestDto publisherRequestDto) throws Exception {
 
-        PublisherResponseDto publisherResponseDto = new PublisherResponseDto();
+        PublisherResponseDto response = new PublisherResponseDto();
         Publisher publisher = new Publisher();
 
         publisherRequestDto
@@ -36,22 +38,25 @@ public class PublisherServiceImpl implements PublisherService {
             throw new Exception("Publisher request object is null");
         }
 
-        BeanUtils.copyProperties(publisherRequestDto, publisher);
+        publisher.setCreatedDate(LocalDate.now());
+        publisher.setCreatedTime(LocalTime.now());
+        publisher.setCreatedBy("admin");
 
-        Publisher publisherSaved = publisherRepository.save(publisher);
+        BeanUtils.copyProperties(publisherRequestDto, publisher);
+        Publisher publisherSaved = publisherRepository.saveAndFlush(publisher);
 
         if( publisherSaved == null ){
-            throw new Exception("Publisher saved object is null");
+            throw new Exception("Publisher saved is null");
         }
 
-        BeanUtils.copyProperties(publisherSaved, publisherResponseDto);
-        return publisherResponseDto;
+        BeanUtils.copyProperties(publisherSaved, response);
+        return response;
     }
 
     @Override
     public PublisherResponseDto update(PublisherRequestDto publisherRequestDto) throws Exception {
 
-        PublisherResponseDto publisherResponseDto = new PublisherResponseDto();
+        PublisherResponseDto response = new PublisherResponseDto();
         Publisher publisher = new Publisher();
 
         publisherRequestDto
@@ -63,16 +68,19 @@ public class PublisherServiceImpl implements PublisherService {
             throw new Exception("Publisher request object is null");
         }
 
+        publisher.setCreatedDate(LocalDate.now());
+        publisher.setCreatedTime(LocalTime.now());
+        publisher.setCreatedBy("admin");
+
         BeanUtils.copyProperties(publisherRequestDto, publisher);
+        Publisher publisherSaved = publisherRepository.saveAndFlush(publisher);
 
-        Publisher publisherUpdated = publisherRepository.save(publisher);
-
-        if( publisherUpdated == null ){
-            throw new Exception("Publisher saved object is null");
+        if( publisherSaved == null ){
+            throw new Exception("Publisher saved is null");
         }
 
-        BeanUtils.copyProperties(publisherUpdated, publisherResponseDto);
-        return publisherResponseDto;
+        BeanUtils.copyProperties(publisherSaved, response);
+        return response;
     }
 
     @Override
@@ -82,7 +90,7 @@ public class PublisherServiceImpl implements PublisherService {
         Publisher findPublisherById = publisherRepository.findById(id).orElse(null);
 
         if( findPublisherById == null ){
-            throw new Exception("Publisher id not found");
+            throw new Exception("publisher id not found");
         }
 
         BeanUtils.copyProperties(findPublisherById, publisherResponseDto);
@@ -103,5 +111,21 @@ public class PublisherServiceImpl implements PublisherService {
                 });
 
         return publisherResponseDtoList;
+    }
+
+    @Override
+    public List<PublisherViewResponseDto> findAllPublishersView() {
+
+        List<PublisherViewResponseDto> publisherViewResponseDtoList = new ArrayList<>();
+        List<PublisherView> findAllPublishers = publisherRepository.findAllPublishersView();
+
+        findAllPublishers.stream()
+                .forEach(publisher -> {
+                    PublisherViewResponseDto publisherViewResponseDto = new PublisherViewResponseDto();
+                    BeanUtils.copyProperties(publisher, publisherViewResponseDto);
+                    publisherViewResponseDtoList.add(publisherViewResponseDto);
+                });
+
+        return publisherViewResponseDtoList;
     }
 }

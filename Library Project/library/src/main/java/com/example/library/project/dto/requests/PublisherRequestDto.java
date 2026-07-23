@@ -1,6 +1,7 @@
 package com.example.library.project.dto.requests;
 
 import com.example.library.project.model.entities.PublisherType;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -132,22 +133,5 @@ public class PublisherRequestDto {
     public PublisherRequestDto setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
         return this;
-    }
-
-    @Override
-    public String toString() {
-        return "PublisherRequestDto{" +
-                "publisherId=" + publisherId +
-                ", name='" + name + '\'' +
-                ", code='" + code + '\'' +
-                ", city='" + city + '\'' +
-                ", country='" + country + '\'' +
-                ", address='" + address + '\'' +
-                ", phone='" + phone + '\'' +
-                ", publisherType=" + publisherType +
-                ", createdDate=" + createdDate +
-                ", createdTime=" + createdTime +
-                ", createdBy='" + createdBy + '\'' +
-                '}';
     }
 }

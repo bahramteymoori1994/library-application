@@ -3,6 +3,7 @@ package com.example.library.project.controllers;
 import com.example.library.project.dto.requests.PublisherRequestDto;
 import com.example.library.project.dto.responses.PublisherResponseDto;
 import com.example.library.project.dto.responses.PublisherTypeResponseDto;
+import com.example.library.project.dto.views.PublisherViewResponseDto;
 import com.example.library.project.services.interfaces.PublisherService;
 import com.example.library.project.services.interfaces.PublisherTypeService;
 import org.springframework.stereotype.Controller;
@@ -25,9 +26,9 @@ public class PublisherController {
     }
 
     @GetMapping
-    public String getAllPublishers(Model model) throws Exception {
+    public String getAllPublishers(Model model){
 
-        List<PublisherResponseDto> publishers = findAll();
+        List<PublisherViewResponseDto> publishers = publisherService.findAllPublishersView();
 
         model.addAttribute("publishers", publishers);
         model.addAttribute("publisherDto", new PublisherRequestDto());
@@ -52,6 +53,7 @@ public class PublisherController {
     }
 
     @GetMapping("/findPublisherById/{id}")
+    @ResponseBody
     public PublisherResponseDto findPublisherById(@PathVariable Long id) throws Exception {
         return publisherService.findById(id);
     }
@@ -62,6 +64,7 @@ public class PublisherController {
     }
 
     @GetMapping("findAllPublisherTypes")
+    @ResponseBody
     public List<PublisherTypeResponseDto> findAllPublisherTypes(){
         return publisherTypeService.findAll();
     }

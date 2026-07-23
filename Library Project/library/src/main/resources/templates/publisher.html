@@ -4,49 +4,52 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>مدیریت ناشران</title>
-
     <style>
-        body { font-family: Tahoma, sans-serif; direction: rtl; text-align: right; margin: 20px; }
-        .container { max-width: 1250px; margin: auto; }
+        body { font-family: Tahoma, sans-serif; direction: rtl; text-align: right; margin: 20px; background: #f8f9fa; }
+        .container { max-width: 1400px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); }
         table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-        th, td { padding: 12px; border: 1px solid #aaa; text-align: right; }
+        th, td { padding: 12px; border: 1px solid #ddd; text-align: right; }
         th { background-color: #f4f4f4; }
-
-        /* Modal Styles */
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
-        .modal-content { background-color: #fefefe; margin: 5% auto; padding: 25px; border: 1px solid #888; width: 52%; border-radius: 8px; }
+        .modal-content { background-color: #fefefe; margin: 3% auto; padding: 25px; width: 72%; border-radius: 8px; max-height: 92vh; overflow-y: auto; }
         .close { color: #aaa; float: right; font-size: 32px; font-weight: bold; cursor: pointer; }
-        .close:hover { color: black; }
-        .form-group { margin-bottom: 15px; }
+        .close:hover { color: #000; }
+        .form-group { margin-bottom: 18px; }
         label { display: block; margin-bottom: 6px; font-weight: bold; }
-        input, select { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 5px; }
-        button { padding: 12px 22px; margin: 6px 4px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+        input, textarea { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 5px; }
+        textarea { resize: vertical; min-height: 80px; }
+        button { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
+        .search-container { display: flex; gap: 10px; margin-bottom: 15px; }
+        .selected-type-info { display: none; margin-top: 8px; background: #f8f9fa; padding: 10px; border-radius: 5px; border: 1px solid #dee2e6; }
+        .selected-type-info.show { display: block; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-warning { background: #ffc107; color: black; }
+        .btn-info { background: #17a2b8; color: white; }
+        .table-hover tbody tr:hover { background-color: #f5f5f5; cursor: pointer; }
     </style>
 </head>
 <body>
-
 <div class="container">
-    <h1>مدیریت اطلاعات ناشران</h1>
-
+    <h1>مدیریت ناشران</h1>
     <div th:if="${message}" style="padding:12px; background:#d4edda; color:#155724; border-radius:5px; margin:15px 0;" th:text="${message}"></div>
 
-    <button onclick="openCreateModal()" style="background:#28a745; color:white; padding:12px 24px;">
+    <button onclick="openCreateModal()" class="btn-success" style="padding:12px 24px; font-size:16px;">
         + ثبت ناشر جدید
     </button>
-
     <hr>
-
     <h2>لیست ناشران ثبت شده</h2>
-    <table>
+    <table class="table-hover">
         <thead>
         <tr>
             <th>شناسه</th>
-            <th>نام ناشر</th>
-            <th>کد ناشر</th>
+            <th>نام</th>
+            <th>نوع ناشر</th>
+            <th>کد</th>
             <th>کشور</th>
             <th>شهر</th>
             <th>آدرس</th>
-            <th>تلفن</th>
             <th>تاریخ ایجاد</th>
             <th>ساعت ایجاد</th>
             <th>ایجاد کننده</th>
@@ -54,114 +57,209 @@
         </tr>
         </thead>
         <tbody>
-        <tr th:each="p : ${publishers}" th:if="${publishers != null and not #lists.isEmpty(publishers)}"
-            th:data-id="${p.publisherId}"
-            th:data-name="${p.name}"
-            th:data-code="${p.code}"
-            th:data-address="${p.address}"
-            th:data-phone="${p.phone}"
-            th:data-city="${p.city}"
-            th:data-country="${p.country}">
-
+        <tr th:each="p : ${publishers}" th:if="${publishers != null and not #lists.isEmpty(publishers)}">
             <td th:text="${p.publisherId}"></td>
-            <td th:text="${p.name}"></td>
-            <td th:text="${p.code}"></td>
-            <td th:text="${p.country}"></td>
-            <td th:text="${p.city}"></td>
-            <td th:text="${p.address}"></td>
-            <td th:text="${p.phone}"></td>
+            <td th:text="${p.publisherName}"></td>
+            <td th:text="${p.publisherTypeName}"></td>
+            <td th:text="${p.publisherCode}"></td>
+            <td th:text="${p.publisherCountry}"></td>
+            <td th:text="${p.publisherCity}"></td>
+            <td th:text="${p.publisherAddress}"></td>
             <td th:text="${#temporals.format(p.createdDate, 'yyyy-MM-dd')}"></td>
             <td th:text="${#temporals.format(p.createdTime, 'HH:mm:ss')}"></td>
             <td th:text="${p.createdBy}"></td>
             <td>
-                <button onclick="openEditModal(this)"
-                        style="background:#ffc107; color:black; padding:8px 16px;">
-                    ✏️ ویرایش
-                </button>
+                <button onclick="openEditModal(this)" class="btn-warning">✏️ ویرایش</button>
             </td>
         </tr>
         <tr th:if="${publishers == null or #lists.isEmpty(publishers)}">
-            <td colspan="9" style="text-align:center; color:#888; padding:20px;">
-                هنوز هیچ ناشری ثبت نشده است.
-            </td>
+            <td colspan="11" style="text-align:center; color:#888; padding:30px;">هنوز هیچ ناشری ثبت نشده است.</td>
         </tr>
         </tbody>
     </table>
 </div>
 
-<!-- Modal -->
+<!-- Modal ثبت/ویرایش ناشر -->
 <div id="publisherModal" class="modal">
     <div class="modal-content">
-        <span class="close" onclick="closeModal()">&times;</span>
+        <span class="close" onclick="closeModal()">×</span>
         <h2 id="modalTitle">ثبت ناشر جدید</h2>
-
         <form id="publisherForm" th:action="@{/publisher/savePublisher}" method="post" th:object="${publisherDto}">
-            <input type="hidden" id="publisherId" th:field="*{publisherId}" />
+            <input type="hidden" id="publisherId" name="publisherId" />
 
             <div class="form-group">
                 <label>نام ناشر:</label>
-                <input type="text" id="name" th:field="*{name}" required />
+                <input type="text" id="name" name="name" required />
             </div>
             <div class="form-group">
                 <label>کد ناشر:</label>
-                <input type="text" id="code" th:field="*{code}" required />
-            </div>
-            <div class="form-group">
-                <label>کشور:</label>
-                <input type="text" id="country" th:field="*{country}" required />
+                <input type="text" id="code" name="code" maxlength="5" required />
             </div>
             <div class="form-group">
                 <label>شهر:</label>
-                <input type="text" id="city" th:field="*{city}" required />
+                <input type="text" id="city" name="city" required />
+            </div>
+            <div class="form-group">
+                <label>کشور:</label>
+                <input type="text" id="country" name="country" required />
             </div>
             <div class="form-group">
                 <label>آدرس:</label>
-                <input type="text" id="address" th:field="*{address}"/>
+                <textarea id="address" name="address"></textarea>
             </div>
             <div class="form-group">
                 <label>تلفن:</label>
-                <input type="text" id="phone" th:field="*{phone}"/>
+                <input type="text" id="phone" name="phone" />
             </div>
 
+            <div class="form-group">
+                <label>نوع ناشر:</label>
+                <div class="search-container">
+                    <input type="number" id="publisherTypeId" name="publisherType" required style="flex:1;" />
+                    <button type="button" onclick="openPublisherTypeSearch()" class="btn-info">🔍 جستجو</button>
+                </div>
+                <div id="selectedTypeInfo" class="selected-type-info">
+                    <strong>نوع ناشر:</strong> <span id="selectedTypeName"></span>
+                </div>
+            </div>
 
-            <div style="margin-top: 20px;">
-                <button type="submit" id="submitBtn" style="background:#28a745; color:white;">ذخیره</button>
-                <button type="button" onclick="closeModal()" style="background:#dc3545; color:white;">انصراف</button>
+            <div style="margin-top: 25px;">
+                <button type="submit" class="btn-success">ذخیره</button>
+                <button type="button" onclick="closeModal()" class="btn-danger">انصراف</button>
             </div>
         </form>
     </div>
 </div>
 
+<!-- Modal جستجوی نوع ناشر -->
+<div id="publisherTypeSearchModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closePublisherTypeSearch()">×</span>
+        <h2>جستجوی نوع ناشر</h2>
+        <div class="search-container">
+            <input type="text" id="typeSearchInput" placeholder="جستجو بر اساس نام نوع ناشر..." />
+            <button onclick="searchPublisherTypes()" class="btn-primary">جستجو</button>
+            <button onclick="clearTypeSearch()" class="btn-secondary">پاک کردن</button>
+        </div>
+        <table class="table-hover">
+            <thead>
+            <tr>
+                <th>شناسه</th>
+                <th>نام نوع ناشر</th>
+                <th>انتخاب</th>
+            </tr>
+            </thead>
+            <tbody id="publisherTypeTableBody"></tbody>
+        </table>
+    </div>
+</div>
+
 <script>
+    let allPublisherTypes = [];
+
+    function loadPublisherTypes() {
+        fetch('/publisher/findAllPublisherTypes')
+            .then(r => r.json())
+            .then(data => {
+                allPublisherTypes = data;
+                displayPublisherTypes(data);
+            })
+            .catch(err => console.error('Error loading publisher types:', err));
+    }
+
+    function displayPublisherTypes(types) {
+        let html = '';
+        if (!types || types.length === 0) {
+            html = '<tr><td colspan="3" style="text-align:center;color:#888;">موردی یافت نشد</td></tr>';
+        } else {
+            types.forEach(t => {
+                const name = t.publisherTypeName || t.typeName || t.name || '';
+                html += `<tr onclick="selectPublisherType('${t.publisherTypeId || t.id}','${name.replace(/'/g, "\\'")}')">
+                    <td>${t.publisherTypeId || t.id}</td>
+                    <td>${name}</td>
+                    <td><button class="btn-success" style="padding:5px 15px;">انتخاب</button></td>
+                </tr>`;
+            });
+        }
+        document.getElementById('publisherTypeTableBody').innerHTML = html;
+    }
+
+    function selectPublisherType(id, name) {
+        document.getElementById('publisherTypeId').value = id;
+        document.getElementById('selectedTypeInfo').classList.add('show');
+        document.getElementById('selectedTypeName').textContent = name;
+        closePublisherTypeSearch();
+    }
+
+    function openPublisherTypeSearch() {
+        document.getElementById('publisherTypeSearchModal').style.display = 'block';
+        if (!allPublisherTypes.length) loadPublisherTypes();
+        else displayPublisherTypes(allPublisherTypes);
+        setTimeout(() => document.getElementById('typeSearchInput').focus(), 100);
+    }
+
+    function closePublisherTypeSearch() {
+        document.getElementById('publisherTypeSearchModal').style.display = 'none';
+    }
+
+    function searchPublisherTypes() {
+        const term = document.getElementById('typeSearchInput').value.toLowerCase().trim();
+        const filtered = term === '' ? allPublisherTypes : allPublisherTypes.filter(t =>
+            (t.publisherTypeName || t.typeName || t.name || '').toLowerCase().includes(term));
+        displayPublisherTypes(filtered);
+    }
+
+    function clearTypeSearch() {
+        document.getElementById('typeSearchInput').value = '';
+        displayPublisherTypes(allPublisherTypes);
+    }
+
     function openCreateModal() {
         document.getElementById("modalTitle").textContent = "ثبت ناشر جدید";
-        document.getElementById("submitBtn").textContent = "ذخیره";
         document.getElementById("publisherForm").reset();
-        document.getElementById("publisherId").value = "";
+        document.getElementById("publisherId").value = '';
+        document.getElementById("selectedTypeInfo").classList.remove('show');
         document.getElementById("publisherModal").style.display = "block";
+        setTimeout(() => document.getElementById("name").focus(), 100);
     }
 
     function openEditModal(btn) {
         const row = btn.closest('tr');
+        const id = row.querySelector('td:first-child').textContent.trim();
 
-        document.getElementById("modalTitle").textContent = "ویرایش ناشر";
-        document.getElementById("submitBtn").textContent = "به‌روزرسانی";
+        fetch(`/publisher/findPublisherById/${id}`)
+            .then(r => r.json())
+            .then(p => {
+                document.getElementById("modalTitle").textContent = "ویرایش ناشر";
+                document.getElementById("publisherId").value = p.publisherId || '';
+                document.getElementById("name").value = p.name || '';
+                document.getElementById("code").value = p.code || '';
+                document.getElementById("city").value = p.city || '';
+                document.getElementById("country").value = p.country || '';
+                document.getElementById("address").value = p.address || '';
+                document.getElementById("phone").value = p.phone || '';
 
-        document.getElementById("publisherId").value = row.dataset.id;
-        document.getElementById("name").value = row.dataset.name;
-        document.getElementById("code").value = row.dataset.code;
-        document.getElementById("city").value = row.dataset.city;
-        document.getElementById("country").value = row.dataset.country;
-        document.getElementById("address").value = row.dataset.address;
-        document.getElementById("phone").value = row.dataset.phone;
-
-        document.getElementById("publisherModal").style.display = "block";
+                document.getElementById("publisherTypeId").value = p.publisherTypeName || '';
+                if (p.publisherTypeName) {
+                    document.getElementById("selectedTypeName").textContent = p.publisherTypeName;
+                    document.getElementById("selectedTypeInfo").classList.add('show');
+                }
+                document.getElementById("publisherModal").style.display = "block";
+            })
+            .catch(() => alert('خطا در بارگذاری اطلاعات ناشر'));
     }
 
     function closeModal() {
         document.getElementById("publisherModal").style.display = "none";
     }
-</script>
 
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadPublisherTypes();
+    });
+</script>
 </body>
 </html>
