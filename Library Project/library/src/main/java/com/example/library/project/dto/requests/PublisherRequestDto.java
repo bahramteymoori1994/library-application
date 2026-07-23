@@ -1,11 +1,6 @@
 package com.example.library.project.dto.requests;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.validation.constraints.NotNull;
-
+import com.example.library.project.model.entities.PublisherType;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -18,6 +13,7 @@ public class PublisherRequestDto {
     private String country;
     private String address;
     private String phone;
+    private PublisherType publisherType;
     private LocalDate createdDate;
     private LocalTime createdTime;
     private String createdBy;
@@ -25,7 +21,7 @@ public class PublisherRequestDto {
     public PublisherRequestDto() {
     }
 
-    public PublisherRequestDto(Long publisherId, String name, String code, String city, String country, String address, String phone, LocalDate createdDate, LocalTime createdTime, String createdBy) {
+    public PublisherRequestDto(Long publisherId, String name, String code, String city, String country, String address, String phone, PublisherType publisherType, LocalDate createdDate, LocalTime createdTime, String createdBy) {
         this.publisherId = publisherId;
         this.name = name;
         this.code = code;
@@ -33,6 +29,7 @@ public class PublisherRequestDto {
         this.country = country;
         this.address = address;
         this.phone = phone;
+        this.publisherType = publisherType;
         this.createdDate = createdDate;
         this.createdTime = createdTime;
         this.createdBy = createdBy;
@@ -101,6 +98,15 @@ public class PublisherRequestDto {
         return this;
     }
 
+    public PublisherType getPublisherType() {
+        return publisherType;
+    }
+
+    public PublisherRequestDto setPublisherType(PublisherType publisherType) {
+        this.publisherType = publisherType;
+        return this;
+    }
+
     public LocalDate getCreatedDate() {
         return createdDate;
     }
@@ -138,6 +144,7 @@ public class PublisherRequestDto {
                 ", country='" + country + '\'' +
                 ", address='" + address + '\'' +
                 ", phone='" + phone + '\'' +
+                ", publisherType=" + publisherType +
                 ", createdDate=" + createdDate +
                 ", createdTime=" + createdTime +
                 ", createdBy='" + createdBy + '\'' +

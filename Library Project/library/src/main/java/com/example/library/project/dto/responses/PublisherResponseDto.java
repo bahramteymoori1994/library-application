@@ -1,5 +1,6 @@
 package com.example.library.project.dto.responses;
 
+import com.example.library.project.model.entities.PublisherType;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -12,6 +13,7 @@ public class PublisherResponseDto {
     private String country;
     private String address;
     private String phone;
+    private PublisherType publisherType;
     private LocalDate createdDate;
     private LocalTime createdTime;
     private String createdBy;
@@ -19,7 +21,7 @@ public class PublisherResponseDto {
     public PublisherResponseDto() {
     }
 
-    public PublisherResponseDto(Long publisherId, String name, String code, String city, String country, String address, String phone, LocalDate createdDate, LocalTime createdTime, String createdBy) {
+    public PublisherResponseDto(Long publisherId, String name, String code, String city, String country, String address, String phone, PublisherType publisherType, LocalDate createdDate, LocalTime createdTime, String createdBy) {
         this.publisherId = publisherId;
         this.name = name;
         this.code = code;
@@ -27,6 +29,7 @@ public class PublisherResponseDto {
         this.country = country;
         this.address = address;
         this.phone = phone;
+        this.publisherType = publisherType;
         this.createdDate = createdDate;
         this.createdTime = createdTime;
         this.createdBy = createdBy;
@@ -95,6 +98,15 @@ public class PublisherResponseDto {
         return this;
     }
 
+    public PublisherType getPublisherType() {
+        return publisherType;
+    }
+
+    public PublisherResponseDto setPublisherType(PublisherType publisherType) {
+        this.publisherType = publisherType;
+        return this;
+    }
+
     public LocalDate getCreatedDate() {
         return createdDate;
     }
@@ -132,6 +144,7 @@ public class PublisherResponseDto {
                 ", country='" + country + '\'' +
                 ", address='" + address + '\'' +
                 ", phone='" + phone + '\'' +
+                ", publisherType=" + publisherType +
                 ", createdDate=" + createdDate +
                 ", createdTime=" + createdTime +
                 ", createdBy='" + createdBy + '\'' +

@@ -36,6 +36,10 @@ public class Publisher {
     @Column(name = "PHONE", columnDefinition = "varchar(15)", unique = true)
     private String phone;
 
+    @OneToOne
+    @JoinColumn(name = "PUBLISHER_TYPE_ID")
+    private PublisherType publisherType;
+
     @Column(name = "CREATED_DATE", columnDefinition = "date", nullable = false)
     private LocalDate createdDate;
 
@@ -48,7 +52,7 @@ public class Publisher {
     public Publisher() {
     }
 
-    public Publisher(Long publisherId, String name, String code, String city, String country, String address, String phone, LocalDate createdDate, LocalTime createdTime, String createdBy) {
+    public Publisher(Long publisherId, String name, String code, String city, String country, String address, String phone, PublisherType publisherType, LocalDate createdDate, LocalTime createdTime, String createdBy) {
         this.publisherId = publisherId;
         this.name = name;
         this.code = code;
@@ -56,6 +60,7 @@ public class Publisher {
         this.country = country;
         this.address = address;
         this.phone = phone;
+        this.publisherType = publisherType;
         this.createdDate = createdDate;
         this.createdTime = createdTime;
         this.createdBy = createdBy;
@@ -124,6 +129,15 @@ public class Publisher {
         return this;
     }
 
+    public PublisherType getPublisherType() {
+        return publisherType;
+    }
+
+    public Publisher setPublisherType(PublisherType publisherType) {
+        this.publisherType = publisherType;
+        return this;
+    }
+
     public LocalDate getCreatedDate() {
         return createdDate;
     }
@@ -161,6 +175,7 @@ public class Publisher {
                 ", country='" + country + '\'' +
                 ", address='" + address + '\'' +
                 ", phone='" + phone + '\'' +
+                ", publisherType=" + publisherType +
                 ", createdDate=" + createdDate +
                 ", createdTime=" + createdTime +
                 ", createdBy='" + createdBy + '\'' +
