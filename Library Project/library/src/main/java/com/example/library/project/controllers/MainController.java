@@ -45,4 +45,9 @@ public class MainController {
     public String authorTypes() {
         return "authorType";
     }
+
+    @GetMapping("/libraryTypes")
+    public String libraryTypes() {
+        return "library";
+    }
 }

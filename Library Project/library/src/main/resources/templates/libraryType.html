@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مدیریت انواع کتابخانه</title>
+    <style>
+        body {
+            font-family: Tahoma, sans-serif;
+            direction: rtl;
+            text-align: right;
+            margin: 20px;
+        }
+        .container { max-width: 1350px; margin: auto; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { padding: 12px; border: 1px solid #aaa; text-align: right; }
+        th { background-color: #f4f4f4; }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 25px;
+            border: 1px solid #888;
+            width: 58%;
+            border-radius: 8px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 32px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover { color: black; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 6px; font-weight: bold; }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 12px 22px;
+            margin: 6px 4px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn-success { background: #28a745; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-warning { background: #ffc107; color: black; }
+        .btn-info { background: #17a2b8; color: white; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>مدیریت انواع کتابخانه</h1>
+    <div th:if="${message}" style="padding:12px; background:#d4edda; color:#155724; border-radius:5px; margin:15px 0;" th:text="${message}"></div>
+    <button onclick="openCreateModal()" class="btn-success" style="padding:12px 24px; font-size:16px;">
+        + ثبت نوع کتابخانه جدید
+    </button>
+    <hr>
+    <h2>لیست انواع کتابخانه ثبت شده</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>شناسه</th>
+            <th>دسترسی</th>
+            <th>مالکیت</th>
+            <th>گستره</th>
+            <th>نوع خدمت</th>
+            <th>اندازه</th>
+            <th>دوره تاریخی</th>
+            <th>تاریخ ایجاد</th>
+            <th>ساعت ایجاد</th>
+            <th>ایجاد کننده</th>
+            <th>عملیات</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- ردیف‌های اصلی داده -->
+        <tr th:each="l : ${libraryTypes}"
+            th:data-id="${l.libraryTypeId}"
+            th:data-accessibility="${l.libraryTypeAccessibility}"
+            th:data-ownership="${l.libraryTypeOwnership}"
+            th:data-scope="${l.libraryTypeScope}"
+            th:data-service="${l.libraryTypeService}"
+            th:data-size="${l.libraryTypeSize}"
+            th:data-historical="${l.historicalPeriodLevel}">
+
+            <td th:text="${l.libraryTypeId}"></td>
+            <td th:text="${l.libraryTypeAccessibility}"></td>
+            <td th:text="${l.libraryTypeOwnership}"></td>
+            <td th:text="${l.libraryTypeScope}"></td>
+            <td th:text="${l.libraryTypeService}"></td>
+            <td th:text="${l.libraryTypeSize}"></td>
+            <td th:text="${l.historicalPeriodLevel}"></td>
+            <td th:text="${#temporals.format(l.createdDate, 'yyyy-MM-dd')}"></td>
+            <td th:text="${#temporals.format(l.createdTime, 'HH:mm:ss')}"></td>
+            <td th:text="${l.createdBy}"></td>
+            <td>
+                <button onclick="openEditModal(this)" class="btn-warning" style="padding:8px 16px;">
+                    ✏️ ویرایش
+                </button>
+            </td>
+        </tr>
+
+        <!-- پیام وقتی لیست خالی است -->
+        <tr th:if="${libraryTypes == null or #lists.isEmpty(libraryTypes)}">
+            <td colspan="11" style="text-align:center; color:#888; padding:20px;">
+                هنوز هیچ نوع کتابخانه‌ای ثبت نشده است.
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal -->
+<div id="libraryTypeModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h2 id="modalTitle">ثبت نوع کتابخانه جدید</h2>
+        <form id="libraryTypeForm" th:action="@{/libraryType/saveLibraryType}" method="post">
+            <input type="hidden" id="libraryTypeId" name="libraryTypeId" />
+
+            <div class="form-group">
+                <label>دسترسی:</label>
+                <select id="libraryTypeAccessibility" name="libraryTypeAccessibility" required>
+                    <option value="">انتخاب کنید</option>
+                    <option value="OPEN_ACCESS">دسترسی باز</option>
+                    <option value="RESTRICTED">محدود</option>
+                    <option value="MEMBERSHIP_BASED">بر اساس عضویت</option>
+                    <option value="REFERENCE">مرجع</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>مالکیت:</label>
+                <select id="libraryTypeOwnership" name="libraryTypeOwnership" required>
+                    <option value="">انتخاب کنید</option>
+                    <option value="PUBLIC">عمومی</option>
+                    <option value="ACADEMIC">آکادمیک</option>
+                    <option value="SPECIAL">ویژه</option>
+                    <option value="NATIONAL">ملی</option>
+                    <option value="CORPORATE">شرکتی</option>
+                    <option value="PRIVATE">خصوصی</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>گستره:</label>
+                <select id="libraryTypeScope" name="libraryTypeScope" required>
+                    <option value="">انتخاب کنید</option>
+                    <option value="NEIGHBORHOOD">محله‌ای</option>
+                    <option value="CITY">شهری</option>
+                    <option value="PROVINCIAL">استانی</option>
+                    <option value="NATIONAL">ملی</option>
+                    <option value="INTERNATIONAL">بین‌المللی</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>نوع خدمت:</label>
+                <select id="libraryTypeService" name="libraryTypeService" required>
+                    <option value="">انتخاب کنید</option>
+                    <option value="TRADITIONAL">سنتی</option>
+                    <option value="RESEARCH">پژوهشی</option>
+                    <option value="EDUCATIONAL">آموزشی</option>
+                    <option value="COMMUNITY">اجتماعی</option>
+                    <option value="COMPREHENSIVE">جامع</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>اندازه:</label>
+                <select id="libraryTypeSize" name="libraryTypeSize" required>
+                    <option value="">انتخاب کنید</option>
+                    <option value="SMALL">کوچک</option>
+                    <option value="MEDIUM">متوسط</option>
+                    <option value="LARGE">بزرگ</option>
+                    <option value="VERY_LARGE">بسیار بزرگ</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>دوره تاریخی:</label>
+                <select id="historicalPeriodLevel" name="historicalPeriodLevel">
+                    <option value="">انتخاب کنید</option>
+                    <option value="ANCIENT">باستان</option>
+                    <option value="MEDIEVAL">قرون وسطی</option>
+                    <option value="MODERN">مدرن</option>
+                    <option value="CONTEMPORARY">معاصر</option>
+                </select>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <button type="submit" id="submitBtn" class="btn-success">ذخیره</button>
+                <button type="button" onclick="closeModal()" class="btn-danger">انصراف</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openCreateModal() {
+        document.getElementById("modalTitle").textContent = "ثبت نوع کتابخانه جدید";
+        document.getElementById("submitBtn").textContent = "ذخیره";
+        document.getElementById("libraryTypeForm").reset();
+        document.getElementById("libraryTypeId").value = "";
+        document.getElementById("libraryTypeModal").style.display = "block";
+    }
+
+    function openEditModal(btn) {
+        const row = btn.closest('tr');
+        document.getElementById("modalTitle").textContent = "ویرایش نوع کتابخانه";
+        document.getElementById("submitBtn").textContent = "به‌روزرسانی";
+
+        // تنظیم مقادیر در فرم
+        document.getElementById("libraryTypeId").value = row.dataset.id || "";
+        document.getElementById("libraryTypeAccessibility").value = row.dataset.accessibility || "";
+        document.getElementById("libraryTypeOwnership").value = row.dataset.ownership || "";
+        document.getElementById("libraryTypeScope").value = row.dataset.scope || "";
+        document.getElementById("libraryTypeService").value = row.dataset.service || "";
+        document.getElementById("libraryTypeSize").value = row.dataset.size || "";
+        document.getElementById("historicalPeriodLevel").value = row.dataset.historical || "";
+
+        document.getElementById("libraryTypeModal").style.display = "block";
+    }
+
+    function closeModal() {
+        document.getElementById("libraryTypeModal").style.display = "none";
+    }
+
+    // بستن مدال با کلیک روی背景
+    document.getElementById("libraryTypeModal").addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+    });
+
+    // بستن مدال با کلید Escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeModal();
+        }
+    });
+</script>
+</body>
+</html>
