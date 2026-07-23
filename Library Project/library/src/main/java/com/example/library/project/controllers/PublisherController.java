@@ -3,10 +3,14 @@ package com.example.library.project.controllers;
 import com.example.library.project.dto.requests.PublisherRequestDto;
 import com.example.library.project.dto.responses.PublisherResponseDto;
 import com.example.library.project.services.interfaces.PublisherService;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
 import java.util.List;
 
-@RestController
+@Controller
 @RequestMapping("/publisher")
 public class PublisherController {
 
@@ -16,9 +20,26 @@ public class PublisherController {
         this.publisherService = publisherService;
     }
 
+    @GetMapping
+    public String getAllPublishers(Model model) throws Exception {
+
+        List<PublisherResponseDto> publishers = findAll();
+
+        model.addAttribute("publishers", publishers);
+        model.addAttribute("publisherDto", new PublisherRequestDto());
+
+        return "publisher";
+    }
+
     @PostMapping("/savePublisher")
-    public PublisherResponseDto save(@RequestBody PublisherRequestDto publisherRequestDto) throws Exception {
-        return publisherService.save(publisherRequestDto);
+    public String savePerson(@ModelAttribute("publisherDto") PublisherRequestDto publisherRequestDto, RedirectAttributes redirectAttributes) {
+        try {
+            publisherService.save(publisherRequestDto);
+            redirectAttributes.addFlashAttribute("message", "ناشر با موفقیت ثبت شد.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("message", "خطا در ثبت: " + e.getMessage());
+        }
+        return "redirect:/publisher";
     }
 
     @PutMapping("/updatePublisher")

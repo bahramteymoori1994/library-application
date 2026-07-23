@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مدیریت ناشران</title>
+
+    <style>
+        body { font-family: Tahoma, sans-serif; direction: rtl; text-align: right; margin: 20px; }
+        .container { max-width: 1250px; margin: auto; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { padding: 12px; border: 1px solid #aaa; text-align: right; }
+        th { background-color: #f4f4f4; }
+
+        /* Modal Styles */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
+        .modal-content { background-color: #fefefe; margin: 5% auto; padding: 25px; border: 1px solid #888; width: 52%; border-radius: 8px; }
+        .close { color: #aaa; float: right; font-size: 32px; font-weight: bold; cursor: pointer; }
+        .close:hover { color: black; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 6px; font-weight: bold; }
+        input, select { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 5px; }
+        button { padding: 12px 22px; margin: 6px 4px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>مدیریت اطلاعات ناشران</h1>
+
+    <div th:if="${message}" style="padding:12px; background:#d4edda; color:#155724; border-radius:5px; margin:15px 0;" th:text="${message}"></div>
+
+    <button onclick="openCreateModal()" style="background:#28a745; color:white; padding:12px 24px;">
+        + ثبت ناشر جدید
+    </button>
+
+    <hr>
+
+    <h2>لیست ناشران ثبت شده</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>شناسه</th>
+            <th>نام ناشر</th>
+            <th>کد ناشر</th>
+            <th>کشور</th>
+            <th>شهر</th>
+            <th>آدرس</th>
+            <th>تلفن</th>
+            <th>تاریخ ایجاد</th>
+            <th>ساعت ایجاد</th>
+            <th>ایجاد کننده</th>
+            <th>عملیات</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="p : ${publishers}" th:if="${publishers != null and not #lists.isEmpty(publishers)}"
+            th:data-id="${p.publisherId}"
+            th:data-name="${p.name}"
+            th:data-code="${p.code}"
+            th:data-address="${p.address}"
+            th:data-phone="${p.phone}"
+            th:data-city="${p.city}"
+            th:data-country="${p.country}">
+
+            <td th:text="${p.publisherId}"></td>
+            <td th:text="${p.name}"></td>
+            <td th:text="${p.code}"></td>
+            <td th:text="${p.country}"></td>
+            <td th:text="${p.city}"></td>
+            <td th:text="${p.address}"></td>
+            <td th:text="${p.phone}"></td>
+            <td th:text="${#temporals.format(p.createdDate, 'yyyy-MM-dd')}"></td>
+            <td th:text="${#temporals.format(p.createdTime, 'HH:mm:ss')}"></td>
+            <td th:text="${p.createdBy}"></td>
+            <td>
+                <button onclick="openEditModal(this)"
+                        style="background:#ffc107; color:black; padding:8px 16px;">
+                    ✏️ ویرایش
+                </button>
+            </td>
+        </tr>
+        <tr th:if="${publishers == null or #lists.isEmpty(publishers)}">
+            <td colspan="9" style="text-align:center; color:#888; padding:20px;">
+                هنوز هیچ ناشری ثبت نشده است.
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal -->
+<div id="publisherModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h2 id="modalTitle">ثبت ناشر جدید</h2>
+
+        <form id="publisherForm" th:action="@{/publisher/savePublisher}" method="post" th:object="${publisherDto}">
+            <input type="hidden" id="publisherId" th:field="*{publisherId}" />
+
+            <div class="form-group">
+                <label>نام ناشر:</label>
+                <input type="text" id="name" th:field="*{name}" required />
+            </div>
+            <div class="form-group">
+                <label>کد ناشر:</label>
+                <input type="text" id="code" th:field="*{code}" required />
+            </div>
+            <div class="form-group">
+                <label>کشور:</label>
+                <input type="text" id="country" th:field="*{country}" required />
+            </div>
+            <div class="form-group">
+                <label>شهر:</label>
+                <input type="text" id="city" th:field="*{city}" required />
+            </div>
+            <div class="form-group">
+                <label>آدرس:</label>
+                <input type="text" id="address" th:field="*{address}"/>
+            </div>
+            <div class="form-group">
+                <label>تلفن:</label>
+                <input type="text" id="phone" th:field="*{phone}"/>
+            </div>
+
+
+            <div style="margin-top: 20px;">
+                <button type="submit" id="submitBtn" style="background:#28a745; color:white;">ذخیره</button>
+                <button type="button" onclick="closeModal()" style="background:#dc3545; color:white;">انصراف</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openCreateModal() {
+        document.getElementById("modalTitle").textContent = "ثبت ناشر جدید";
+        document.getElementById("submitBtn").textContent = "ذخیره";
+        document.getElementById("publisherForm").reset();
+        document.getElementById("publisherId").value = "";
+        document.getElementById("publisherModal").style.display = "block";
+    }
+
+    function openEditModal(btn) {
+        const row = btn.closest('tr');
+
+        document.getElementById("modalTitle").textContent = "ویرایش ناشر";
+        document.getElementById("submitBtn").textContent = "به‌روزرسانی";
+
+        document.getElementById("publisherId").value = row.dataset.id;
+        document.getElementById("name").value = row.dataset.name;
+        document.getElementById("code").value = row.dataset.code;
+        document.getElementById("city").value = row.dataset.city;
+        document.getElementById("country").value = row.dataset.country;
+        document.getElementById("address").value = row.dataset.address;
+        document.getElementById("phone").value = row.dataset.phone;
+
+        document.getElementById("publisherModal").style.display = "block";
+    }
+
+    function closeModal() {
+        document.getElementById("publisherModal").style.display = "none";
+    }
+</script>
+
+</body>
+</html>
