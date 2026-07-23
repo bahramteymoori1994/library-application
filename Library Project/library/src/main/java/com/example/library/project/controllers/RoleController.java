@@ -10,7 +10,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.List;
 
 @Controller
-@RequestMapping("role")
+@RequestMapping("/role")
 public class RoleController {
 
     private final RoleService roleService;
