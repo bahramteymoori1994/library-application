@@ -7,7 +7,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Entity(name = "authorTypeEntity")
-@Table(name = "author-type")
+@Table(name = "author_type")
 public class AuthorType {
 
     @Id
