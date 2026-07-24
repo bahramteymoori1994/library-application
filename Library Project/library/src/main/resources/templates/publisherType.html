@@ -5,122 +5,114 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>مدیریت انواع ناشران</title>
 
-    <style>
-        body { font-family: Tahoma, sans-serif; direction: rtl; text-align: right; margin: 20px; }
-        .container { max-width: 1250px; margin: auto; }
-        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-        th, td { padding: 12px; border: 1px solid #aaa; text-align: right; }
-        th { background-color: #f4f4f4; }
-
-        /* Modal Styles */
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
-        .modal-content { background-color: #fefefe; margin: 5% auto; padding: 25px; border: 1px solid #888; width: 52%; border-radius: 8px; }
-        .close { color: #aaa; float: right; font-size: 32px; font-weight: bold; cursor: pointer; }
-        .close:hover { color: black; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 6px; font-weight: bold; }
-        input, select { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 5px; }
-        button { padding: 12px 22px; margin: 6px 4px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
-    </style>
+    <!-- لینک به فایل CSS -->
+    <link rel="stylesheet" th:href="@{/css/publisherType.css}">
 </head>
 <body>
 
 <div class="container">
-    <h1>مدیریت انواع ناشران</h1>
+    <!-- Header -->
+    <div class="page-header">
+        <h1><span class="icon">📑</span> مدیریت انواع ناشران</h1>
+        <button onclick="openCreateModal()" class="btn btn-success btn-lg">
+            ➕ ثبت نوع ناشر جدید
+        </button>
+    </div>
 
-    <div th:if="${message}" style="padding:12px; background:#d4edda; color:#155724; border-radius:5px; margin:15px 0;" th:text="${message}"></div>
-
-    <button onclick="openCreateModal()" style="background:#28a745; color:white; padding:12px 24px;">
-        + ثبت نوع ناشر جدید
-    </button>
+    <!-- نمایش پیام‌ها -->
+    <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
 
     <hr>
 
-    <h2>لیست انواع ناشران ثبت شده</h2>
-    <table>
-        <thead>
-        <tr>
-            <th>شناسه</th>
-            <th>عنوان نوع ناشر</th>
-            <th>تاریخ ایجاد</th>
-            <th>ساعت ایجاد</th>
-            <th>ایجاد کننده</th>
-            <th>عملیات</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="p : ${publisherTypes}" th:if="${publisherTypes != null and not #lists.isEmpty(publisherTypes)}"
-            th:data-id="${p.publisherTypeId}"
-            th:data-typename="${p.typeName}">
+    <!-- Search Panel (اختیاری) -->
+    <div class="search-panel">
+        <h3>🔍 جستجوی انواع ناشران</h3>
+        <form id="searchForm" onsubmit="searchPublisherTypes(event)">
+            <div class="search-grid">
+                <div class="search-group">
+                    <label for="searchTypeName">عنوان نوع ناشر:</label>
+                    <input type="text" id="searchTypeName" name="typeName" placeholder="جستجوی عنوان..." />
+                </div>
+            </div>
 
-            <td th:text="${p.publisherTypeId}"></td>
-            <td th:text="${p.typeName}"></td>
-            <td th:text="${#temporals.format(p.createdDate, 'yyyy-MM-dd')}"></td>
-            <td th:text="${#temporals.format(p.createdTime, 'HH:mm:ss')}"></td>
-            <td th:text="${p.createdBy}"></td>
-            <td>
-                <button onclick="openEditModal(this)"
-                        style="background:#ffc107; color:black; padding:8px 16px;">
-                    ✏️ ویرایش
-                </button>
-            </td>
-        </tr>
-        <tr th:if="${publisherTypes == null or #lists.isEmpty(publisherTypes)}">
-            <td colspan="8" style="text-align:center; color:#888; padding:20px;">
-                هنوز هیچ نوع ناشری ثبت نشده است.
-            </td>
-        </tr>
-        </tbody>
-    </table>
+            <div class="search-buttons">
+                <button type="submit" class="btn btn-primary">🔍 جستجو</button>
+                <button type="reset" class="btn btn-secondary" onclick="resetSearch()">🔄 پاک کردن</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Result Count -->
+    <div th:if="${publisherTypes != null}" class="result-count">
+        تعداد نتایج: <strong th:text="${#lists.size(publisherTypes)}"></strong>
+    </div>
+
+    <h2>لیست انواع ناشران ثبت شده</h2>
+
+    <!-- Table -->
+    <div class="table-container">
+        <table>
+            <thead>
+            <tr>
+                <th>شناسه</th>
+                <th>عنوان نوع ناشر</th>
+                <th>تاریخ ایجاد</th>
+                <th>ساعت ایجاد</th>
+                <th>ایجاد کننده</th>
+                <th>عملیات</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="p : ${publisherTypes}" th:if="${publisherTypes != null and not #lists.isEmpty(publisherTypes)}"
+                th:data-id="${p.publisherTypeId}"
+                th:data-typename="${p.typeName}">
+
+                <td th:text="${p.publisherTypeId}"></td>
+                <td th:text="${p.typeName}"></td>
+                <td th:text="${#temporals.format(p.createdDate, 'yyyy-MM-dd')}"></td>
+                <td th:text="${#temporals.format(p.createdTime, 'HH:mm:ss')}"></td>
+                <td th:text="${p.createdBy}"></td>
+                <td>
+                    <button onclick="openEditModal(this)" class="btn btn-warning btn-sm">
+                        ✏️ ویرایش
+                    </button>
+                </td>
+            </tr>
+            <tr th:if="${publisherTypes == null or #lists.isEmpty(publisherTypes)}">
+                <td colspan="6" class="empty-state">
+                    <span class="icon">📭</span>
+                    <div class="message">هنوز هیچ نوع ناشری ثبت نشده است</div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <!-- Modal -->
 <div id="publisherTypeModal" class="modal">
     <div class="modal-content">
         <span class="close" onclick="closeModal()">&times;</span>
-        <h2 id="modalTitle">ثبت نوع ناشر جدید</h2>
+        <h2 class="modal-title" id="modalTitle">ثبت نوع ناشر جدید</h2>
 
         <form id="publisherTypeForm" th:action="@{/publisherType/savePublisherType}" method="post" th:object="${publisherTypeDto}">
             <input type="hidden" id="publisherTypeId" th:field="*{publisherTypeId}" />
 
             <div class="form-group">
-                <label>عنوان نوع ناشر:</label>
-                <input type="text" id="title" th:field="*{typeName}" required />
+                <label for="typeName">عنوان نوع ناشر <span class="required">*</span></label>
+                <input type="text" id="typeName" th:field="*{typeName}" required placeholder="مثال: انتشارات داخلی" />
             </div>
 
-            <div style="margin-top: 20px;">
-                <button type="submit" id="submitBtn" style="background:#28a745; color:white;">ذخیره</button>
-                <button type="button" onclick="closeModal()" style="background:#dc3545; color:white;">انصراف</button>
+            <div class="form-actions">
+                <button type="submit" id="submitBtn" class="btn btn-success">ذخیره</button>
+                <button type="button" onclick="closeModal()" class="btn btn-danger">انصراف</button>
             </div>
         </form>
     </div>
 </div>
 
-<script>
-    function openCreateModal() {
-        document.getElementById("modalTitle").textContent = "ثبت نوع ناشر جدید";
-        document.getElementById("submitBtn").textContent = "ذخیره";
-        document.getElementById("publisherTypeForm").reset();
-        document.getElementById("publisherTypeId").value = "";
-        document.getElementById("publisherTypeModal").style.display = "block";
-    }
-
-    function openEditModal(btn) {
-        const row = btn.closest('tr');
-
-        document.getElementById("modalTitle").textContent = "ویرایش نوع ناشر";
-        document.getElementById("submitBtn").textContent = "به‌روزرسانی";
-
-        document.getElementById("publisherTypeId").value = row.dataset.id;
-        document.getElementById("typeName").value = row.dataset.title;
-
-        document.getElementById("publisherTypeModal").style.display = "block";
-    }
-
-    function closeModal() {
-        document.getElementById("publisherTypeModal").style.display = "none";
-    }
-</script>
+<!-- لینک به فایل JavaScript -->
+<script th:src="@{/js/publisherType.js}"></script>
 
 </body>
 </html>

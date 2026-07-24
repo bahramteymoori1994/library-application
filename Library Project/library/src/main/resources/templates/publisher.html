@@ -4,128 +4,161 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>مدیریت ناشران</title>
-    <style>
-        body { font-family: Tahoma, sans-serif; direction: rtl; text-align: right; margin: 20px; background: #f8f9fa; }
-        .container { max-width: 1400px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); }
-        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-        th, td { padding: 12px; border: 1px solid #ddd; text-align: right; }
-        th { background-color: #f4f4f4; }
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
-        .modal-content { background-color: #fefefe; margin: 3% auto; padding: 25px; width: 72%; border-radius: 8px; max-height: 92vh; overflow-y: auto; }
-        .close { color: #aaa; float: right; font-size: 32px; font-weight: bold; cursor: pointer; }
-        .close:hover { color: #000; }
-        .form-group { margin-bottom: 18px; }
-        label { display: block; margin-bottom: 6px; font-weight: bold; }
-        input, textarea { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 5px; }
-        textarea { resize: vertical; min-height: 80px; }
-        button { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
-        .search-container { display: flex; gap: 10px; margin-bottom: 15px; }
-        .selected-type-info { display: none; margin-top: 8px; background: #f8f9fa; padding: 10px; border-radius: 5px; border: 1px solid #dee2e6; }
-        .selected-type-info.show { display: block; }
-        .btn-primary { background: #007bff; color: white; }
-        .btn-success { background: #28a745; color: white; }
-        .btn-danger { background: #dc3545; color: white; }
-        .btn-warning { background: #ffc107; color: black; }
-        .btn-info { background: #17a2b8; color: white; }
-        .table-hover tbody tr:hover { background-color: #f5f5f5; cursor: pointer; }
-    </style>
+
+    <!-- لینک به فایل CSS -->
+    <link rel="stylesheet" th:href="@{/css/publisher.css}">
 </head>
 <body>
-<div class="container">
-    <h1>مدیریت ناشران</h1>
-    <div th:if="${message}" style="padding:12px; background:#d4edda; color:#155724; border-radius:5px; margin:15px 0;" th:text="${message}"></div>
 
-    <button onclick="openCreateModal()" class="btn-success" style="padding:12px 24px; font-size:16px;">
-        + ثبت ناشر جدید
-    </button>
+<div class="container">
+    <!-- Header -->
+    <div class="page-header">
+        <h1><span class="icon">🏢</span> مدیریت ناشران</h1>
+        <button onclick="openCreateModal()" class="btn btn-success btn-lg">
+            ➕ ثبت ناشر جدید
+        </button>
+    </div>
+
+    <!-- نمایش پیام‌ها -->
+    <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+
     <hr>
+
+    <!-- Search Panel (اختیاری) -->
+    <div class="search-panel">
+        <h3>🔍 جستجوی ناشران</h3>
+        <form id="searchForm" onsubmit="searchPublishers(event)">
+            <div class="search-grid">
+                <div class="search-group">
+                    <label for="searchName">نام ناشر:</label>
+                    <input type="text" id="searchName" name="name" placeholder="جستجوی نام..." />
+                </div>
+
+                <div class="search-group">
+                    <label for="searchCity">شهر:</label>
+                    <input type="text" id="searchCity" name="city" placeholder="جستجوی شهر..." />
+                </div>
+
+                <div class="search-group">
+                    <label for="searchCountry">کشور:</label>
+                    <input type="text" id="searchCountry" name="country" placeholder="جستجوی کشور..." />
+                </div>
+            </div>
+
+            <div class="search-buttons">
+                <button type="submit" class="btn btn-primary">🔍 جستجو</button>
+                <button type="reset" class="btn btn-secondary" onclick="resetSearch()">🔄 پاک کردن</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Result Count -->
+    <div th:if="${publishers != null}" class="result-count">
+        تعداد نتایج: <strong th:text="${#lists.size(publishers)}"></strong>
+    </div>
+
     <h2>لیست ناشران ثبت شده</h2>
-    <table class="table-hover">
-        <thead>
-        <tr>
-            <th>شناسه</th>
-            <th>نام</th>
-            <th>نوع ناشر</th>
-            <th>کد</th>
-            <th>کشور</th>
-            <th>شهر</th>
-            <th>آدرس</th>
-            <th>تاریخ ایجاد</th>
-            <th>ساعت ایجاد</th>
-            <th>ایجاد کننده</th>
-            <th>عملیات</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="p : ${publishers}" th:if="${publishers != null and not #lists.isEmpty(publishers)}">
-            <td th:text="${p.publisherId}"></td>
-            <td th:text="${p.publisherName}"></td>
-            <td th:text="${p.publisherTypeName}"></td>
-            <td th:text="${p.publisherCode}"></td>
-            <td th:text="${p.publisherCountry}"></td>
-            <td th:text="${p.publisherCity}"></td>
-            <td th:text="${p.publisherAddress}"></td>
-            <td th:text="${#temporals.format(p.createdDate, 'yyyy-MM-dd')}"></td>
-            <td th:text="${#temporals.format(p.createdTime, 'HH:mm:ss')}"></td>
-            <td th:text="${p.createdBy}"></td>
-            <td>
-                <button onclick="openEditModal(this)" class="btn-warning">✏️ ویرایش</button>
-            </td>
-        </tr>
-        <tr th:if="${publishers == null or #lists.isEmpty(publishers)}">
-            <td colspan="11" style="text-align:center; color:#888; padding:30px;">هنوز هیچ ناشری ثبت نشده است.</td>
-        </tr>
-        </tbody>
-    </table>
+
+    <!-- Table -->
+    <div class="table-container">
+        <table class="table-hover">
+            <thead>
+            <tr>
+                <th>شناسه</th>
+                <th>نام</th>
+                <th>نوع ناشر</th>
+                <th>کد</th>
+                <th>کشور</th>
+                <th>شهر</th>
+                <th>آدرس</th>
+                <th>تاریخ ایجاد</th>
+                <th>ساعت ایجاد</th>
+                <th>ایجاد کننده</th>
+                <th>عملیات</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="p : ${publishers}" th:if="${publishers != null and not #lists.isEmpty(publishers)}">
+                <td th:text="${p.publisherId}"></td>
+                <td th:text="${p.publisherName}"></td>
+                <td th:text="${p.publisherTypeName}"></td>
+                <td th:text="${p.publisherCode}"></td>
+                <td th:text="${p.publisherCountry}"></td>
+                <td th:text="${p.publisherCity}"></td>
+                <td th:text="${p.publisherAddress}"></td>
+                <td th:text="${#temporals.format(p.createdDate, 'yyyy-MM-dd')}"></td>
+                <td th:text="${#temporals.format(p.createdTime, 'HH:mm:ss')}"></td>
+                <td th:text="${p.createdBy}"></td>
+                <td>
+                    <button onclick="openEditModal(this)" class="btn btn-warning btn-sm">
+                        ✏️ ویرایش
+                    </button>
+                </td>
+            </tr>
+            <tr th:if="${publishers == null or #lists.isEmpty(publishers)}">
+                <td colspan="11" class="empty-state">
+                    <span class="icon">📭</span>
+                    <div class="message">هنوز هیچ ناشری ثبت نشده است</div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <!-- Modal ثبت/ویرایش ناشر -->
 <div id="publisherModal" class="modal">
     <div class="modal-content">
         <span class="close" onclick="closeModal()">×</span>
-        <h2 id="modalTitle">ثبت ناشر جدید</h2>
+        <h2 class="modal-title" id="modalTitle">ثبت ناشر جدید</h2>
+
         <form id="publisherForm" th:action="@{/publisher/savePublisher}" method="post" th:object="${publisherDto}">
-            <input type="hidden" id="publisherId" name="publisherId" />
+            <input type="hidden" id="publisherId" th:field="*{publisherId}" />
 
             <div class="form-group">
-                <label>نام ناشر:</label>
-                <input type="text" id="name" name="name" required />
-            </div>
-            <div class="form-group">
-                <label>کد ناشر:</label>
-                <input type="text" id="code" name="code" maxlength="5" required />
-            </div>
-            <div class="form-group">
-                <label>شهر:</label>
-                <input type="text" id="city" name="city" required />
-            </div>
-            <div class="form-group">
-                <label>کشور:</label>
-                <input type="text" id="country" name="country" required />
-            </div>
-            <div class="form-group">
-                <label>آدرس:</label>
-                <textarea id="address" name="address"></textarea>
-            </div>
-            <div class="form-group">
-                <label>تلفن:</label>
-                <input type="text" id="phone" name="phone" />
+                <label for="name">نام ناشر <span class="required">*</span></label>
+                <input type="text" id="name" th:field="*{name}" required placeholder="مثال: انتشارات علمی" />
             </div>
 
             <div class="form-group">
-                <label>نوع ناشر:</label>
+                <label for="code">کد ناشر <span class="required">*</span></label>
+                <input type="text" id="code" th:field="*{code}" maxlength="5" required placeholder="مثال: ۱۲۳۴۵" />
+            </div>
+
+            <div class="form-group">
+                <label for="city">شهر <span class="required">*</span></label>
+                <input type="text" id="city" th:field="*{city}" required placeholder="مثال: تهران" />
+            </div>
+
+            <div class="form-group">
+                <label for="country">کشور <span class="required">*</span></label>
+                <input type="text" id="country" th:field="*{country}" required placeholder="مثال: ایران" />
+            </div>
+
+            <div class="form-group">
+                <label for="address">آدرس:</label>
+                <textarea id="address" th:field="*{address}" placeholder="آدرس کامل ناشر را وارد کنید..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">تلفن:</label>
+                <input type="text" id="phone" th:field="*{phone}" placeholder="مثال: ۰۲۱-۱۲۳۴۵۶۷۸" />
+            </div>
+
+            <div class="form-group">
+                <label for="publisherTypeId">نوع ناشر <span class="required">*</span></label>
                 <div class="search-container">
-                    <input type="number" id="publisherTypeId" name="publisherType" required style="flex:1;" />
-                    <button type="button" onclick="openPublisherTypeSearch()" class="btn-info">🔍 جستجو</button>
+                    <input type="number" id="publisherTypeId" th:field="*{publisherType}" required style="flex:1;" />
+                    <button type="button" onclick="openPublisherTypeSearch()" class="btn btn-info">🔍 جستجو</button>
                 </div>
                 <div id="selectedTypeInfo" class="selected-type-info">
                     <strong>نوع ناشر:</strong> <span id="selectedTypeName"></span>
                 </div>
             </div>
 
-            <div style="margin-top: 25px;">
-                <button type="submit" class="btn-success">ذخیره</button>
-                <button type="button" onclick="closeModal()" class="btn-danger">انصراف</button>
+            <div class="form-actions">
+                <button type="submit" id="submitBtn" class="btn btn-success">ذخیره</button>
+                <button type="button" onclick="closeModal()" class="btn btn-danger">انصراف</button>
             </div>
         </form>
     </div>
@@ -135,131 +168,31 @@
 <div id="publisherTypeSearchModal" class="modal">
     <div class="modal-content">
         <span class="close" onclick="closePublisherTypeSearch()">×</span>
-        <h2>جستجوی نوع ناشر</h2>
+        <h2 class="modal-title">جستجوی نوع ناشر</h2>
+
         <div class="search-container">
             <input type="text" id="typeSearchInput" placeholder="جستجو بر اساس نام نوع ناشر..." />
-            <button onclick="searchPublisherTypes()" class="btn-primary">جستجو</button>
-            <button onclick="clearTypeSearch()" class="btn-secondary">پاک کردن</button>
+            <button onclick="searchPublisherTypes()" class="btn btn-primary">جستجو</button>
+            <button onclick="clearTypeSearch()" class="btn btn-secondary">پاک کردن</button>
         </div>
-        <table class="table-hover">
-            <thead>
-            <tr>
-                <th>شناسه</th>
-                <th>نام نوع ناشر</th>
-                <th>انتخاب</th>
-            </tr>
-            </thead>
-            <tbody id="publisherTypeTableBody"></tbody>
-        </table>
+
+        <div class="table-container">
+            <table class="table-hover">
+                <thead>
+                <tr>
+                    <th>شناسه</th>
+                    <th>نام نوع ناشر</th>
+                    <th>انتخاب</th>
+                </tr>
+                </thead>
+                <tbody id="publisherTypeTableBody"></tbody>
+            </table>
+        </div>
     </div>
 </div>
 
-<script>
-    let allPublisherTypes = [];
+<!-- لینک به فایل JavaScript -->
+<script th:src="@{/js/publisher.js}"></script>
 
-    function loadPublisherTypes() {
-        fetch('/publisher/findAllPublisherTypes')
-            .then(r => r.json())
-            .then(data => {
-                allPublisherTypes = data;
-                displayPublisherTypes(data);
-            })
-            .catch(err => console.error('Error loading publisher types:', err));
-    }
-
-    function displayPublisherTypes(types) {
-        let html = '';
-        if (!types || types.length === 0) {
-            html = '<tr><td colspan="3" style="text-align:center;color:#888;">موردی یافت نشد</td></tr>';
-        } else {
-            types.forEach(t => {
-                const name = t.publisherTypeName || t.typeName || t.name || '';
-                html += `<tr onclick="selectPublisherType('${t.publisherTypeId || t.id}','${name.replace(/'/g, "\\'")}')">
-                    <td>${t.publisherTypeId || t.id}</td>
-                    <td>${name}</td>
-                    <td><button class="btn-success" style="padding:5px 15px;">انتخاب</button></td>
-                </tr>`;
-            });
-        }
-        document.getElementById('publisherTypeTableBody').innerHTML = html;
-    }
-
-    function selectPublisherType(id, name) {
-        document.getElementById('publisherTypeId').value = id;
-        document.getElementById('selectedTypeInfo').classList.add('show');
-        document.getElementById('selectedTypeName').textContent = name;
-        closePublisherTypeSearch();
-    }
-
-    function openPublisherTypeSearch() {
-        document.getElementById('publisherTypeSearchModal').style.display = 'block';
-        if (!allPublisherTypes.length) loadPublisherTypes();
-        else displayPublisherTypes(allPublisherTypes);
-        setTimeout(() => document.getElementById('typeSearchInput').focus(), 100);
-    }
-
-    function closePublisherTypeSearch() {
-        document.getElementById('publisherTypeSearchModal').style.display = 'none';
-    }
-
-    function searchPublisherTypes() {
-        const term = document.getElementById('typeSearchInput').value.toLowerCase().trim();
-        const filtered = term === '' ? allPublisherTypes : allPublisherTypes.filter(t =>
-            (t.publisherTypeName || t.typeName || t.name || '').toLowerCase().includes(term));
-        displayPublisherTypes(filtered);
-    }
-
-    function clearTypeSearch() {
-        document.getElementById('typeSearchInput').value = '';
-        displayPublisherTypes(allPublisherTypes);
-    }
-
-    function openCreateModal() {
-        document.getElementById("modalTitle").textContent = "ثبت ناشر جدید";
-        document.getElementById("publisherForm").reset();
-        document.getElementById("publisherId").value = '';
-        document.getElementById("selectedTypeInfo").classList.remove('show');
-        document.getElementById("publisherModal").style.display = "block";
-        setTimeout(() => document.getElementById("name").focus(), 100);
-    }
-
-    function openEditModal(btn) {
-        const row = btn.closest('tr');
-        const id = row.querySelector('td:first-child').textContent.trim();
-
-        fetch(`/publisher/findPublisherById/${id}`)
-            .then(r => r.json())
-            .then(p => {
-                document.getElementById("modalTitle").textContent = "ویرایش ناشر";
-                document.getElementById("publisherId").value = p.publisherId || '';
-                document.getElementById("name").value = p.name || '';
-                document.getElementById("code").value = p.code || '';
-                document.getElementById("city").value = p.city || '';
-                document.getElementById("country").value = p.country || '';
-                document.getElementById("address").value = p.address || '';
-                document.getElementById("phone").value = p.phone || '';
-
-                document.getElementById("publisherTypeId").value = p.publisherTypeName || '';
-                if (p.publisherTypeName) {
-                    document.getElementById("selectedTypeName").textContent = p.publisherTypeName;
-                    document.getElementById("selectedTypeInfo").classList.add('show');
-                }
-                document.getElementById("publisherModal").style.display = "block";
-            })
-            .catch(() => alert('خطا در بارگذاری اطلاعات ناشر'));
-    }
-
-    function closeModal() {
-        document.getElementById("publisherModal").style.display = "none";
-    }
-
-    document.addEventListener('keydown', e => {
-        if (e.key === 'Escape') document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
-    });
-
-    document.addEventListener('DOMContentLoaded', () => {
-        loadPublisherTypes();
-    });
-</script>
 </body>
 </html>

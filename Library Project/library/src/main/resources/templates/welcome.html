@@ -4,168 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>خوش آمدید - سیستم مدیریت</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap');
 
-        body {
-            font-family: 'Vazirmatn', Tahoma, sans-serif;
-            direction: rtl;
-            text-align: right;
-            margin: 0;
-            padding: 0;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            min-height: 100vh;
-            color: #333;
-        }
-
-        .header {
-            background: linear-gradient(90deg, #007bff, #00c6ff);
-            color: white;
-            padding: 1.5rem 2rem;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .header h1 {
-            margin: 0;
-            font-size: 2.2rem;
-            font-weight: 700;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 40px auto;
-            padding: 0 20px;
-        }
-
-        .welcome-section {
-            text-align: center;
-            margin-bottom: 50px;
-        }
-
-        .welcome-section h2 {
-            font-size: 2.8rem;
-            color: #2c3e50;
-            margin-bottom: 10px;
-        }
-
-        .welcome-section p {
-            font-size: 1.3rem;
-            color: #555;
-            max-width: 700px;
-            margin: 0 auto;
-        }
-
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 25px;
-        }
-
-        .card {
-            background: white;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s ease;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .card:hover {
-            transform: translateY(-12px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-        }
-
-        .card-icon {
-            height: 120px;
-            background: linear-gradient(135deg, #007bff, #00c6ff);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 3.5rem;
-            color: white;
-        }
-
-        .card-content {
-            padding: 25px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .card h3 {
-            margin: 0 0 12px 0;
-            font-size: 1.5rem;
-            color: #2c3e50;
-        }
-
-        .card p {
-            color: #666;
-            margin-bottom: 25px;
-            flex: 1;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 14px 28px;
-            background: #28a745;
-            color: white;
-            text-decoration: none;
-            border-radius: 50px;
-            font-weight: 600;
-            text-align: center;
-            transition: all 0.3s ease;
-            border: none;
-            cursor: pointer;
-            font-size: 1.1rem;
-        }
-
-        .btn:hover {
-            background: #218838;
-            transform: scale(1.05);
-        }
-
-        .nav-bar {
-            background: white;
-            padding: 15px 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .nav-menu {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
-        .nav-item {
-            padding: 10px 22px;
-            background: #f8f9fa;
-            border-radius: 30px;
-            text-decoration: none;
-            color: #333;
-            font-weight: 500;
-            transition: all 0.3s;
-        }
-
-        .nav-item:hover {
-            background: #007bff;
-            color: white;
-        }
-    </style>
+    <!-- لینک به فایل CSS -->
+    <link rel="stylesheet" th:href="@{/css/welcome.css}">
 </head>
 <body>
 
 <!-- Header -->
 <div class="header">
     <h1>📚 سیستم مدیریت کتاب و کاربران</h1>
+    <div class="header-info">
+        <span id="greetingMessage" class="greeting">🌅 صبح بخیر</span>
+        <span id="currentDateTime" class="datetime"></span>
+    </div>
 </div>
 
 <!-- Navigation Bar -->
@@ -186,7 +37,8 @@
 <div class="container">
     <div class="welcome-section">
         <h2>به پنل مدیریتی خوش آمدید</h2>
-        <p>از اینجا می‌توانید تمام بخش‌های سیستم را به راحتی مدیریت کنید.</p>
+        <p class="subtitle">از اینجا می‌توانید تمام بخش‌های سیستم را به راحتی مدیریت کنید.</p>
+        <div id="welcomeDate" class="badge-date">📅 امروز</div>
     </div>
 
     <div class="dashboard-grid">
@@ -196,7 +48,10 @@
             <div class="card-content">
                 <h3>مدیریت کاربران</h3>
                 <p>ثبت، ویرایش و مدیریت کاربران سیستم، تخصیص نقش و ارتباط با اشخاص.</p>
-                <a href="/user" class="btn">ورود به بخش کاربران</a>
+                <div class="card-footer">
+                    <a href="/user" class="btn">ورود به بخش کاربران</a>
+                    <span class="small-info" id="userStat">۰ کاربر</span>
+                </div>
             </div>
         </div>
 
@@ -205,7 +60,10 @@
             <div class="card-content">
                 <h3>مدیریت نقش‌ها</h3>
                 <p>تعریف نقش‌های جدید، ویرایش عناوین انگلیسی و فارسی نقش‌ها.</p>
-                <a href="/role" class="btn">ورود به بخش نقش‌ها</a>
+                <div class="card-footer">
+                    <a href="/role" class="btn">ورود به بخش نقش‌ها</a>
+                    <span class="small-info" id="roleStat">۰ نقش</span>
+                </div>
             </div>
         </div>
 
@@ -214,7 +72,10 @@
             <div class="card-content">
                 <h3>مدیریت اشخاص</h3>
                 <p>ثبت اطلاعات اشخاص شامل نام، کد ملی، تاریخ تولد و سایر جزئیات.</p>
-                <a href="/person" class="btn">ورود به بخش اشخاص</a>
+                <div class="card-footer">
+                    <a href="/person" class="btn">ورود به بخش اشخاص</a>
+                    <span class="small-info" id="personStat">۰ شخص</span>
+                </div>
             </div>
         </div>
 
@@ -223,7 +84,9 @@
             <div class="card-content">
                 <h3>انواع ناشران</h3>
                 <p>مدیریت دسته‌بندی‌های مختلف ناشران.</p>
-                <a href="/publisherType" class="btn">ورود به بخش انواع ناشران</a>
+                <div class="card-footer">
+                    <a href="/publisherType" class="btn">ورود به بخش انواع ناشران</a>
+                </div>
             </div>
         </div>
 
@@ -232,7 +95,9 @@
             <div class="card-content">
                 <h3>مدیریت ناشران</h3>
                 <p>ثبت ناشران جدید، اطلاعات تماس و ارتباط با انواع ناشر.</p>
-                <a href="/publisher" class="btn">ورود به بخش ناشران</a>
+                <div class="card-footer">
+                    <a href="/publisher" class="btn">ورود به بخش ناشران</a>
+                </div>
             </div>
         </div>
 
@@ -241,7 +106,9 @@
             <div class="card-content">
                 <h3>انواع کتاب</h3>
                 <p>مدیریت انواع کتاب بر اساس موضوع، گروه سنی، زبان و سایر ویژگی‌ها.</p>
-                <a href="/bookType" class="btn">ورود به بخش انواع کتاب</a>
+                <div class="card-footer">
+                    <a href="/bookType" class="btn">ورود به بخش انواع کتاب</a>
+                </div>
             </div>
         </div>
 
@@ -250,7 +117,9 @@
             <div class="card-content">
                 <h3>انواع نویسنده</h3>
                 <p>مدیریت انواع کتاب ها بر اساس تخصص و سبک نوشتاری آن ها.</p>
-                <a href="/authorType" class="btn">ورود به بخش انواع نویسنده</a>
+                <div class="card-footer">
+                    <a href="/authorType" class="btn">ورود به بخش انواع نویسنده</a>
+                </div>
             </div>
         </div>
 
@@ -259,12 +128,22 @@
             <div class="card-content">
                 <h3>انواع کتاب خانه</h3>
                 <p>مدیریت انواع کتاب خانه ها بر اساس دسترسی و نوع خدمات</p>
-                <a href="/libraryType" class="btn">ورود به بخش انواع کتاب خانه</a>
+                <div class="card-footer">
+                    <a href="/libraryType" class="btn">ورود به بخش انواع کتاب خانه</a>
+                </div>
             </div>
         </div>
 
     </div>
 </div>
+
+<!-- Footer -->
+<div class="footer">
+    <p>سیستم مدیریت کتاب و کاربران &copy; 2024 - تمامی حقوق محفوظ است</p>
+</div>
+
+<!-- لینک به فایل JavaScript -->
+<script th:src="@{/js/welcome.js}"></script>
 
 </body>
 </html>

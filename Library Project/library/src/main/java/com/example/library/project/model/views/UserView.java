@@ -8,7 +8,6 @@ import lombok.Getter;
 import org.hibernate.annotations.Immutable;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
 
 @Getter
 @Entity
@@ -49,12 +48,6 @@ public class UserView {
 
     @Column(name = "roles_farsi")
     private String rolesFarsi;
-
-//    @Column(name = "role_ids")
-//    private List<Long> roleIds;
-//
-//    @Column(name = "roles_list")
-//    private List<String> rolesList;
 
     public UserView() {
     }
