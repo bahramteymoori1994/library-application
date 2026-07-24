@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مدیریت نویسندگان</title>
+    <link rel="stylesheet" th:href="@{/css/author.css}">
+</head>
+<body>
+<div class="container">
+    <div class="page-header">
+        <h1>✍️ مدیریت نویسندگان</h1>
+        <button onclick="openCreateModal()" class="btn btn-success">➕ ثبت نویسنده جدید</button>
+    </div>
+
+    <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+
+    <!-- جدول نویسندگان -->
+    <h2>لیست نویسندگان</h2>
+    <div class="table-container">
+        <table>
+            <thead>
+            <tr>
+                <th>شناسه</th>
+                <th>نام</th>
+                <th>نام خانوادگی</th>
+                <th>نوع نویسنده</th>
+                <th>عملیات</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="a : ${authors}">
+                <td th:text="${a.authorId}"></td>
+                <td th:text="${a.personFirstName}"></td>
+                <td th:text="${a.personLastName}"></td>
+                <td th:text="${a.authorTypeTitle}"></td>
+                <td>
+                    <button onclick="openEditModal(this)" class="btn btn-warning btn-sm">ویرایش</button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal ثبت/ویرایش نویسنده -->
+<div id="authorModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">×</span>
+        <h2 class="modal-title" id="modalTitle">ثبت نویسنده جدید</h2>
+        <form id="authorForm" th:action="@{/author/saveAuthor}" method="post" th:object="${authorDto}">
+            <input type="hidden" id="authorId" name="authorId" />
+
+            <!-- شناسه شخص -->
+            <div class="form-group">
+                <label>شناسه شخص:</label>
+                <div class="search-container">
+                    <input type="number" id="personId" name="personId" required style="flex:1;" />
+                    <button type="button" onclick="openPersonSearch()" class="btn btn-info">🔍 جستجو</button>
+                </div>
+                <div id="selectedPersonInfo" class="selected-person-info">
+                    <strong>نام:</strong> <span id="selectedFirstName"></span> |
+                    <strong>نام خانوادگی:</strong> <span id="selectedLastName"></span> |
+                    <strong>کد ملی:</strong> <span id="selectedNationalCode"></span>
+                </div>
+            </div>
+
+            <!-- نوع نویسنده -->
+            <div class="form-group">
+                <label>نوع نویسنده:</label>
+                <div class="search-container">
+                    <input type="number" id="authorTypeId" name="authorTypeId" required style="flex:1;" />
+                    <button type="button" onclick="openAuthorTypeSearch()" class="btn btn-info">🔍 جستجو</button>
+                </div>
+                <div id="selectedAuthorTypeInfo" class="selected-author-type-info">
+                    <strong>عنوان:</strong> <span id="selectedAuthorTypeTitle"></span>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-success">ذخیره</button>
+                <button type="button" onclick="closeModal()" class="btn btn-danger">انصراف</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal جستجوی شخص -->
+<div id="personSearchModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closePersonSearch()">×</span>
+        <h2 class="modal-title">جستجوی شخص</h2>
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="نام، نام خانوادگی یا کد ملی..." />
+            <button onclick="searchPersons()" class="btn btn-primary">جستجو</button>
+        </div>
+        <div class="table-container">
+            <table class="table-hover">
+                <thead>
+                <tr>
+                    <th>شناسه</th>
+                    <th>نام</th>
+                    <th>نام خانوادگی</th>
+                    <th>کد ملی</th>
+                    <th>انتخاب</th>
+                </tr>
+                </thead>
+                <tbody id="personTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal جستجوی نوع نویسنده -->
+<div id="authorTypeSearchModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeAuthorTypeSearch()">×</span>
+        <h2 class="modal-title">انتخاب نوع نویسنده</h2>
+        <div class="search-container">
+            <input type="text" id="authorTypeSearchInput" placeholder="عنوان نوع نویسنده..." />
+            <button onclick="searchAuthorTypes()" class="btn btn-primary">جستجو</button>
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                <tr>
+                    <th>شناسه</th>
+                    <th>عنوان</th>
+                    <th>توضیحات</th>
+                    <th>انتخاب</th>
+                </tr>
+                </thead>
+                <tbody id="authorTypeTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/js/author.js}"></script>
+</body>
+</html>
