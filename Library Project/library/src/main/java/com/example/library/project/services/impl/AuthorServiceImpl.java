@@ -2,7 +2,9 @@ package com.example.library.project.services.impl;
 
 import com.example.library.project.dto.requests.AuthorRequestDto;
 import com.example.library.project.dto.responses.AuthorResponseDto;
+import com.example.library.project.dto.views.AuthorViewResponseDto;
 import com.example.library.project.model.entities.Author;
+import com.example.library.project.model.views.AuthorView;
 import com.example.library.project.repositories.AuthorRepository;
 import com.example.library.project.services.interfaces.AuthorService;
 import org.springframework.beans.BeanUtils;
@@ -103,5 +105,21 @@ public class AuthorServiceImpl implements AuthorService {
                 });
 
         return authorResponseDtoList;
+    }
+
+    @Override
+    public List<AuthorViewResponseDto> findAllUsersView() {
+
+        List<AuthorViewResponseDto> authorViewResponseDtoList = new ArrayList<>();
+        List<AuthorView> findAuthorsView = authorRepository.findAllAuthorsView();
+
+        findAuthorsView.stream()
+                .forEach(author -> {
+                    AuthorViewResponseDto authorViewResponseDto = new AuthorViewResponseDto();
+                    BeanUtils.copyProperties(author, authorViewResponseDto);
+                    authorViewResponseDtoList.add(authorViewResponseDto);
+                });
+
+        return authorViewResponseDtoList;
     }
 }

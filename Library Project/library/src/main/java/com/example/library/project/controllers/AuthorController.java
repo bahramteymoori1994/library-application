@@ -4,6 +4,7 @@ import com.example.library.project.dto.requests.AuthorRequestDto;
 import com.example.library.project.dto.responses.AuthorResponseDto;
 import com.example.library.project.dto.responses.AuthorTypeResponseDto;
 import com.example.library.project.dto.responses.PersonResponseDto;
+import com.example.library.project.dto.views.AuthorViewResponseDto;
 import com.example.library.project.services.interfaces.AuthorService;
 import com.example.library.project.services.interfaces.AuthorTypeService;
 import com.example.library.project.services.interfaces.PersonService;
@@ -32,7 +33,7 @@ public class AuthorController {
     @GetMapping
     public String getAllAuthorTypes(Model model){
 
-        List<AuthorResponseDto> authors = findAllAuthors();
+        List<AuthorViewResponseDto> authors = findAllAuthorsView();
 
         model.addAttribute("authors", authors);
         model.addAttribute("authorDto", new AuthorRequestDto());
@@ -59,6 +60,7 @@ public class AuthorController {
     }
 
     @GetMapping("/findAuthorById/{id}")
+    @ResponseBody
     @ResponseStatus(value = HttpStatus.OK)
     public AuthorResponseDto findAuthorTypeById(@PathVariable Long id) throws Exception {
         return authorService.findById(id);
@@ -69,6 +71,13 @@ public class AuthorController {
     @ResponseStatus(value = HttpStatus.OK)
     public List<AuthorResponseDto> findAllAuthors(){
         return authorService.findAll();
+    }
+
+    @GetMapping("/findAllAuthorsView")
+    @ResponseBody
+    @ResponseStatus(value = HttpStatus.OK)
+    public List<AuthorViewResponseDto> findAllAuthorsView(){
+        return authorService.findAllUsersView();
     }
 
     @GetMapping("/findAllPeople")
