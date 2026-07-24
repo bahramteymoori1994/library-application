@@ -28,6 +28,7 @@ public class PersonController {
 
         model.addAttribute("persons", persons);
         model.addAttribute("personDto", new PersonRequestDto());
+        model.addAttribute("searchDto", new PersonRequestDto());
 
         return "person";
     }
@@ -43,6 +44,16 @@ public class PersonController {
         return "redirect:/person";
     }
 
+    @PostMapping("/search")
+    public String searchPeople(@ModelAttribute("searchDto") PersonRequestDto searchDto, Model model) {
+        List<PersonResponseDto> persons = personService.findAllPeopleSpecification(searchDto);
+
+        model.addAttribute("persons", persons);
+        model.addAttribute("personDto", new PersonRequestDto());
+        model.addAttribute("searchDto", searchDto);
+
+        return "person";
+    }
 
     @PutMapping("/updatePerson")
     @ResponseStatus(value = HttpStatus.OK)
