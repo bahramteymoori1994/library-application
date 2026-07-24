@@ -63,4 +63,9 @@ public class PersonController {
     public List<PersonResponseDto> findAllPeople(){
         return personService.findAll();
     }
+
+    @PostMapping("/findAllPeopleSpecification")
+    public List<PersonResponseDto> findAllPeopleSpecification(@RequestBody PersonRequestDto personRequestDto){
+        return personService.findAllPeopleSpecification(personRequestDto);
+    }
 }

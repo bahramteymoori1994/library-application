@@ -5,8 +5,11 @@ import com.example.library.project.dto.responses.PersonResponseDto;
 import com.example.library.project.model.entities.Person;
 import com.example.library.project.repositories.PersonRepository;
 import com.example.library.project.services.interfaces.PersonService;
+import jakarta.persistence.criteria.Predicate;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -89,6 +92,72 @@ public class PersonServiceImpl implements PersonService {
 
         findAllPeople.stream()
                 .forEach(person -> {
+                    PersonResponseDto personResponseDto = new PersonResponseDto();
+                    BeanUtils.copyProperties(person, personResponseDto);
+                    personResponseDtoList.add(personResponseDto);
+                });
+
+        return personResponseDtoList;
+    }
+
+    private Specification<Person> searchSpecification(PersonRequestDto personRequestDto){
+
+        return(root, query, builder) -> {
+
+            List<Predicate> predicates = new ArrayList<>();
+
+            if( StringUtils.hasText(personRequestDto.getFirstName()) ){
+                predicates.add(builder.like(
+                        builder.lower(root.get("firstName")),
+                        "%" + personRequestDto.getFirstName().toLowerCase() + "%"
+                ));
+            }
+
+            if( StringUtils.hasText(personRequestDto.getLastName()) ){
+                predicates.add(builder.like(
+                        builder.lower(root.get("lastName")),
+                        "%" + personRequestDto.getLastName().toLowerCase() + "%"
+                ));
+            }
+
+            if( StringUtils.hasText(personRequestDto.getNationalCode()) ){
+                predicates.add(builder.like(
+                        builder.lower(root.get("nationalCode")),
+                        "%" + personRequestDto.getNationalCode().toLowerCase() + "%"
+                ));
+            }
+
+            if( StringUtils.hasText(personRequestDto.getPhoneNumber()) ){
+                predicates.add(builder.like(
+                        builder.lower(root.get("phoneNumber")),
+                        "%" + personRequestDto.getPhoneNumber().toLowerCase() + "%"
+                ));
+            }
+
+            if( personRequestDto.getBirthDate() != null ){
+                predicates.add(builder.equal(root.get("birthDate"), personRequestDto.getBirthDate())
+                );
+            }
+
+            if( personRequestDto.getGender() != null ){
+                predicates.add(builder.equal(root.get("gender"), personRequestDto.getGender())
+                );
+            }
+
+            return builder.and(predicates.toArray(new Predicate[0]));
+        };
+    }
+
+    @Override
+    public List<PersonResponseDto> findAllPeopleSpecification(PersonRequestDto personRequestDto) {
+
+        List<PersonResponseDto> personResponseDtoList = new ArrayList<>();
+        Specification<Person> specification = searchSpecification(personRequestDto);
+        List<Person> findAllPeople = personRepository.findAll(specification);
+
+        findAllPeople.stream()
+                .forEach(person -> {
+
                     PersonResponseDto personResponseDto = new PersonResponseDto();
                     BeanUtils.copyProperties(person, personResponseDto);
                     personResponseDtoList.add(personResponseDto);
