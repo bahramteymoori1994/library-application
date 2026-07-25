@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 public class RoleServiceImpl implements RoleService {
 
     private final RoleRepository roleRepository;
-    private final String CACHE_NAME = "role";
+    private final String CACHE_NAME = "roles";
 
     public RoleServiceImpl(RoleRepository roleRepository) {
         this.roleRepository = roleRepository;
@@ -75,7 +75,7 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    @Cacheable(cacheNames = CACHE_NAME)
+    @Cacheable(cacheNames = CACHE_NAME, key = "#id")
     public RoleResponseDto findById(Long id) {
 
         RoleResponseDto roleResponseDto = new RoleResponseDto();

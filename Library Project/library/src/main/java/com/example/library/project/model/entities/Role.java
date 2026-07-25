@@ -3,12 +3,13 @@ package com.example.library.project.model.entities;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import org.hibernate.validator.constraints.Length;
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Entity(name = "roleEntity")
 @Table(name = "role")
-public class Role {
+public class Role implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
