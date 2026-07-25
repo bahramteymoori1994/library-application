@@ -6,6 +6,7 @@ import com.example.library.project.model.entities.LibraryType;
 import com.example.library.project.repositories.LibraryTypeRepository;
 import com.example.library.project.services.interfaces.LibraryTypeService;
 import org.springframework.beans.BeanUtils;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -16,6 +17,7 @@ import java.util.List;
 public class LibraryTypeServiceImpl implements LibraryTypeService {
 
     private final LibraryTypeRepository libraryTypeRepository;
+    private final String CACHE_NAME = "libraryType";
 
     public LibraryTypeServiceImpl(LibraryTypeRepository libraryTypeRepository) {
         this.libraryTypeRepository = libraryTypeRepository;
@@ -76,6 +78,7 @@ public class LibraryTypeServiceImpl implements LibraryTypeService {
     }
 
     @Override
+    @Cacheable(cacheNames = CACHE_NAME)
     public LibraryTypeResponseDto findById(Long id) throws Exception {
 
         LibraryTypeResponseDto libraryTypeResponseDto = new LibraryTypeResponseDto();
@@ -90,6 +93,7 @@ public class LibraryTypeServiceImpl implements LibraryTypeService {
     }
 
     @Override
+    @Cacheable(cacheNames = CACHE_NAME)
     public List<LibraryTypeResponseDto> findAll() {
 
         List<LibraryTypeResponseDto> libraryTypeResponseDtoList = new ArrayList<>();

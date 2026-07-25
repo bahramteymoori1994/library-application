@@ -6,6 +6,7 @@ import com.example.library.project.model.entities.AuthorType;
 import com.example.library.project.repositories.AuthorTypeRepository;
 import com.example.library.project.services.interfaces.AuthorTypeService;
 import org.springframework.beans.BeanUtils;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -16,6 +17,7 @@ import java.util.List;
 public class AuthorTypeServiceImpl implements AuthorTypeService {
 
     private final AuthorTypeRepository authorTypeRepository;
+    private final String CACHE_NAME = "authorType";
 
     public AuthorTypeServiceImpl(AuthorTypeRepository authorTypeRepository) {
         this.authorTypeRepository = authorTypeRepository;
@@ -76,6 +78,7 @@ public class AuthorTypeServiceImpl implements AuthorTypeService {
     }
 
     @Override
+    @Cacheable(cacheNames = CACHE_NAME)
     public AuthorTypeResponseDto findById(Long id) throws Exception {
 
         AuthorTypeResponseDto authorTypeResponseDto = new AuthorTypeResponseDto();
@@ -90,6 +93,7 @@ public class AuthorTypeServiceImpl implements AuthorTypeService {
     }
 
     @Override
+    @Cacheable(cacheNames = CACHE_NAME)
     public List<AuthorTypeResponseDto> findAll() {
 
         List<AuthorTypeResponseDto> authorTypeResponseDtoList = new ArrayList<>();

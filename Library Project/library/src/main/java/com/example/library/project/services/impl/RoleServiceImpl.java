@@ -6,6 +6,7 @@ import com.example.library.project.model.entities.Role;
 import com.example.library.project.repositories.RoleRepository;
 import com.example.library.project.services.interfaces.RoleService;
 import org.springframework.beans.BeanUtils;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 public class RoleServiceImpl implements RoleService {
 
     private final RoleRepository roleRepository;
+    private final String CACHE_NAME = "role";
 
     public RoleServiceImpl(RoleRepository roleRepository) {
         this.roleRepository = roleRepository;
@@ -73,6 +75,7 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
+    @Cacheable(cacheNames = CACHE_NAME)
     public RoleResponseDto findById(Long id) {
 
         RoleResponseDto roleResponseDto = new RoleResponseDto();
@@ -83,6 +86,7 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
+    @Cacheable(cacheNames = CACHE_NAME)
     public List<RoleResponseDto> findAll() {
 
         List<RoleResponseDto> roleResponseDtoList = new ArrayList<>();
@@ -99,6 +103,7 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
+    @Cacheable(cacheNames = CACHE_NAME)
     public List<RoleResponseDto> searchRoles(String term) {
         List<Role> roles;
 

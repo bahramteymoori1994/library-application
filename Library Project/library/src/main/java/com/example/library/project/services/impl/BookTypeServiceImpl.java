@@ -6,6 +6,7 @@ import com.example.library.project.model.entities.BookType;
 import com.example.library.project.repositories.BookTypeRepository;
 import com.example.library.project.services.interfaces.BookTypeService;
 import org.springframework.beans.BeanUtils;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -16,6 +17,7 @@ import java.util.List;
 public class BookTypeServiceImpl implements BookTypeService {
 
     private final BookTypeRepository bookTypeRepository;
+    private final String CACHE_NAME = "bookType";
 
     public BookTypeServiceImpl(BookTypeRepository bookTypeRepository) {
         this.bookTypeRepository = bookTypeRepository;
@@ -76,6 +78,7 @@ public class BookTypeServiceImpl implements BookTypeService {
     }
 
     @Override
+    @Cacheable(cacheNames = CACHE_NAME)
     public BookTypeResponseDto findById(Long id) throws Exception {
 
         BookTypeResponseDto bookTypeResponseDto = new BookTypeResponseDto();
@@ -90,6 +93,7 @@ public class BookTypeServiceImpl implements BookTypeService {
     }
 
     @Override
+    @Cacheable(cacheNames = CACHE_NAME)
     public List<BookTypeResponseDto> findAll() {
 
         List<BookTypeResponseDto> bookTypeResponseDtoList = new ArrayList<>();
