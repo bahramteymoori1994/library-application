@@ -2,6 +2,7 @@ package com.example.library.project.dto.requests;
 
 import com.example.library.project.model.entities.Author;
 import com.example.library.project.model.entities.BookType;
+import com.example.library.project.model.entities.Library;
 import com.example.library.project.model.entities.Publisher;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -16,6 +17,7 @@ public class BookRequestDto {
     private LocalDate publishDate;
     private Integer bookCount;
     private List<Author> authors = new ArrayList<>();
+    private List<Library> libraries = new ArrayList<>();
     private BookType bookType;
     private Publisher publisher;
     private LocalDate createdDate;
@@ -25,13 +27,14 @@ public class BookRequestDto {
     public BookRequestDto() {
     }
 
-    public BookRequestDto(Long bookId, String bookTitle, String isbn, LocalDate publishDate, Integer bookCount, List<Author> authors, BookType bookType, Publisher publisher, LocalDate createdDate, LocalTime createdTime, String createdBy) {
+    public BookRequestDto(Long bookId, String bookTitle, String isbn, LocalDate publishDate, Integer bookCount, List<Author> authors, List<Library> libraries, BookType bookType, Publisher publisher, LocalDate createdDate, LocalTime createdTime, String createdBy) {
         this.bookId = bookId;
         this.bookTitle = bookTitle;
         this.isbn = isbn;
         this.publishDate = publishDate;
         this.bookCount = bookCount;
         this.authors = authors;
+        this.libraries = libraries;
         this.bookType = bookType;
         this.publisher = publisher;
         this.createdDate = createdDate;
@@ -90,6 +93,15 @@ public class BookRequestDto {
 
     public BookRequestDto setAuthors(List<Author> authors) {
         this.authors = authors;
+        return this;
+    }
+
+    public List<Library> getLibraries() {
+        return libraries;
+    }
+
+    public BookRequestDto setLibraries(List<Library> libraries) {
+        this.libraries = libraries;
         return this;
     }
 

@@ -28,7 +28,7 @@ public class Book {
     @NotNull(message = "Publish date is required")
     private LocalDate publishDate;
 
-    @Column(name = "BOOK_COUNT", columnDefinition = "number", nullable = false)
+    @Column(name = "BOOK_COUNT", nullable = false)
     @NotNull(message = "Book count is required")
     private Integer bookCount;
 
@@ -37,6 +37,12 @@ public class Book {
     foreignKey = @ForeignKey(name = "FK_BOOK_ID")), inverseJoinColumns = @JoinColumn(name = "AUTHOR_ID",
     referencedColumnName = "AUTHOR_ID"), foreignKey = @ForeignKey(name = "FK_AUTHOR_ID"))
     private List<Author> authors = new ArrayList<>();
+
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+    @JoinTable(name = "library_book", joinColumns = @JoinColumn(name = "BOOK_ID", referencedColumnName = "BOOK_ID",
+            foreignKey = @ForeignKey(name = "FK_BOOK_ID")), inverseJoinColumns = @JoinColumn(name = "LIBRARY_ID",
+            referencedColumnName = "LIBRARY_ID"), foreignKey = @ForeignKey(name = "FK_LIBRARY_ID"))
+    private List<Library> libraries = new ArrayList<>();
 
     @OneToOne
     @JoinColumn(name = "BOOK_TYPE_ID")
@@ -61,13 +67,14 @@ public class Book {
     public Book() {
     }
 
-    public Book(Long bookId, String bookTitle, String isbn, LocalDate publishDate, Integer bookCount, List<Author> authors, BookType bookType, Publisher publisher, LocalDate createdDate, LocalTime createdTime, String createdBy) {
+    public Book(Long bookId, String bookTitle, String isbn, LocalDate publishDate, Integer bookCount, List<Author> authors, List<Library> libraries, BookType bookType, Publisher publisher, LocalDate createdDate, LocalTime createdTime, String createdBy) {
         this.bookId = bookId;
         this.bookTitle = bookTitle;
         this.isbn = isbn;
         this.publishDate = publishDate;
         this.bookCount = bookCount;
         this.authors = authors;
+        this.libraries = libraries;
         this.bookType = bookType;
         this.publisher = publisher;
         this.createdDate = createdDate;
@@ -129,6 +136,15 @@ public class Book {
         return this;
     }
 
+    public List<Library> getLibraries() {
+        return libraries;
+    }
+
+    public Book setLibraries(List<Library> libraries) {
+        this.libraries = libraries;
+        return this;
+    }
+
     public BookType getBookType() {
         return bookType;
     }
@@ -183,6 +199,7 @@ public class Book {
                 ", publishDate=" + publishDate +
                 ", bookCount=" + bookCount +
                 ", authors=" + authors +
+                ", libraries=" + libraries +
                 ", bookType=" + bookType +
                 ", publisher=" + publisher +
                 ", createdDate=" + createdDate +

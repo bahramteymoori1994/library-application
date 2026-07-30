@@ -1,14 +1,8 @@
 package com.example.library.project.controllers;
 
 import com.example.library.project.dto.requests.BookRequestDto;
-import com.example.library.project.dto.responses.AuthorResponseDto;
-import com.example.library.project.dto.responses.BookResponseDto;
-import com.example.library.project.dto.responses.BookTypeResponseDto;
-import com.example.library.project.dto.responses.PublisherResponseDto;
-import com.example.library.project.services.interfaces.AuthorService;
-import com.example.library.project.services.interfaces.BookService;
-import com.example.library.project.services.interfaces.BookTypeService;
-import com.example.library.project.services.interfaces.PublisherService;
+import com.example.library.project.dto.responses.*;
+import com.example.library.project.services.interfaces.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,12 +18,15 @@ public class BookController {
     private final PublisherService publisherService;
     private final AuthorService authorService;
     private final BookTypeService bookTypeService;
+    private final LibraryService libraryService;
 
-    public BookController(BookService bookService, PublisherService publisherService, AuthorService authorService, BookTypeService bookTypeService) {
+    public BookController(BookService bookService, PublisherService publisherService, AuthorService authorService, BookTypeService bookTypeService,
+                          LibraryService libraryService) {
         this.bookService = bookService;
         this.publisherService = publisherService;
         this.authorService = authorService;
         this.bookTypeService = bookTypeService;
+        this.libraryService = libraryService;
     }
 
     @GetMapping
@@ -95,5 +92,12 @@ public class BookController {
     @ResponseStatus(value = HttpStatus.OK)
     public List<BookTypeResponseDto> findAllBookTypes(){
         return bookTypeService.findAll();
+    }
+
+    @GetMapping("/findAllLibraries")
+    @ResponseBody
+    @ResponseStatus(value = HttpStatus.OK)
+    public List<LibraryResponseDto> findAllLibraries(){
+        return libraryService.findAll();
     }
 }
