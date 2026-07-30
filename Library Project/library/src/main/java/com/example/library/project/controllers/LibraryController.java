@@ -2,8 +2,10 @@ package com.example.library.project.controllers;
 
 import com.example.library.project.dto.requests.LibraryRequestDto;
 import com.example.library.project.dto.responses.LibraryResponseDto;
+import com.example.library.project.dto.responses.LibraryTypeResponseDto;
 import com.example.library.project.dto.views.LibraryViewResponseDto;
 import com.example.library.project.services.interfaces.LibraryService;
+import com.example.library.project.services.interfaces.LibraryTypeService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,9 +18,11 @@ import java.util.List;
 public class LibraryController {
 
     private final LibraryService libraryService;
+    private final LibraryTypeService libraryTypeService;
 
-    public LibraryController(LibraryService libraryService) {
+    public LibraryController(LibraryService libraryService, LibraryTypeService libraryTypeService) {
         this.libraryService = libraryService;
+        this.libraryTypeService = libraryTypeService;
     }
 
     @GetMapping
@@ -51,11 +55,18 @@ public class LibraryController {
     }
 
     @GetMapping("/findLibraryById/{id}")
+    @ResponseBody
     @ResponseStatus(value = HttpStatus.OK)
     public LibraryResponseDto findLibraryById(@PathVariable Long id) throws Exception {
         return libraryService.findById(id);
     }
 
+    @GetMapping("/findAllLibraryTypes")
+    @ResponseBody
+    @ResponseStatus(value = HttpStatus.OK)
+    public List<LibraryTypeResponseDto> findAllLibraryTypes(){
+        return libraryTypeService.findAll();
+    }
 
     @GetMapping("/findAllLibraries")
     @ResponseBody

@@ -29,15 +29,12 @@ public class LibraryServiceImpl implements LibraryService {
         LibraryResponseDto libraryResponseDto = new LibraryResponseDto();
         Library library = new Library();
 
+        libraryRequestDto
+                .setCreatedDate(LocalDate.now())
+                .setCreatedTime(LocalTime.now())
+                .setCreatedBy("admin");
+
         if( libraryRequestDto == null ){
-
-            libraryRequestDto
-                    .setCreatedDate(LocalDate.now())
-                    .setCreatedTime(LocalTime.now())
-                    .setCreatedBy("admin");
-
-        }
-        else {
             throw new Exception("Library request object is null");
         }
 
@@ -59,15 +56,12 @@ public class LibraryServiceImpl implements LibraryService {
         LibraryResponseDto libraryResponseDto = new LibraryResponseDto();
         Library library = new Library();
 
+        libraryRequestDto
+                .setCreatedDate(LocalDate.now())
+                .setCreatedTime(LocalTime.now())
+                .setCreatedBy("admin");
+
         if( libraryRequestDto == null ){
-
-            libraryRequestDto
-                    .setCreatedDate(LocalDate.now())
-                    .setCreatedTime(LocalTime.now())
-                    .setCreatedBy("admin");
-
-        }
-        else {
             throw new Exception("Library request object is null");
         }
 

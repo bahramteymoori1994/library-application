@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مدیریت کتابخانه‌ها</title>
+    <link rel="stylesheet" th:href="@{/css/library.css}">
+</head>
+<body>
+<div class="container">
+    <!-- Header -->
+    <div class="page-header">
+        <h1>📚 مدیریت کتابخانه‌ها</h1>
+        <button onclick="openCreateModal()" class="btn btn-success">
+            ➕ ثبت کتابخانه جدید
+        </button>
+    </div>
+
+    <!-- پیام‌ها -->
+    <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+
+    <h2>لیست کتابخانه‌های ثبت شده</h2>
+
+    <!-- جدول لیست کتابخانه‌ها -->
+    <div class="table-container">
+        <table class="table-hover">
+            <thead>
+            <tr>
+                <th>شناسه</th>
+                <th>نام کتابخانه</th>
+                <th>نوع خدمات کتاب خانه</th>
+                <th>مالکیت</th>
+                <th>کد کتابخانه</th>
+                <th>شهر</th>
+                <th>تلفن</th>
+                <th>تاریخ ثبت</th>
+                <th>عملیات</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="l : ${libraries}">
+                <td th:text="${l.libraryId}"></td>
+                <td th:text="${l.libraryName}"></td>
+                <td th:text="${l.libraryTypeService}"></td>
+                <td th:text="${l.libraryTypeOwnership}"></td>
+                <td th:text="${l.libararyCode}"></td>
+                <td th:text="${l.libraryCity}"></td>
+                <td th:text="${l.libraryPhone}"></td>
+                <td th:text="${#temporals.format(l.createdDate, 'yyyy/MM/dd')}"></td>
+                <td>
+                    <button onclick="openEditModal(this)" class="btn btn-warning btn-sm">✏️ ویرایش</button>
+                </td>
+            </tr>
+            <tr th:if="${libraries == null or #lists.isEmpty(libraries)}">
+                <td colspan="8" class="empty-state">
+                    <div>📭</div>
+                    <div style="margin-top: 10px;">هیچ کتابخانه‌ای ثبت نشده است</div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ========== MODAL ثبت/ویرایش کتابخانه ========== -->
+<div id="libraryModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">×</span>
+        <h2 class="modal-title" id="modalTitle">ثبت کتابخانه جدید</h2>
+
+        <form id="libraryForm" th:action="@{/library/saveLibrary}" method="post" th:object="${libraryDto}">
+            <input type="hidden" id="libraryId" name="libraryId" />
+
+            <!-- ====== نام کتابخانه ====== -->
+            <div class="form-group">
+                <label for="libraryName">نام کتابخانه <span class="required">*</span></label>
+                <input type="text" id="libraryName" name="libraryName" required />
+            </div>
+
+            <!-- ====== نوع کتابخانه ====== -->
+            <div class="form-group">
+                <label for="libraryTypeId">نوع کتابخانه <span class="required">*</span></label>
+                <div class="search-container">
+                    <input type="number" id="libraryTypeId" name="libraryType.libraryTypeId" required style="flex:1;" />
+                    <button type="button" onclick="openLibraryTypeSearch()" class="btn btn-info">🔍 جستجو</button>
+                </div>
+                <div id="selectedLibraryTypeInfo" class="selected-library-type-info">
+                    <strong>نوع کتابخانه:</strong> <span id="selectedLibraryTypeTitle">هیچ نوعی انتخاب نشده</span>
+                </div>
+            </div>
+
+            <!-- ====== کد کتابخانه ====== -->
+            <div class="form-group">
+                <label for="libraryCode">کد کتابخانه <span class="required">*</span></label>
+                <input type="text" id="libraryCode" name="libraryCode" required />
+            </div>
+
+            <!-- ====== شهر ====== -->
+            <div class="form-group">
+                <label for="city">شهر <span class="required">*</span></label>
+                <input type="text" id="city" name="city" required />
+            </div>
+
+            <!-- ====== تلفن ====== -->
+            <div class="form-group">
+                <label for="phone">تلفن <span class="required">*</span></label>
+                <input type="text" id="phone" name="phone" required />
+            </div>
+
+            <!-- ====== آدرس ====== -->
+            <div class="form-group">
+                <label for="address">آدرس</label>
+                <textarea id="address" name="address" rows="3"></textarea>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-success">ذخیره</button>
+                <button type="button" onclick="closeModal()" class="btn btn-danger">انصراف</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ========== MODAL جستجوی نوع کتابخانه ========== -->
+<div id="libraryTypeSearchModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeLibraryTypeSearch()">×</span>
+        <h2 class="modal-title">🔍 جستجوی نوع کتابخانه</h2>
+
+        <div class="search-container">
+            <input type="text" id="libraryTypeSearchInput" placeholder="جستجو بر اساس عنوان..." />
+            <button onclick="searchLibraryTypes()" class="btn btn-primary">جستجو</button>
+            <button onclick="clearLibraryTypeSearch()" class="btn btn-secondary">پاک کردن</button>
+        </div>
+
+        <div class="table-container">
+            <table class="table-hover">
+                <thead>
+                <tr>
+                    <th>شناسه</th>
+                    <th>عنوان</th>
+                    <th>ایجاد کننده</th>
+                    <th>انتخاب</th>
+                </tr>
+                </thead>
+                <tbody id="libraryTypeTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/js/library.js}"></script>
+</body>
+</html>
