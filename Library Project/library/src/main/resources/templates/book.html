@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مدیریت کتاب‌ها</title>
+
+    <!-- لینک به فایل CSS -->
+    <link rel="stylesheet" th:href="@{/css/book.css}">
+</head>
+<body>
+
+<div class="container">
+    <!-- Header -->
+    <div class="page-header">
+        <h1>📚 مدیریت کتاب‌ها</h1>
+        <button onclick="openCreateModal()" class="btn btn-success">
+            ➕ ثبت کتاب جدید
+        </button>
+    </div>
+
+    <!-- نمایش پیام‌ها -->
+    <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+
+    <hr>
+
+    <h2>لیست کتاب‌های ثبت شده</h2>
+
+    <!-- Table -->
+    <div class="table-container">
+        <table>
+            <thead>
+            <tr>
+                <th>شناسه</th>
+                <th>عنوان کتاب</th>
+                <th>شابک</th>
+                <th>تعداد</th>
+                <th>تاریخ انتشار</th>
+                <th>نویسندگان</th>
+                <th>کتابخانه‌ها</th>
+                <th>موضوع</th>
+                <th>زبان</th>
+                <th>ناشر</th>
+                <th>تاریخ ایجاد</th>
+                <th>ایجاد کننده</th>
+                <th>عملیات</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="b : ${books}" th:if="${books != null and not #lists.isEmpty(books)}">
+                <td th:text="${b.bookId}"></td>
+                <td th:text="${b.bookTitle}"></td>
+                <td th:text="${b.bookIsbn}"></td>
+                <td th:text="${b.bookCount}"></td>
+                <td th:text="${#temporals.format(b.bookPublishDate, 'yyyy-MM-dd')}"></td>
+                <td>
+                    <span th:each="author : ${b.authorNames}" class="role-tag" th:text="${author}"></span>
+                    <span th:if="${b.authorNames == null or #lists.isEmpty(b.authorNames)}" style="color:#888;">—</span>
+                </td>
+                <td>
+                    <span th:each="library : ${b.libraryNames}" class="role-tag" th:text="${library}"></span>
+                    <span th:if="${b.libraryNames == null or #lists.isEmpty(b.libraryNames)}" style="color:#888;">—</span>
+                </td>
+                <td th:text="${b.bookTypeSubject}"></td>
+                <td th:text="${b.bookTypeLanguage}"></td>
+                <td th:text="${b.publisherName}"></td>
+                <td th:text="${#temporals.format(b.createdDate, 'yyyy-MM-dd')}"></td>
+                <td th:text="${b.createdBy}"></td>
+                <td>
+                    <button onclick="openEditModal(this)" class="btn btn-warning btn-sm">
+                        ✏️ ویرایش
+                    </button>
+                </td>
+            </tr>
+            <tr th:if="${books == null or #lists.isEmpty(books)}">
+                <td colspan="13" class="empty-state">
+                    <div>📭</div>
+                    <div style="margin-top: 10px;">هیچ کتابی ثبت نشده است</div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal ثبت/ویرایش کتاب -->
+<div id="bookModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">×</span>
+        <h2 class="modal-title" id="modalTitle">ثبت کتاب جدید</h2>
+
+        <form id="bookForm" th:action="@{/book/saveBook}" method="post" th:object="${bookDto}">
+            <input type="hidden" id="bookId" name="bookId" />
+
+            <div class="form-group">
+                <label for="bookTitle">عنوان کتاب:</label>
+                <input type="text" id="bookTitle" name="bookTitle" required />
+            </div>
+
+            <div class="form-group">
+                <label for="isbn">ISBN:</label>
+                <input type="text" id="isbn" name="isbn" required />
+            </div>
+
+            <div class="form-group">
+                <label for="bookCount">تعداد:</label>
+                <input type="number" id="bookCount" name="bookCount" required min="0" />
+            </div>
+
+            <div class="form-group">
+                <label for="publishDate">تاریخ انتشار:</label>
+                <input type="date" id="publishDate" name="publishDate" required />
+            </div>
+
+            <!-- Publisher -->
+            <div class="form-group">
+                <label for="publisherId">ناشر:</label>
+                <div class="search-container">
+                    <input type="number" id="publisherId" name="publisher.publisherId" required style="flex:1;" placeholder="شناسه ناشر" />
+                    <button type="button" onclick="openPublisherSearch()" class="btn btn-info">
+                        🔍 جستجو
+                    </button>
+                </div>
+                <div id="selectedPublisherInfo" class="selected-person-info">
+                    <strong>نام ناشر:</strong> <span id="selectedPublisherName"></span> |
+                    <strong>نوع ناشر:</strong> <span id="selectedPublisherType"></span>
+                </div>
+            </div>
+
+            <!-- BookType -->
+            <div class="form-group">
+                <label for="bookTypeId">نوع کتاب:</label>
+                <div class="search-container">
+                    <input type="number" id="bookTypeId" name="bookType.bookTypeId" required style="flex:1;" placeholder="شناسه نوع کتاب" />
+                    <button type="button" onclick="openBookTypeSearch()" class="btn btn-info">
+                        🔍 جستجو
+                    </button>
+                </div>
+                <div id="selectedBookTypeInfo" class="selected-person-info">
+                    <strong>موضوع:</strong> <span id="selectedBookTypeSubject"></span> |
+                    <strong>زبان:</strong> <span id="selectedBookTypeLanguage"></span>
+                </div>
+            </div>
+
+            <!-- Authors (چندگانه) -->
+            <div class="form-group">
+                <label>نویسندگان:</label>
+                <div class="search-container">
+                    <input type="text" id="authorsDisplay" readonly placeholder="هیچ نویسنده‌ای انتخاب نشده"
+                           style="flex:1; background:#f8f9fa;">
+                    <button type="button" onclick="openAuthorSearch()" class="btn btn-info">
+                        🔍 جستجو و انتخاب نویسنده
+                    </button>
+                </div>
+                <div id="selectedAuthorsContainer"></div>
+                <div id="authorIdsContainer"></div>
+            </div>
+
+            <!-- Libraries (چندگانه) -->
+            <div class="form-group">
+                <label>کتابخانه‌ها:</label>
+                <div class="search-container">
+                    <input type="text" id="librariesDisplay" readonly placeholder="هیچ کتابخانه‌ای انتخاب نشده"
+                           style="flex:1; background:#f8f9fa;">
+                    <button type="button" onclick="openLibrarySearch()" class="btn btn-info">
+                        🔍 جستجو و انتخاب کتابخانه
+                    </button>
+                </div>
+                <div id="selectedLibrariesContainer"></div>
+                <div id="libraryIdsContainer"></div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" id="submitBtn" class="btn btn-success">ذخیره</button>
+                <button type="button" onclick="closeModal()" class="btn btn-danger">انصراف</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal جستجوی ناشر -->
+<div id="publisherSearchModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closePublisherSearch()">×</span>
+        <h2 class="modal-title">جستجوی ناشر</h2>
+
+        <div class="search-container">
+            <div class="search-input-wrapper">
+                <input type="text" id="publisherSearchInput" placeholder="جستجو بر اساس نام ناشر..." />
+                <span class="search-icon">🔍</span>
+            </div>
+            <button onclick="searchPublishers()" class="btn btn-primary">جستجو</button>
+            <button onclick="clearPublisherSearch()" class="btn btn-secondary">پاک کردن</button>
+        </div>
+
+        <div class="table-container">
+            <table class="table-hover">
+                <thead>
+                <tr>
+                    <th>شناسه</th>
+                    <th>نام ناشر</th>
+                    <th>نوع ناشر</th>
+                    <th>انتخاب</th>
+                </tr>
+                </thead>
+                <tbody id="publisherTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal جستجوی نوع کتاب -->
+<div id="bookTypeSearchModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeBookTypeSearch()">×</span>
+        <h2 class="modal-title">جستجوی نوع کتاب</h2>
+
+        <div class="search-container">
+            <div class="search-input-wrapper">
+                <input type="text" id="bookTypeSearchInput" placeholder="جستجو بر اساس موضوع یا زبان..." />
+                <span class="search-icon">🔍</span>
+            </div>
+            <button onclick="searchBookTypes()" class="btn btn-primary">جستجو</button>
+            <button onclick="clearBookTypeSearch()" class="btn btn-secondary">پاک کردن</button>
+        </div>
+
+        <div class="table-container">
+            <table class="table-hover">
+                <thead>
+                <tr>
+                    <th>شناسه</th>
+                    <th>موضوع</th>
+                    <th>زبان</th>
+                    <th>انتخاب</th>
+                </tr>
+                </thead>
+                <tbody id="bookTypeTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal جستجوی نویسنده (چندگانه) -->
+<div id="authorSearchModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeAuthorSearch()">×</span>
+        <h2 class="modal-title">انتخاب نویسنده‌ها</h2>
+
+        <div class="search-container">
+            <div class="search-input-wrapper">
+                <input type="text" id="authorSearchInput" placeholder="جستجو بر اساس نام یا نام خانوادگی..." />
+                <span class="search-icon">🔍</span>
+            </div>
+            <button onclick="searchAuthors()" class="btn btn-primary">جستجو</button>
+            <button onclick="clearAuthorSearch()" class="btn btn-secondary">پاک کردن</button>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                <tr>
+                    <th>شناسه</th>
+                    <th>نام</th>
+                    <th>نام خانوادگی</th>
+                    <th>تخصص</th>
+                    <th>انتخاب</th>
+                </tr>
+                </thead>
+                <tbody id="authorTableBody"></tbody>
+            </table>
+        </div>
+
+        <div class="form-actions">
+            <button onclick="closeAuthorSearch()" class="btn btn-danger">بستن</button>
+            <button onclick="confirmSelectedAuthors()" class="btn btn-success">تایید انتخاب‌ها</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal جستجوی کتابخانه (چندگانه) -->
+<div id="librarySearchModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeLibrarySearch()">×</span>
+        <h2 class="modal-title">انتخاب کتابخانه‌ها</h2>
+
+        <div class="search-container">
+            <div class="search-input-wrapper">
+                <input type="text" id="librarySearchInput" placeholder="جستجو بر اساس نام یا شهر..." />
+                <span class="search-icon">🔍</span>
+            </div>
+            <button onclick="searchLibraries()" class="btn btn-primary">جستجو</button>
+            <button onclick="clearLibrarySearch()" class="btn btn-secondary">پاک کردن</button>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                <tr>
+                    <th>شناسه</th>
+                    <th>نام کتابخانه</th>
+                    <th>شهر</th>
+                    <th>نوع مالکیت</th>
+                    <th>انتخاب</th>
+                </tr>
+                </thead>
+                <tbody id="libraryTableBody"></tbody>
+            </table>
+        </div>
+
+        <div class="form-actions">
+            <button onclick="closeLibrarySearch()" class="btn btn-danger">بستن</button>
+            <button onclick="confirmSelectedLibraries()" class="btn btn-success">تایید انتخاب‌ها</button>
+        </div>
+    </div>
+</div>
+
+<!-- لینک به فایل JavaScript -->
+<script th:src="@{/js/book.js}"></script>
+
+</body>
+</html>

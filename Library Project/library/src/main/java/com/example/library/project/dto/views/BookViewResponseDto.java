@@ -1,6 +1,8 @@
 package com.example.library.project.dto.views;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 public class BookViewResponseDto {
 
@@ -24,10 +26,20 @@ public class BookViewResponseDto {
     private String publisherName;
     private String publisherTypeName;
 
+    // اضافه کردن این دو فیلد برای نمایش در جدول
+    private List<String> authorNames = new ArrayList<>();
+    private List<String> libraryNames = new ArrayList<>();
+
     public BookViewResponseDto() {
     }
 
-    public BookViewResponseDto(Long bookId, String bookTitle, String bookIsbn, Integer bookCount, LocalDate bookPublishDate, LocalDate createdDate, String createdBy, String bookTypeSubject, String bookTypeLanguage, String authorFirstName, String authorLastName, LocalDate personBirthDate, String authorExpertise, String authorWritingStyle, String libraryName, String libraryCity, String libraryOwnership, String publisherName, String publisherTypeName) {
+    public BookViewResponseDto(Long bookId, String bookTitle, String bookIsbn, Integer bookCount,
+                               LocalDate bookPublishDate, LocalDate createdDate, String createdBy,
+                               String bookTypeSubject, String bookTypeLanguage, String authorFirstName,
+                               String authorLastName, LocalDate personBirthDate, String authorExpertise,
+                               String authorWritingStyle, String libraryName, String libraryCity,
+                               String libraryOwnership, String publisherName, String publisherTypeName,
+                               List<String> authorNames, List<String> libraryNames) {
         this.bookId = bookId;
         this.bookTitle = bookTitle;
         this.bookIsbn = bookIsbn;
@@ -47,8 +59,11 @@ public class BookViewResponseDto {
         this.libraryOwnership = libraryOwnership;
         this.publisherName = publisherName;
         this.publisherTypeName = publisherTypeName;
+        this.authorNames = authorNames != null ? authorNames : new ArrayList<>();
+        this.libraryNames = libraryNames != null ? libraryNames : new ArrayList<>();
     }
 
+    // Getters and Setters
     public Long getBookId() {
         return bookId;
     }
@@ -217,6 +232,24 @@ public class BookViewResponseDto {
 
     public BookViewResponseDto setPublisherTypeName(String publisherTypeName) {
         this.publisherTypeName = publisherTypeName;
+        return this;
+    }
+
+    public List<String> getAuthorNames() {
+        return authorNames;
+    }
+
+    public BookViewResponseDto setAuthorNames(List<String> authorNames) {
+        this.authorNames = authorNames;
+        return this;
+    }
+
+    public List<String> getLibraryNames() {
+        return libraryNames;
+    }
+
+    public BookViewResponseDto setLibraryNames(List<String> libraryNames) {
+        this.libraryNames = libraryNames;
         return this;
     }
 }
