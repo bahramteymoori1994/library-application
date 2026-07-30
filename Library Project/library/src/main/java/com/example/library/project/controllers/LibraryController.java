@@ -2,6 +2,7 @@ package com.example.library.project.controllers;
 
 import com.example.library.project.dto.requests.LibraryRequestDto;
 import com.example.library.project.dto.responses.LibraryResponseDto;
+import com.example.library.project.dto.views.LibraryViewResponseDto;
 import com.example.library.project.services.interfaces.LibraryService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -23,7 +24,7 @@ public class LibraryController {
     @GetMapping
     public String getAllLibraries(Model model){
 
-        List<LibraryResponseDto> libraries = findAllLibraries();
+        List<LibraryViewResponseDto> libraries = findAllLibraries();
 
         model.addAttribute("libraries", libraries);
         model.addAttribute("libraryDto", new LibraryRequestDto());
@@ -59,7 +60,7 @@ public class LibraryController {
     @GetMapping("/findAllLibraries")
     @ResponseBody
     @ResponseStatus(value = HttpStatus.OK)
-    public List<LibraryResponseDto> findAllLibraries(){
-        return libraryService.findAll();
+    public List<LibraryViewResponseDto> findAllLibraries(){
+        return libraryService.findAllLibraries();
     }
 }

@@ -2,7 +2,9 @@ package com.example.library.project.services.impl;
 
 import com.example.library.project.dto.requests.LibraryRequestDto;
 import com.example.library.project.dto.responses.LibraryResponseDto;
+import com.example.library.project.dto.views.LibraryViewResponseDto;
 import com.example.library.project.model.entities.Library;
+import com.example.library.project.model.views.LibraryView;
 import com.example.library.project.repositories.LibraryRepository;
 import com.example.library.project.services.interfaces.LibraryService;
 import org.springframework.beans.BeanUtils;
@@ -109,5 +111,21 @@ public class LibraryServiceImpl implements LibraryService {
                 });
 
         return libraryResponseDtoList;
+    }
+
+    @Override
+    public List<LibraryViewResponseDto> findAllLibraries() {
+
+        List<LibraryViewResponseDto> libraryViewResponseDtoList = new ArrayList<>();
+        List<LibraryView> findLibraries = libraryRepository.findAllLibraries();
+
+        findLibraries.stream()
+                .forEach(library -> {
+                    LibraryViewResponseDto libraryViewResponseDto = new LibraryViewResponseDto();
+                    BeanUtils.copyProperties(library, libraryViewResponseDto);
+                    libraryViewResponseDtoList.add(libraryViewResponseDto);
+                });
+
+        return libraryViewResponseDtoList;
     }
 }
