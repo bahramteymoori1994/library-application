@@ -2,7 +2,9 @@ package com.example.library.project.services.impl;
 
 import com.example.library.project.dto.requests.BookRequestDto;
 import com.example.library.project.dto.responses.BookResponseDto;
+import com.example.library.project.dto.views.BookViewResponseDto;
 import com.example.library.project.model.entities.Book;
+import com.example.library.project.model.views.BookView;
 import com.example.library.project.repositories.BookRepository;
 import com.example.library.project.services.interfaces.BookService;
 import org.springframework.beans.BeanUtils;
@@ -103,5 +105,21 @@ public class BookServiceImpl implements BookService {
                 });
 
         return bookResponseDtoList;
+    }
+
+    @Override
+    public List<BookViewResponseDto> findAllBooksView() {
+
+        List<BookViewResponseDto> bookViewResponseDtoList = new ArrayList<>();
+        List<BookView> findBooks = bookRepository.findAllBooksView();
+
+        findBooks.stream()
+                .forEach(book -> {
+                    BookViewResponseDto bookViewResponseDto = new BookViewResponseDto();
+                    BeanUtils.copyProperties(book, bookViewResponseDto);
+                    bookViewResponseDtoList.add(bookViewResponseDto);
+                });
+
+        return bookViewResponseDtoList;
     }
 }

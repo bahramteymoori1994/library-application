@@ -2,6 +2,7 @@ package com.example.library.project.controllers;
 
 import com.example.library.project.dto.requests.BookRequestDto;
 import com.example.library.project.dto.responses.*;
+import com.example.library.project.dto.views.BookViewResponseDto;
 import com.example.library.project.services.interfaces.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -32,7 +33,7 @@ public class BookController {
     @GetMapping
     public String getAllBooks(Model model){
 
-        List<BookResponseDto> books = findAllBooks();
+        List<BookViewResponseDto> books = findAllBooks();
 
         model.addAttribute("books", books);
         model.addAttribute("bookDto", new BookRequestDto());
@@ -69,8 +70,8 @@ public class BookController {
     @GetMapping("/findAllBooks")
     @ResponseBody
     @ResponseStatus(value = HttpStatus.OK)
-    public List<BookResponseDto> findAllBooks(){
-        return bookService.findAll();
+    public List<BookViewResponseDto> findAllBooks(){
+        return bookService.findAllBooksView();
     }
 
     @GetMapping("/findAllPublishers")
