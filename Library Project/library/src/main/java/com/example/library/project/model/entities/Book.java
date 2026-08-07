@@ -68,6 +68,10 @@ public class Book {
             referencedColumnName = "LIBRARY_ID", foreignKey = @ForeignKey(name = "FK_LIBRARY_ID")))
     private List<Library> libraries = new ArrayList<>();
 
+    @Column(name = "BOOK_COUNT", nullable = false)
+    @NotNull(message = "Book count is required")
+    private Byte bookCount;
+
     @ManyToOne
     @JoinColumn(name = "PUBLISHER_ID")
     private Publisher publisher;
@@ -88,7 +92,7 @@ public class Book {
     public Book() {
     }
 
-    public Book(Long bookId, String bookTitle, TranslateStatus translateStatus, HistoricalPeriodLevel historicalPeriodLevel, String isbn, String description, Short publishYear, Byte publishNumber, Short pageCount, List<Author> authors, List<Translator> translators, List<Library> libraries, Publisher publisher, BookSubject bookSubject, LocalDate createdDate, LocalTime createdTime, String createdBy) {
+    public Book(Long bookId, String bookTitle, TranslateStatus translateStatus, HistoricalPeriodLevel historicalPeriodLevel, String isbn, String description, Short publishYear, Byte publishNumber, Short pageCount, List<Author> authors, List<Translator> translators, List<Library> libraries, Byte bookCount, Publisher publisher, BookSubject bookSubject, LocalDate createdDate, LocalTime createdTime, String createdBy) {
         this.bookId = bookId;
         this.bookTitle = bookTitle;
         this.translateStatus = translateStatus;
@@ -101,6 +105,7 @@ public class Book {
         this.authors = authors;
         this.translators = translators;
         this.libraries = libraries;
+        this.bookCount = bookCount;
         this.publisher = publisher;
         this.bookSubject = bookSubject;
         this.createdDate = createdDate;
@@ -216,6 +221,15 @@ public class Book {
         return this;
     }
 
+    public Byte getBookCount() {
+        return bookCount;
+    }
+
+    public Book setBookCount(Byte bookCount) {
+        this.bookCount = bookCount;
+        return this;
+    }
+
     public Publisher getPublisher() {
         return publisher;
     }
@@ -276,6 +290,7 @@ public class Book {
                 ", authors=" + authors +
                 ", translators=" + translators +
                 ", libraries=" + libraries +
+                ", bookCount=" + bookCount +
                 ", publisher=" + publisher +
                 ", bookSubject=" + bookSubject +
                 ", createdDate=" + createdDate +

@@ -27,6 +27,7 @@ public class BookRequestDto {
     private List<Translator> translators = new ArrayList<>();
     private List<Library> libraries = new ArrayList<>();
     private BookSubject bookSubject;
+    private Byte bookCount;
     private LocalDate createdDate;
     private LocalTime createdTime;
     private String createdBy;
@@ -34,7 +35,7 @@ public class BookRequestDto {
     public BookRequestDto() {
     }
 
-    public BookRequestDto(Long bookId, String bookTitle, TranslateStatus translateStatus, HistoricalPeriodLevel historicalPeriodLevel, String isbn, String description, Short publishYear, Byte publishNumber, Short pageCount, Publisher publisher, List<Author> authors, List<Translator> translators, List<Library> libraries, BookSubject bookSubject, LocalDate createdDate, LocalTime createdTime, String createdBy) {
+    public BookRequestDto(Long bookId, String bookTitle, TranslateStatus translateStatus, HistoricalPeriodLevel historicalPeriodLevel, String isbn, String description, Short publishYear, Byte publishNumber, Short pageCount, Publisher publisher, List<Author> authors, List<Translator> translators, List<Library> libraries, BookSubject bookSubject, Byte bookCount, LocalDate createdDate, LocalTime createdTime, String createdBy) {
         this.bookId = bookId;
         this.bookTitle = bookTitle;
         this.translateStatus = translateStatus;
@@ -49,9 +50,19 @@ public class BookRequestDto {
         this.translators = translators;
         this.libraries = libraries;
         this.bookSubject = bookSubject;
+        this.bookCount = bookCount;
         this.createdDate = createdDate;
         this.createdTime = createdTime;
         this.createdBy = createdBy;
+    }
+
+    public Byte getBookCount() {
+        return bookCount;
+    }
+
+    public BookRequestDto setBookCount(Byte bookCount) {
+        this.bookCount = bookCount;
+        return this;
     }
 
     public Long getBookId() {

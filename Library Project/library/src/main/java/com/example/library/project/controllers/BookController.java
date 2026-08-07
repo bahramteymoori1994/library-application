@@ -36,7 +36,7 @@ public class BookController {
     @GetMapping
     public String getAllBooks(Model model){
 
-        List<BookViewResponseDto> books = findAllBooks();
+        List<BookResponseDto> books = findAllBooks();
 
         model.addAttribute("books", books);
         model.addAttribute("bookDto", new BookRequestDto());
@@ -70,11 +70,18 @@ public class BookController {
     }
 
 
+//    @GetMapping("/findAllBooks")
+//    @ResponseBody
+//    @ResponseStatus(value = HttpStatus.OK)
+//    public List<BookViewResponseDto> findAllBooks(){
+//        return bookService.findAllBooksView();
+//    }
+
     @GetMapping("/findAllBooks")
     @ResponseBody
     @ResponseStatus(value = HttpStatus.OK)
-    public List<BookViewResponseDto> findAllBooks(){
-        return bookService.findAllBooksView();
+    public List<BookResponseDto> findAllBooks(){
+        return bookService.findAll();
     }
 
     @GetMapping("/findAllPublishers")

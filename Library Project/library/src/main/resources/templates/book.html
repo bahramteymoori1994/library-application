@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>مدیریت کتاب‌ها</title>
-
-    <!-- لینک به فایل CSS -->
     <link rel="stylesheet" th:href="@{/css/book.css}">
 </head>
 <body>
@@ -34,15 +32,17 @@
                 <th>شناسه</th>
                 <th>عنوان کتاب</th>
                 <th>شابک</th>
-                <th>تعداد</th>
-                <th>تاریخ انتشار</th>
+                <th>سال انتشار</th>
+                <th>شماره انتشار</th>
+                <th>تعداد صفحات</th>
+                <th>تعداد کتاب</th>
                 <th>نویسندگان</th>
-                <th>کتابخانه‌ها</th>
+                <th>مترجمان</th>
                 <th>موضوع</th>
-                <th>زبان</th>
                 <th>ناشر</th>
+                <th>وضعیت ترجمه</th>
+                <th>دوره تاریخی</th>
                 <th>تاریخ ایجاد</th>
-                <th>ایجاد کننده</th>
                 <th>عملیات</th>
             </tr>
             </thead>
@@ -50,22 +50,24 @@
             <tr th:each="b : ${books}" th:if="${books != null and not #lists.isEmpty(books)}">
                 <td th:text="${b.bookId}"></td>
                 <td th:text="${b.bookTitle}"></td>
-                <td th:text="${b.bookIsbn}"></td>
+                <td th:text="${b.isbn}"></td>
+                <td th:text="${b.publishYear}"></td>
+                <td th:text="${b.publishNumber}"></td>
+                <td th:text="${b.pageCount}"></td>
                 <td th:text="${b.bookCount}"></td>
-                <td th:text="${#temporals.format(b.bookPublishDate, 'yyyy-MM-dd')}"></td>
                 <td>
-                    <span th:each="author : ${b.authorNames}" class="role-tag" th:text="${author}"></span>
-                    <span th:if="${b.authorNames == null or #lists.isEmpty(b.authorNames)}" style="color:#888;">—</span>
+                    <span th:each="author : ${b.authors}" class="role-tag" th:text="${author.firstName + ' ' + author.lastName}"></span>
+                    <span th:if="${b.authors == null or #lists.isEmpty(b.authors)}" style="color:#888;">—</span>
                 </td>
                 <td>
-                    <span th:each="library : ${b.libraryNames}" class="role-tag" th:text="${library}"></span>
-                    <span th:if="${b.libraryNames == null or #lists.isEmpty(b.libraryNames)}" style="color:#888;">—</span>
+                    <span th:each="translator : ${b.translators}" class="role-tag" th:text="${translator.firstName + ' ' + translator.lastName}"></span>
+                    <span th:if="${b.translators == null or #lists.isEmpty(b.translators)}" style="color:#888;">—</span>
                 </td>
-                <td th:text="${b.bookTypeSubject}"></td>
-                <td th:text="${b.bookTypeLanguage}"></td>
-                <td th:text="${b.publisherName}"></td>
+                <td th:text="${b.bookSubject != null ? b.bookSubject.subjectTitle : '—'}"></td>
+                <td th:text="${b.publisher != null ? b.publisher.name : '—'}"></td>
+                <td th:text="${b.translateStatus}"></td>
+                <td th:text="${b.historicalPeriodLevel}"></td>
                 <td th:text="${#temporals.format(b.createdDate, 'yyyy-MM-dd')}"></td>
-                <td th:text="${b.createdBy}"></td>
                 <td>
                     <button onclick="openEditModal(this)" class="btn btn-warning btn-sm">
                         ✏️ ویرایش
@@ -73,7 +75,7 @@
                 </td>
             </tr>
             <tr th:if="${books == null or #lists.isEmpty(books)}">
-                <td colspan="13" class="empty-state">
+                <td colspan="15" class="empty-state">
                     <div>📭</div>
                     <div style="margin-top: 10px;">هیچ کتابی ثبت نشده است</div>
                 </td>
@@ -89,37 +91,81 @@
         <span class="close" onclick="closeModal()">×</span>
         <h2 class="modal-title" id="modalTitle">ثبت کتاب جدید</h2>
 
-        <form id="bookForm" th:action="@{/book/saveBook}" method="post" th:object="${bookDto}">
+        <form id="bookForm" method="post" th:object="${bookDto}">
             <input type="hidden" id="bookId" name="bookId" />
+            <input type="hidden" id="formAction" name="formAction" value="save" />
 
+            <!-- عنوان کتاب -->
             <div class="form-group">
-                <label for="bookTitle">عنوان کتاب:</label>
-                <input type="text" id="bookTitle" name="bookTitle" required />
+                <label for="bookTitle">عنوان کتاب <span class="required">*</span></label>
+                <input type="text" id="bookTitle" name="bookTitle" required placeholder="عنوان کتاب را وارد کنید" />
             </div>
 
+            <!-- شابک -->
             <div class="form-group">
-                <label for="isbn">ISBN:</label>
-                <input type="text" id="isbn" name="isbn" required />
+                <label for="isbn">شابک (ISBN) <span class="required">*</span></label>
+                <input type="text" id="isbn" name="isbn" required placeholder="مثال: 978-3-16-148410-0" />
             </div>
 
+            <!-- توضیحات -->
             <div class="form-group">
-                <label for="bookCount">تعداد:</label>
-                <input type="number" id="bookCount" name="bookCount" required min="0" />
+                <label for="description">توضیحات:</label>
+                <textarea id="description" name="description" rows="3" placeholder="توضیحات کتاب را وارد کنید" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:5px;"></textarea>
             </div>
 
+            <!-- سال انتشار -->
             <div class="form-group">
-                <label for="publishDate">تاریخ انتشار:</label>
-                <input type="date" id="publishDate" name="publishDate" required />
+                <label for="publishYear">سال انتشار <span class="required">*</span></label>
+                <input type="number" id="publishYear" name="publishYear" required min="1000" max="2100" placeholder="مثال: 1400" />
             </div>
 
-            <!-- Publisher -->
+            <!-- شماره انتشار -->
             <div class="form-group">
-                <label for="publisherId">ناشر:</label>
+                <label for="publishNumber">شماره انتشار <span class="required">*</span></label>
+                <input type="number" id="publishNumber" name="publishNumber" required min="1" max="99" placeholder="مثال: 1" />
+            </div>
+
+            <!-- تعداد صفحات -->
+            <div class="form-group">
+                <label for="pageCount">تعداد صفحات <span class="required">*</span></label>
+                <input type="number" id="pageCount" name="pageCount" required min="1" placeholder="مثال: 250" />
+            </div>
+
+            <!-- تعداد کتاب -->
+            <div class="form-group">
+                <label for="bookCount">تعداد کتاب <span class="required">*</span></label>
+                <input type="number" id="bookCount" name="bookCount" required min="0" max="255" placeholder="مثال: ۱۰" />
+                <small style="color:#888; display:block; margin-top:4px;">تعداد کتاب‌های موجود (حداکثر ۲۵۵)</small>
+            </div>
+
+            <!-- وضعیت ترجمه -->
+            <div class="form-group">
+                <label for="translateStatus">وضعیت ترجمه <span class="required">*</span></label>
+                <select id="translateStatus" name="translateStatus" required onchange="toggleTranslatorSection()">
+                    <option value="">انتخاب کنید</option>
+                    <option value="TRANSLATED">ترجمه شده</option>
+                    <option value="NOT_TRANSLATED">ترجمه نشده</option>
+                </select>
+            </div>
+
+            <!-- دوره تاریخی -->
+            <div class="form-group">
+                <label for="historicalPeriodLevel">دوره تاریخی <span class="required">*</span></label>
+                <select id="historicalPeriodLevel" name="historicalPeriodLevel" required>
+                    <option value="">انتخاب کنید</option>
+                    <option value="ANCIENT">باستان</option>
+                    <option value="MEDIEVAL">قرون وسطی</option>
+                    <option value="MODERN">مدرن</option>
+                    <option value="CONTEMPORARY">معاصر</option>
+                </select>
+            </div>
+
+            <!-- ناشر -->
+            <div class="form-group">
+                <label for="publisherId">ناشر <span class="required">*</span></label>
                 <div class="search-container">
-                    <input type="number" id="publisherId" name="publisher.publisherId" required style="flex:1;" placeholder="شناسه ناشر" />
-                    <button type="button" onclick="openPublisherSearch()" class="btn btn-info">
-                        🔍 جستجو
-                    </button>
+                    <input type="number" id="publisherId" name="publisher" required style="flex:1;" placeholder="شناسه ناشر" />
+                    <button type="button" onclick="openPublisherSearch()" class="btn btn-info">🔍 جستجو</button>
                 </div>
                 <div id="selectedPublisherInfo" class="selected-person-info">
                     <strong>نام ناشر:</strong> <span id="selectedPublisherName"></span> |
@@ -127,22 +173,20 @@
                 </div>
             </div>
 
-            <!-- BookType -->
+            <!-- موضوع کتاب -->
             <div class="form-group">
-                <label for="bookTypeId">نوع کتاب:</label>
+                <label for="bookSubjectId">موضوع کتاب <span class="required">*</span></label>
                 <div class="search-container">
-                    <input type="number" id="bookTypeId" name="bookType.bookTypeId" required style="flex:1;" placeholder="شناسه نوع کتاب" />
-                    <button type="button" onclick="openBookTypeSearch()" class="btn btn-info">
-                        🔍 جستجو
-                    </button>
+                    <input type="number" id="bookSubjectId" name="bookSubject" required style="flex:1;" placeholder="شناسه موضوع کتاب" />
+                    <button type="button" onclick="openBookSubjectSearch()" class="btn btn-info">🔍 جستجو</button>
                 </div>
-                <div id="selectedBookTypeInfo" class="selected-person-info">
-                    <strong>موضوع:</strong> <span id="selectedBookTypeSubject"></span> |
-                    <strong>زبان:</strong> <span id="selectedBookTypeLanguage"></span>
+                <div id="selectedBookSubjectInfo" class="selected-person-info">
+                    <strong>عنوان موضوع:</strong> <span id="selectedBookSubjectTitle"></span> |
+                    <strong>موضوع والد:</strong> <span id="selectedBookSubjectParent"></span>
                 </div>
             </div>
 
-            <!-- Authors (چندگانه) -->
+            <!-- نویسندگان (چندگانه) -->
             <div class="form-group">
                 <label>نویسندگان:</label>
                 <div class="search-container">
@@ -156,7 +200,21 @@
                 <div id="authorIdsContainer"></div>
             </div>
 
-            <!-- Libraries (چندگانه) -->
+            <!-- مترجمان (چندگانه) - فقط در حالت TRANSLATED نمایش داده می‌شود -->
+            <div id="translatorSection" class="form-group" style="display:none;">
+                <label>مترجمان <span class="required">*</span></label>
+                <div class="search-container">
+                    <input type="text" id="translatorsDisplay" readonly placeholder="هیچ مترجمی انتخاب نشده"
+                           style="flex:1; background:#f8f9fa;">
+                    <button type="button" onclick="openTranslatorSearch()" class="btn btn-info">
+                        🔍 جستجو و انتخاب مترجم
+                    </button>
+                </div>
+                <div id="selectedTranslatorsContainer"></div>
+                <div id="translatorIdsContainer"></div>
+            </div>
+
+            <!-- کتابخانه‌ها (چندگانه) -->
             <div class="form-group">
                 <label>کتابخانه‌ها:</label>
                 <div class="search-container">
@@ -209,19 +267,19 @@
     </div>
 </div>
 
-<!-- Modal جستجوی نوع کتاب -->
-<div id="bookTypeSearchModal" class="modal">
+<!-- Modal جستجوی موضوع کتاب -->
+<div id="bookSubjectSearchModal" class="modal">
     <div class="modal-content">
-        <span class="close" onclick="closeBookTypeSearch()">×</span>
-        <h2 class="modal-title">جستجوی نوع کتاب</h2>
+        <span class="close" onclick="closeBookSubjectSearch()">×</span>
+        <h2 class="modal-title">جستجوی موضوع کتاب</h2>
 
         <div class="search-container">
             <div class="search-input-wrapper">
-                <input type="text" id="bookTypeSearchInput" placeholder="جستجو بر اساس موضوع یا زبان..." />
+                <input type="text" id="bookSubjectSearchInput" placeholder="جستجو بر اساس عنوان موضوع..." />
                 <span class="search-icon">🔍</span>
             </div>
-            <button onclick="searchBookTypes()" class="btn btn-primary">جستجو</button>
-            <button onclick="clearBookTypeSearch()" class="btn btn-secondary">پاک کردن</button>
+            <button onclick="searchBookSubjects()" class="btn btn-primary">جستجو</button>
+            <button onclick="clearBookSubjectSearch()" class="btn btn-secondary">پاک کردن</button>
         </div>
 
         <div class="table-container">
@@ -229,12 +287,12 @@
                 <thead>
                 <tr>
                     <th>شناسه</th>
-                    <th>موضوع</th>
-                    <th>زبان</th>
+                    <th>عنوان موضوع</th>
+                    <th>موضوع والد</th>
                     <th>انتخاب</th>
                 </tr>
                 </thead>
-                <tbody id="bookTypeTableBody"></tbody>
+                <tbody id="bookSubjectTableBody"></tbody>
             </table>
         </div>
     </div>
@@ -273,6 +331,43 @@
         <div class="form-actions">
             <button onclick="closeAuthorSearch()" class="btn btn-danger">بستن</button>
             <button onclick="confirmSelectedAuthors()" class="btn btn-success">تایید انتخاب‌ها</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal جستجوی مترجم (چندگانه) -->
+<div id="translatorSearchModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeTranslatorSearch()">×</span>
+        <h2 class="modal-title">انتخاب مترجمان</h2>
+
+        <div class="search-container">
+            <div class="search-input-wrapper">
+                <input type="text" id="translatorSearchInput" placeholder="جستجو بر اساس نام یا نام خانوادگی..." />
+                <span class="search-icon">🔍</span>
+            </div>
+            <button onclick="searchTranslators()" class="btn btn-primary">جستجو</button>
+            <button onclick="clearTranslatorSearch()" class="btn btn-secondary">پاک کردن</button>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                <tr>
+                    <th>شناسه</th>
+                    <th>نام</th>
+                    <th>نام خانوادگی</th>
+                    <th>زبان‌ها</th>
+                    <th>انتخاب</th>
+                </tr>
+                </thead>
+                <tbody id="translatorTableBody"></tbody>
+            </table>
+        </div>
+
+        <div class="form-actions">
+            <button onclick="closeTranslatorSearch()" class="btn btn-danger">بستن</button>
+            <button onclick="confirmSelectedTranslators()" class="btn btn-success">تایید انتخاب‌ها</button>
         </div>
     </div>
 </div>

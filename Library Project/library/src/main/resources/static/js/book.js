@@ -5,27 +5,23 @@
 // ============================
 
 let allPublishers = [];
-let allBookTypes = [];
+let allBookSubjects = [];
 let allAuthors = [];
+let allTranslators = [];
 let allLibraries = [];
 let selectedAuthors = [];
+let selectedTranslators = [];
 let selectedLibraries = [];
 let publisherSearchTimeout = null;
-let bookTypeSearchTimeout = null;
+let bookSubjectSearchTimeout = null;
 let authorSearchTimeout = null;
+let translatorSearchTimeout = null;
 let librarySearchTimeout = null;
+let isEditMode = false;
 
 // ============================
 // توابع کمکی
 // ============================
-
-function getEnumDisplayName(enumValue) {
-    if (!enumValue) return '';
-    if (typeof enumValue === 'string') return enumValue;
-    if (enumValue.displayName) return enumValue.displayName;
-    if (enumValue.name) return enumValue.name;
-    return String(enumValue);
-}
 
 function showMessage(message, type = 'success') {
     const container = document.querySelector('.container');
@@ -50,6 +46,26 @@ function showMessage(message, type = 'success') {
         alertDiv.style.transition = 'opacity 0.5s ease';
         setTimeout(() => alertDiv.remove(), 500);
     }, 5000);
+}
+
+// ============================
+// توابع مدیریت نمایش مترجمان
+// ============================
+
+function toggleTranslatorSection() {
+    const translateStatus = document.getElementById('translateStatus').value;
+    const translatorSection = document.getElementById('translatorSection');
+
+    if (translateStatus === 'TRANSLATED') {
+        translatorSection.style.display = 'block';
+        if (selectedTranslators.length === 0) {
+            document.getElementById('translatorsDisplay').value = 'هیچ مترجمی انتخاب نشده';
+        }
+    } else {
+        translatorSection.style.display = 'none';
+        selectedTranslators = [];
+        renderSelectedTranslators();
+    }
 }
 
 // ============================
@@ -154,46 +170,46 @@ function clearPublisherSearch() {
 }
 
 // ============================
-// توابع مدیریت نوع کتاب
+// توابع مدیریت موضوع کتاب
 // ============================
 
-function loadBookTypes() {
-    fetch('/book/findAllBookTypes')
+function loadBookSubjects() {
+    fetch('/book/findAllBookSubjects')
         .then(r => {
-            if (!r.ok) throw new Error('خطا در دریافت لیست نوع کتاب');
+            if (!r.ok) throw new Error('خطا در دریافت لیست موضوعات کتاب');
             return r.json();
         })
         .then(data => {
-            allBookTypes = data;
-            displayBookTypes(data);
+            allBookSubjects = data;
+            displayBookSubjects(data);
         })
         .catch(err => {
-            console.error('Error loading book types:', err);
-            showMessage('خطا در بارگذاری لیست نوع کتاب', 'error');
+            console.error('Error loading book subjects:', err);
+            showMessage('خطا در بارگذاری لیست موضوعات کتاب', 'error');
         });
 }
 
-function displayBookTypes(bookTypes) {
-    const tbody = document.getElementById('bookTypeTableBody');
+function displayBookSubjects(subjects) {
+    const tbody = document.getElementById('bookSubjectTableBody');
     if (!tbody) return;
 
     let html = '';
-    if (!bookTypes || bookTypes.length === 0) {
-        html = `<tr><td colspan="4" class="empty-state">نوع کتابی یافت نشد</td></tr>`;
+    if (!subjects || subjects.length === 0) {
+        html = `<tr><td colspan="4" class="empty-state">موضوعی یافت نشد</td></tr>`;
     } else {
-        bookTypes.forEach(bt => {
-            const subject = getEnumDisplayName(bt.bookTypeSubject);
-            const language = getEnumDisplayName(bt.bookTypeLanguage);
-            const escapedSubject = subject.replace(/'/g, "\\'");
-            const escapedLanguage = language.replace(/'/g, "\\'");
+        subjects.forEach(s => {
+            const subjectTitle = s.subjectTitle || '';
+            const parentTitle = s.bookSubject ? (s.bookSubject.subjectTitle || '') : '—';
+            const escapedTitle = subjectTitle.replace(/'/g, "\\'");
+            const escapedParent = parentTitle.replace(/'/g, "\\'");
 
             html += `
                 <tr>
-                    <td>${bt.bookTypeId}</td>
-                    <td>${subject}</td>
-                    <td>${language}</td>
+                    <td>${s.bookSubjectId}</td>
+                    <td>${subjectTitle}</td>
+                    <td>${parentTitle}</td>
                     <td>
-                        <button class="btn btn-success btn-sm" onclick="selectBookType(${bt.bookTypeId}, '${escapedSubject}', '${escapedLanguage}')">
+                        <button class="btn btn-success btn-sm" onclick="selectBookSubject(${s.bookSubjectId}, '${escapedTitle}', '${escapedParent}')">
                             انتخاب
                         </button>
                     </td>
@@ -204,54 +220,54 @@ function displayBookTypes(bookTypes) {
     tbody.innerHTML = html;
 }
 
-function selectBookType(id, subject, language) {
-    document.getElementById('bookTypeId').value = id;
+function selectBookSubject(id, title, parentTitle) {
+    document.getElementById('bookSubjectId').value = id;
 
-    const infoDiv = document.getElementById('selectedBookTypeInfo');
+    const infoDiv = document.getElementById('selectedBookSubjectInfo');
     infoDiv.classList.add('show');
-    document.getElementById('selectedBookTypeSubject').textContent = subject || '';
-    document.getElementById('selectedBookTypeLanguage').textContent = language || '';
+    document.getElementById('selectedBookSubjectTitle').textContent = title || '';
+    document.getElementById('selectedBookSubjectParent').textContent = parentTitle || '—';
 
-    closeBookTypeSearch();
-    showMessage('نوع کتاب با موفقیت انتخاب شد', 'success');
+    closeBookSubjectSearch();
+    showMessage('موضوع کتاب با موفقیت انتخاب شد', 'success');
 }
 
-function openBookTypeSearch() {
-    const modal = document.getElementById('bookTypeSearchModal');
+function openBookSubjectSearch() {
+    const modal = document.getElementById('bookSubjectSearchModal');
     modal.style.display = 'block';
 
-    if (!allBookTypes.length) {
-        loadBookTypes();
+    if (!allBookSubjects.length) {
+        loadBookSubjects();
     }
 
     setTimeout(() => {
-        document.getElementById('bookTypeSearchInput').focus();
+        document.getElementById('bookSubjectSearchInput').focus();
     }, 100);
 }
 
-function closeBookTypeSearch() {
-    document.getElementById('bookTypeSearchModal').style.display = 'none';
+function closeBookSubjectSearch() {
+    document.getElementById('bookSubjectSearchModal').style.display = 'none';
 }
 
-function searchBookTypes() {
-    const term = document.getElementById('bookTypeSearchInput').value.toLowerCase().trim();
+function searchBookSubjects() {
+    const term = document.getElementById('bookSubjectSearchInput').value.toLowerCase().trim();
     if (term === '') {
-        displayBookTypes(allBookTypes);
+        displayBookSubjects(allBookSubjects);
         return;
     }
 
-    const filtered = allBookTypes.filter(bt => {
-        const subject = getEnumDisplayName(bt.bookTypeSubject).toLowerCase();
-        const language = getEnumDisplayName(bt.bookTypeLanguage).toLowerCase();
-        return subject.includes(term) || language.includes(term);
+    const filtered = allBookSubjects.filter(s => {
+        const title = (s.subjectTitle || '').toLowerCase();
+        const parent = s.bookSubject ? (s.bookSubject.subjectTitle || '').toLowerCase() : '';
+        return title.includes(term) || parent.includes(term);
     });
-    displayBookTypes(filtered);
+    displayBookSubjects(filtered);
 }
 
-function clearBookTypeSearch() {
-    document.getElementById('bookTypeSearchInput').value = '';
-    displayBookTypes(allBookTypes);
-    document.getElementById('bookTypeSearchInput').focus();
+function clearBookSubjectSearch() {
+    document.getElementById('bookSubjectSearchInput').value = '';
+    displayBookSubjects(allBookSubjects);
+    document.getElementById('bookSubjectSearchInput').focus();
 }
 
 // ============================
@@ -260,7 +276,7 @@ function clearBookTypeSearch() {
 
 function loadAuthors(searchTerm) {
     const url = searchTerm ?
-        `/book/searchAuthors?term=${encodeURIComponent(searchTerm)}` :
+        `/book/findAllAuthors?term=${encodeURIComponent(searchTerm)}` :
         '/book/findAllAuthors';
 
     fetch(url)
@@ -288,9 +304,9 @@ function displayAuthors(authors) {
     } else {
         authors.forEach(a => {
             const checked = selectedAuthors.some(s => s.authorId === a.authorId) ? 'checked' : '';
-            const firstName = a.person ? (a.person.firstName || '') : '';
-            const lastName = a.person ? (a.person.lastName || '') : '';
-            const expertise = a.authorType ? (a.authorType.name || '') : '';
+            const firstName = a.firstName || '';
+            const lastName = a.lastName || '';
+            const expertise = a.authorType ? (a.authorType.role || '') : '';
             const escapedFirstName = firstName.replace(/'/g, "\\'");
             const escapedLastName = lastName.replace(/'/g, "\\'");
 
@@ -407,18 +423,168 @@ function updateAuthorIdsInput() {
         input.name = `authors[${index}].authorId`;
         input.value = author.authorId;
         container.appendChild(input);
+    });
+}
 
-        const firstNameInput = document.createElement('input');
-        firstNameInput.type = 'hidden';
-        firstNameInput.name = `authors[${index}].person.firstName`;
-        firstNameInput.value = author.firstName || '';
-        container.appendChild(firstNameInput);
+// ============================
+// توابع مدیریت مترجمان (چندگانه)
+// ============================
 
-        const lastNameInput = document.createElement('input');
-        lastNameInput.type = 'hidden';
-        lastNameInput.name = `authors[${index}].person.lastName`;
-        lastNameInput.value = author.lastName || '';
-        container.appendChild(lastNameInput);
+function loadTranslators(searchTerm) {
+    const url = searchTerm ?
+        `/book/findAllTranslators?term=${encodeURIComponent(searchTerm)}` :
+        '/book/findAllTranslators';
+
+    fetch(url)
+        .then(r => {
+            if (!r.ok) throw new Error('خطا در دریافت لیست مترجمان');
+            return r.json();
+        })
+        .then(data => {
+            allTranslators = data;
+            displayTranslators(data);
+        })
+        .catch(err => {
+            console.error('Error loading translators:', err);
+            showMessage('خطا در بارگذاری لیست مترجمان', 'error');
+        });
+}
+
+function displayTranslators(translators) {
+    const tbody = document.getElementById('translatorTableBody');
+    if (!tbody) return;
+
+    let html = '';
+    if (!translators || translators.length === 0) {
+        html = `<tr><td colspan="5" class="empty-state">مترجمی یافت نشد</td></tr>`;
+    } else {
+        translators.forEach(t => {
+            const checked = selectedTranslators.some(s => s.translatorId === t.translatorId) ? 'checked' : '';
+            const firstName = t.firstName || '';
+            const lastName = t.lastName || '';
+            const languages = t.translateLanguages || '';
+            const escapedFirstName = firstName.replace(/'/g, "\\'");
+            const escapedLastName = lastName.replace(/'/g, "\\'");
+
+            html += `
+                <tr>
+                    <td>${t.translatorId}</td>
+                    <td>${firstName}</td>
+                    <td>${lastName}</td>
+                    <td>${languages}</td>
+                    <td>
+                        <input type="checkbox" ${checked}
+                               onchange="toggleTranslator(this, ${t.translatorId}, '${escapedFirstName}', '${escapedLastName}')">
+                    </td>
+                </tr>
+            `;
+        });
+    }
+    tbody.innerHTML = html;
+}
+
+function toggleTranslator(checkbox, id, firstName, lastName) {
+    if (checkbox.checked) {
+        if (!selectedTranslators.some(t => t.translatorId === id)) {
+            selectedTranslators.push({
+                translatorId: id,
+                firstName: firstName,
+                lastName: lastName
+            });
+        }
+    } else {
+        selectedTranslators = selectedTranslators.filter(t => t.translatorId !== id);
+    }
+    renderSelectedTranslators();
+}
+
+function searchTranslators() {
+    const term = document.getElementById('translatorSearchInput').value.trim();
+    loadTranslators(term);
+}
+
+function clearTranslatorSearch() {
+    document.getElementById('translatorSearchInput').value = '';
+    loadTranslators('');
+    document.getElementById('translatorSearchInput').focus();
+}
+
+function openTranslatorSearch() {
+    const modal = document.getElementById('translatorSearchModal');
+    modal.style.display = 'block';
+
+    if (!allTranslators.length) {
+        loadTranslators('');
+    }
+
+    setTimeout(() => {
+        document.getElementById('translatorSearchInput').focus();
+    }, 100);
+}
+
+function closeTranslatorSearch() {
+    document.getElementById('translatorSearchModal').style.display = 'none';
+}
+
+function confirmSelectedTranslators() {
+    renderSelectedTranslators();
+    closeTranslatorSearch();
+    const count = selectedTranslators.length;
+    showMessage(`${count} مترجم انتخاب شد`, 'success');
+
+    const translatorSection = document.getElementById('translatorSection');
+    if (translatorSection && translatorSection.style.display === 'none' && count > 0) {
+        translatorSection.style.display = 'block';
+    }
+}
+
+function renderSelectedTranslators() {
+    const container = document.getElementById('selectedTranslatorsContainer');
+    if (!container) return;
+
+    let html = '';
+    if (selectedTranslators.length === 0) {
+        html = '<span style="color:#888;">هیچ مترجمی انتخاب نشده</span>';
+    } else {
+        selectedTranslators.forEach((t, i) => {
+            const displayName = (t.firstName || '') + ' ' + (t.lastName || '') || 'بدون نام';
+            html += `
+                <span class="role-tag">
+                    ${displayName}
+                    <button onclick="removeTranslator(${i})" class="remove-role" title="حذف مترجم">×</button>
+                </span>
+            `;
+        });
+    }
+    container.innerHTML = html;
+
+    const display = document.getElementById('translatorsDisplay');
+    if (display) {
+        display.value = selectedTranslators.length ?
+            `${selectedTranslators.length} مترجم انتخاب شده` :
+            'هیچ مترجمی انتخاب نشده';
+    }
+
+    updateTranslatorIdsInput();
+}
+
+function removeTranslator(index) {
+    selectedTranslators.splice(index, 1);
+    renderSelectedTranslators();
+}
+
+function updateTranslatorIdsInput() {
+    const container = document.getElementById('translatorIdsContainer');
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    selectedTranslators.forEach((translator, index) => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = `translators[${index}].translatorId`;
+        input.value = translator.translatorId;
+        container.appendChild(input);
     });
 }
 
@@ -428,7 +594,7 @@ function updateAuthorIdsInput() {
 
 function loadLibraries(searchTerm) {
     const url = searchTerm ?
-        `/book/searchLibraries?term=${encodeURIComponent(searchTerm)}` :
+        `/book/findAllLibraries?term=${encodeURIComponent(searchTerm)}` :
         '/book/findAllLibraries';
 
     fetch(url)
@@ -456,16 +622,18 @@ function displayLibraries(libraries) {
     } else {
         libraries.forEach(l => {
             const checked = selectedLibraries.some(s => s.libraryId === l.libraryId) ? 'checked' : '';
-            const libraryType = l.libraryType ? (l.libraryType.name || '') : '';
-            const escapedName = (l.libraryName || '').replace(/'/g, "\\'");
-            const escapedCity = (l.city || '').replace(/'/g, "\\'");
+            const libraryName = l.libraryName || '';
+            const city = l.city || '';
+            const ownership = l.libraryOwnership || '';
+            const escapedName = libraryName.replace(/'/g, "\\'");
+            const escapedCity = city.replace(/'/g, "\\'");
 
             html += `
                 <tr>
                     <td>${l.libraryId}</td>
-                    <td>${l.libraryName || ''}</td>
-                    <td>${l.city || ''}</td>
-                    <td>${libraryType}</td>
+                    <td>${libraryName}</td>
+                    <td>${city}</td>
+                    <td>${ownership}</td>
                     <td>
                         <input type="checkbox" ${checked}
                                onchange="toggleLibrary(this, ${l.libraryId}, '${escapedName}', '${escapedCity}')">
@@ -573,18 +741,6 @@ function updateLibraryIdsInput() {
         input.name = `libraries[${index}].libraryId`;
         input.value = library.libraryId;
         container.appendChild(input);
-
-        const nameInput = document.createElement('input');
-        nameInput.type = 'hidden';
-        nameInput.name = `libraries[${index}].libraryName`;
-        nameInput.value = library.libraryName || '';
-        container.appendChild(nameInput);
-
-        const cityInput = document.createElement('input');
-        cityInput.type = 'hidden';
-        cityInput.name = `libraries[${index}].city`;
-        cityInput.value = library.libraryCity || '';
-        container.appendChild(cityInput);
     });
 }
 
@@ -596,27 +752,39 @@ function openCreateModal() {
     const modal = document.getElementById('bookModal');
     const title = document.getElementById('modalTitle');
     const form = document.getElementById('bookForm');
+    const submitBtn = document.getElementById('submitBtn');
 
     title.textContent = 'ثبت کتاب جدید';
+    submitBtn.textContent = 'ذخیره';
+    submitBtn.className = 'btn btn-success';
     form.reset();
+    isEditMode = false;
 
     document.getElementById('bookId').value = '';
+    document.getElementById('formAction').value = 'save';
+    form.action = '/book/saveBook';
 
     document.getElementById('publisherId').value = '';
     document.getElementById('selectedPublisherInfo').classList.remove('show');
-    document.getElementById('selectedPublisherName').textContent = '';
-    document.getElementById('selectedPublisherType').textContent = '';
 
-    document.getElementById('bookTypeId').value = '';
-    document.getElementById('selectedBookTypeInfo').classList.remove('show');
-    document.getElementById('selectedBookTypeSubject').textContent = '';
-    document.getElementById('selectedBookTypeLanguage').textContent = '';
+    document.getElementById('bookSubjectId').value = '';
+    document.getElementById('selectedBookSubjectInfo').classList.remove('show');
+
+    document.getElementById('bookCount').value = 1;
 
     selectedAuthors = [];
     renderSelectedAuthors();
 
+    selectedTranslators = [];
+    renderSelectedTranslators();
+
     selectedLibraries = [];
     renderSelectedLibraries();
+
+    const translatorSection = document.getElementById('translatorSection');
+    if (translatorSection) {
+        translatorSection.style.display = 'none';
+    }
 
     modal.style.display = 'block';
 
@@ -639,16 +807,37 @@ function openEditModal(button) {
         .then(book => {
             const modal = document.getElementById('bookModal');
             const title = document.getElementById('modalTitle');
+            const submitBtn = document.getElementById('submitBtn');
+            const form = document.getElementById('bookForm');
 
             title.textContent = 'ویرایش کتاب';
+            submitBtn.textContent = 'به‌روزرسانی';
+            submitBtn.className = 'btn btn-primary';
+            isEditMode = true;
 
             document.getElementById('bookId').value = book.bookId || '';
+            document.getElementById('formAction').value = 'update';
+            form.action = '/book/updateBook';
+
             document.getElementById('bookTitle').value = book.bookTitle || '';
             document.getElementById('isbn').value = book.isbn || '';
-            document.getElementById('bookCount').value = book.bookCount || '';
-            document.getElementById('publishDate').value = book.publishDate || '';
+            document.getElementById('description').value = book.description || '';
+            document.getElementById('publishYear').value = book.publishYear || '';
+            document.getElementById('publishNumber').value = book.publishNumber || '';
+            document.getElementById('pageCount').value = book.pageCount || '';
+            document.getElementById('bookCount').value = book.bookCount || 0;
 
-            // Publisher
+            document.getElementById('translateStatus').value = book.translateStatus || '';
+
+            const translatorSection = document.getElementById('translatorSection');
+            if (book.translateStatus === 'TRANSLATED') {
+                translatorSection.style.display = 'block';
+            } else {
+                translatorSection.style.display = 'none';
+            }
+
+            document.getElementById('historicalPeriodLevel').value = book.historicalPeriodLevel || '';
+
             if (book.publisher) {
                 document.getElementById('publisherId').value = book.publisher.publisherId || '';
                 document.getElementById('selectedPublisherInfo').classList.add('show');
@@ -660,26 +849,35 @@ function openEditModal(button) {
                 document.getElementById('selectedPublisherInfo').classList.remove('show');
             }
 
-            // BookType
-            if (book.bookType) {
-                document.getElementById('bookTypeId').value = book.bookType.bookTypeId || '';
-                document.getElementById('selectedBookTypeInfo').classList.add('show');
-                document.getElementById('selectedBookTypeSubject').textContent = getEnumDisplayName(book.bookType.bookTypeSubject);
-                document.getElementById('selectedBookTypeLanguage').textContent = getEnumDisplayName(book.bookType.bookTypeLanguage);
+            if (book.bookSubject) {
+                document.getElementById('bookSubjectId').value = book.bookSubject.bookSubjectId || '';
+                document.getElementById('selectedBookSubjectInfo').classList.add('show');
+                document.getElementById('selectedBookSubjectTitle').textContent = book.bookSubject.subjectTitle || '';
+                const parentTitle = book.bookSubject.bookSubject ? (book.bookSubject.bookSubject.subjectTitle || '') : '—';
+                document.getElementById('selectedBookSubjectParent').textContent = parentTitle;
             } else {
-                document.getElementById('bookTypeId').value = '';
-                document.getElementById('selectedBookTypeInfo').classList.remove('show');
+                document.getElementById('bookSubjectId').value = '';
+                document.getElementById('selectedBookSubjectInfo').classList.remove('show');
             }
 
-            // Authors
             selectedAuthors = (book.authors || []).map(a => ({
                 authorId: a.authorId,
-                firstName: a.person ? (a.person.firstName || '') : '',
-                lastName: a.person ? (a.person.lastName || '') : ''
+                firstName: a.firstName || '',
+                lastName: a.lastName || ''
             }));
             renderSelectedAuthors();
 
-            // Libraries
+            if (book.translateStatus === 'TRANSLATED') {
+                selectedTranslators = (book.translators || []).map(t => ({
+                    translatorId: t.translatorId,
+                    firstName: t.firstName || '',
+                    lastName: t.lastName || ''
+                }));
+            } else {
+                selectedTranslators = [];
+            }
+            renderSelectedTranslators();
+
             selectedLibraries = (book.libraries || []).map(l => ({
                 libraryId: l.libraryId,
                 libraryName: l.libraryName || '',
@@ -701,16 +899,80 @@ function closeModal() {
 }
 
 // ============================
+// ارسال فرم
+// ============================
+
+function submitBookForm(event) {
+    if (event) {
+        event.preventDefault();
+    }
+
+    const bookTitle = document.getElementById('bookTitle').value.trim();
+    const isbn = document.getElementById('isbn').value.trim();
+    const publisherId = document.getElementById('publisherId').value.trim();
+    const bookSubjectId = document.getElementById('bookSubjectId').value.trim();
+    const translateStatus = document.getElementById('translateStatus').value;
+    const bookCount = document.getElementById('bookCount').value;
+
+    if (!bookTitle) {
+        showMessage('لطفاً عنوان کتاب را وارد کنید', 'error');
+        document.getElementById('bookTitle').focus();
+        return false;
+    }
+
+    if (!isbn) {
+        showMessage('لطفاً شابک کتاب را وارد کنید', 'error');
+        document.getElementById('isbn').focus();
+        return false;
+    }
+
+    if (!publisherId) {
+        showMessage('لطفاً ناشر را انتخاب کنید', 'error');
+        return false;
+    }
+
+    if (!bookSubjectId) {
+        showMessage('لطفاً موضوع کتاب را انتخاب کنید', 'error');
+        return false;
+    }
+
+    if (!translateStatus) {
+        showMessage('لطفاً وضعیت ترجمه را انتخاب کنید', 'error');
+        document.getElementById('translateStatus').focus();
+        return false;
+    }
+
+    if (bookCount === '' || bookCount === null || bookCount < 0) {
+        showMessage('لطفاً تعداد کتاب را وارد کنید', 'error');
+        document.getElementById('bookCount').focus();
+        return false;
+    }
+
+    if (bookCount > 255) {
+        showMessage('تعداد کتاب نباید بیشتر از ۲۵۵ باشد', 'error');
+        document.getElementById('bookCount').focus();
+        return false;
+    }
+
+    if (translateStatus === 'TRANSLATED' && selectedTranslators.length === 0) {
+        showMessage('لطفاً حداقل یک مترجم انتخاب کنید', 'error');
+        return false;
+    }
+
+    document.getElementById('bookForm').submit();
+}
+
+// ============================
 // رویدادها
 // ============================
 
 document.addEventListener('DOMContentLoaded', function() {
     loadPublishers();
-    loadBookTypes();
+    loadBookSubjects();
     loadAuthors('');
+    loadTranslators('');
     loadLibraries('');
 
-    // جستجوی خودکار نویسندگان
     const authorSearchInput = document.getElementById('authorSearchInput');
     if (authorSearchInput) {
         authorSearchInput.addEventListener('input', function() {
@@ -729,7 +991,24 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // جستجوی خودکار کتابخانه‌ها
+    const translatorSearchInput = document.getElementById('translatorSearchInput');
+    if (translatorSearchInput) {
+        translatorSearchInput.addEventListener('input', function() {
+            if (translatorSearchTimeout) {
+                clearTimeout(translatorSearchTimeout);
+                translatorSearchTimeout = null;
+            }
+
+            const term = this.value.trim();
+            if (term.length >= 2 || term.length === 0) {
+                translatorSearchTimeout = setTimeout(() => {
+                    loadTranslators(term);
+                    translatorSearchTimeout = null;
+                }, 400);
+            }
+        });
+    }
+
     const librarySearchInput = document.getElementById('librarySearchInput');
     if (librarySearchInput) {
         librarySearchInput.addEventListener('input', function() {
@@ -748,7 +1027,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // جستجوی خودکار ناشران
     const publisherSearchInput = document.getElementById('publisherSearchInput');
     if (publisherSearchInput) {
         publisherSearchInput.addEventListener('input', function() {
@@ -767,33 +1045,40 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // جستجوی خودکار نوع کتاب
-    const bookTypeSearchInput = document.getElementById('bookTypeSearchInput');
-    if (bookTypeSearchInput) {
-        bookTypeSearchInput.addEventListener('input', function() {
-            if (bookTypeSearchTimeout) {
-                clearTimeout(bookTypeSearchTimeout);
-                bookTypeSearchTimeout = null;
+    const bookSubjectSearchInput = document.getElementById('bookSubjectSearchInput');
+    if (bookSubjectSearchInput) {
+        bookSubjectSearchInput.addEventListener('input', function() {
+            if (bookSubjectSearchTimeout) {
+                clearTimeout(bookSubjectSearchTimeout);
+                bookSubjectSearchTimeout = null;
             }
 
             const term = this.value.trim();
             if (term.length >= 2 || term.length === 0) {
-                bookTypeSearchTimeout = setTimeout(() => {
-                    searchBookTypes();
-                    bookTypeSearchTimeout = null;
+                bookSubjectSearchTimeout = setTimeout(() => {
+                    searchBookSubjects();
+                    bookSubjectSearchTimeout = null;
                 }, 400);
             }
         });
     }
 
-    // بستن مودال با کلیک خارج
+    const translateStatus = document.getElementById('translateStatus');
+    if (translateStatus) {
+        translateStatus.addEventListener('change', toggleTranslatorSection);
+    }
+
+    const form = document.getElementById('bookForm');
+    if (form) {
+        form.addEventListener('submit', submitBookForm);
+    }
+
     window.onclick = function(event) {
         if (event.target.classList.contains('modal')) {
             event.target.style.display = 'none';
         }
     };
 
-    // بستن مودال با ESC
     document.addEventListener('keydown', function(event) {
         if (event.key === 'Escape') {
             document.querySelectorAll('.modal').forEach(modal => {

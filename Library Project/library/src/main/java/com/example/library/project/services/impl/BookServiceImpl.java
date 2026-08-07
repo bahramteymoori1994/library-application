@@ -28,11 +28,18 @@ public class BookServiceImpl implements BookService {
     @Transactional
     public BookResponseDto save(BookRequestDto bookRequestDto) throws Exception {
 
-        if (bookRequestDto == null) {
+        Book book = new Book();
+        BookResponseDto bookResponseDto = new BookResponseDto();
+
+        bookRequestDto
+                        .setCreatedTime(LocalTime.now())
+                        .setCreatedDate(LocalDate.now())
+                        .setCreatedBy("admin");
+
+        if (bookRequestDto == null)
+        {
             throw new Exception("Book request object is null");
         }
-
-        Book book = new Book();
 
         if (bookRequestDto.getPublisher() != null && bookRequestDto.getPublisher().getPublisherId() != null) {
             Publisher publisher = new Publisher();
@@ -64,19 +71,16 @@ public class BookServiceImpl implements BookService {
             book.setLibraries(libraries);
         }
 
-        book.setCreatedDate(LocalDate.now());
-        book.setCreatedTime(LocalTime.now());
-        book.setCreatedBy("admin");
-
         BeanUtils.copyProperties(bookRequestDto, book);
 
         Book bookSaved = bookRepository.saveAndFlush(book);
 
-        if (bookSaved == null) {
+        if (bookSaved == null)
+        {
             throw new Exception("Book saved is null");
         }
 
-        BookResponseDto bookResponseDto = new BookResponseDto();
+
         BeanUtils.copyProperties(bookSaved, bookResponseDto);
         return bookResponseDto;
     }
@@ -86,8 +90,15 @@ public class BookServiceImpl implements BookService {
     public BookResponseDto update(BookRequestDto bookRequestDto) throws Exception {
 
         Book book = new Book();
+        BookResponseDto bookResponseDto = new BookResponseDto();
 
-        if (bookRequestDto == null) {
+        bookRequestDto
+                        .setCreatedTime(LocalTime.now())
+                        .setCreatedDate(LocalDate.now())
+                        .setCreatedBy("admin");
+
+        if (bookRequestDto == null)
+        {
             throw new Exception("Book request object is null");
         }
 
@@ -131,11 +142,12 @@ public class BookServiceImpl implements BookService {
 
         Book bookUpdated = bookRepository.save(book);
 
-        if (bookUpdated == null) {
+        if (bookUpdated == null)
+        {
             throw new Exception("Book updated is null");
         }
 
-        BookResponseDto bookResponseDto = new BookResponseDto();
+
         BeanUtils.copyProperties(bookUpdated, bookResponseDto);
         return bookResponseDto;
     }
