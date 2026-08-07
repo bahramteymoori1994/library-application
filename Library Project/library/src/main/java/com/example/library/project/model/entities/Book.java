@@ -69,6 +69,10 @@ public class Book {
     private List<Library> libraries = new ArrayList<>();
 
     @ManyToOne
+    @JoinColumn(name = "PUBLISHER_ID")
+    private Publisher publisher;
+
+    @ManyToOne
     @JoinColumn(name = "BOOK_SUBJECT_ID")
     private BookSubject bookSubject;
 
@@ -84,7 +88,7 @@ public class Book {
     public Book() {
     }
 
-    public Book(Long bookId, String bookTitle, TranslateStatus translateStatus, HistoricalPeriodLevel historicalPeriodLevel, String isbn, String description, Short publishYear, Byte publishNumber, Short pageCount, List<Author> authors, List<Translator> translators, List<Library> libraries, BookSubject bookSubject, LocalDate createdDate, LocalTime createdTime, String createdBy) {
+    public Book(Long bookId, String bookTitle, TranslateStatus translateStatus, HistoricalPeriodLevel historicalPeriodLevel, String isbn, String description, Short publishYear, Byte publishNumber, Short pageCount, List<Author> authors, List<Translator> translators, List<Library> libraries, Publisher publisher, BookSubject bookSubject, LocalDate createdDate, LocalTime createdTime, String createdBy) {
         this.bookId = bookId;
         this.bookTitle = bookTitle;
         this.translateStatus = translateStatus;
@@ -97,6 +101,7 @@ public class Book {
         this.authors = authors;
         this.translators = translators;
         this.libraries = libraries;
+        this.publisher = publisher;
         this.bookSubject = bookSubject;
         this.createdDate = createdDate;
         this.createdTime = createdTime;
@@ -211,6 +216,15 @@ public class Book {
         return this;
     }
 
+    public Publisher getPublisher() {
+        return publisher;
+    }
+
+    public Book setPublisher(Publisher publisher) {
+        this.publisher = publisher;
+        return this;
+    }
+
     public BookSubject getBookSubject() {
         return bookSubject;
     }
@@ -262,6 +276,7 @@ public class Book {
                 ", authors=" + authors +
                 ", translators=" + translators +
                 ", libraries=" + libraries +
+                ", publisher=" + publisher +
                 ", bookSubject=" + bookSubject +
                 ", createdDate=" + createdDate +
                 ", createdTime=" + createdTime +

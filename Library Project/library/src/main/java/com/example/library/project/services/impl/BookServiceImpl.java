@@ -34,27 +34,12 @@ public class BookServiceImpl implements BookService {
 
         Book book = new Book();
 
-//        // کپی کردن فیلدهای ساده
-//        book.setBookTitle(bookRequestDto.getBookTitle());
-//        book.setIsbn(bookRequestDto.getIsbn());
-//        book.setPublishDate(bookRequestDto.getPublishDate());
-//        book.setBookCount(bookRequestDto.getBookCount());
-//
-//        // تنظیم Publisher از روی Object دریافتی
-//        if (bookRequestDto.getPublisher() != null && bookRequestDto.getPublisher().getPublisherId() != null) {
-//            Publisher publisher = new Publisher();
-//            publisher.setPublisherId(bookRequestDto.getPublisher().getPublisherId());
-//            book.setPublisher(publisher);
-//        }
-//
-//        // تنظیم BookType از روی Object دریافتی
-//        if (bookRequestDto.getBookType() != null && bookRequestDto.getBookType().getBookTypeId() != null) {
-//            BookType bookType = new BookType();
-//            bookType.setBookTypeId(bookRequestDto.getBookType().getBookTypeId());
-//            book.setBookType(bookType);
-//        }
+        if (bookRequestDto.getPublisher() != null && bookRequestDto.getPublisher().getPublisherId() != null) {
+            Publisher publisher = new Publisher();
+            publisher.setPublisherId(bookRequestDto.getPublisher().getPublisherId());
+            book.setPublisher(publisher);
+        }
 
-        // تنظیم Authors از روی List دریافتی
         if (bookRequestDto.getAuthors() != null && !bookRequestDto.getAuthors().isEmpty()) {
             List<Author> authors = new ArrayList<>();
             for (Author authorDto : bookRequestDto.getAuthors()) {
@@ -67,7 +52,6 @@ public class BookServiceImpl implements BookService {
             book.setAuthors(authors);
         }
 
-        // تنظیم Libraries از روی List دریافتی
         if (bookRequestDto.getLibraries() != null && !bookRequestDto.getLibraries().isEmpty()) {
             List<Library> libraries = new ArrayList<>();
             for (Library libraryDto : bookRequestDto.getLibraries()) {
@@ -80,10 +64,11 @@ public class BookServiceImpl implements BookService {
             book.setLibraries(libraries);
         }
 
-        // تنظیم تاریخ و زمان
         book.setCreatedDate(LocalDate.now());
         book.setCreatedTime(LocalTime.now());
         book.setCreatedBy("admin");
+
+        BeanUtils.copyProperties(bookRequestDto, book);
 
         Book bookSaved = bookRepository.saveAndFlush(book);
 
@@ -100,39 +85,20 @@ public class BookServiceImpl implements BookService {
     @Transactional
     public BookResponseDto update(BookRequestDto bookRequestDto) throws Exception {
 
+        Book book = new Book();
+
         if (bookRequestDto == null) {
             throw new Exception("Book request object is null");
         }
 
-        // پیدا کردن کتاب موجود
-        Book existingBook = bookRepository.findById(bookRequestDto.getBookId())
-                .orElseThrow(() -> new Exception("Book not found"));
+        if (bookRequestDto.getPublisher() != null && bookRequestDto.getPublisher().getPublisherId() != null) {
+            Publisher publisher = new Publisher();
+            publisher.setPublisherId(bookRequestDto.getPublisher().getPublisherId());
+            book.setPublisher(publisher);
+        } else {
+            book.setPublisher(null);
+        }
 
-        // به‌روزرسانی فیلدها
-//        existingBook.setBookTitle(bookRequestDto.getBookTitle());
-//        existingBook.setIsbn(bookRequestDto.getIsbn());
-//        existingBook.setPublishDate(bookRequestDto.getPublishDate());
-//        existingBook.setBookCount(bookRequestDto.getBookCount());
-//
-//        // به‌روزرسانی Publisher
-//        if (bookRequestDto.getPublisher() != null && bookRequestDto.getPublisher().getPublisherId() != null) {
-//            Publisher publisher = new Publisher();
-//            publisher.setPublisherId(bookRequestDto.getPublisher().getPublisherId());
-//            existingBook.setPublisher(publisher);
-//        } else {
-//            existingBook.setPublisher(null);
-//        }
-//
-//        // به‌روزرسانی BookType
-//        if (bookRequestDto.getBookType() != null && bookRequestDto.getBookType().getBookTypeId() != null) {
-//            BookType bookType = new BookType();
-//            bookType.setBookTypeId(bookRequestDto.getBookType().getBookTypeId());
-//            existingBook.setBookType(bookType);
-//        } else {
-//            existingBook.setBookType(null);
-//        }
-
-        // به‌روزرسانی Authors
         if (bookRequestDto.getAuthors() != null && !bookRequestDto.getAuthors().isEmpty()) {
             List<Author> authors = new ArrayList<>();
             for (Author authorDto : bookRequestDto.getAuthors()) {
@@ -142,12 +108,11 @@ public class BookServiceImpl implements BookService {
                     authors.add(author);
                 }
             }
-            existingBook.setAuthors(authors);
+            book.setAuthors(authors);
         } else {
-            existingBook.setAuthors(new ArrayList<>());
+            book.setAuthors(new ArrayList<>());
         }
 
-        // به‌روزرسانی Libraries
         if (bookRequestDto.getLibraries() != null && !bookRequestDto.getLibraries().isEmpty()) {
             List<Library> libraries = new ArrayList<>();
             for (Library libraryDto : bookRequestDto.getLibraries()) {
@@ -157,12 +122,14 @@ public class BookServiceImpl implements BookService {
                     libraries.add(library);
                 }
             }
-            existingBook.setLibraries(libraries);
+            book.setLibraries(libraries);
         } else {
-            existingBook.setLibraries(new ArrayList<>());
+            book.setLibraries(new ArrayList<>());
         }
 
-        Book bookUpdated = bookRepository.save(existingBook);
+        BeanUtils.copyProperties(bookRequestDto, book);
+
+        Book bookUpdated = bookRepository.save(book);
 
         if (bookUpdated == null) {
             throw new Exception("Book updated is null");

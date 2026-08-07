@@ -22,6 +22,7 @@ public class BookRequestDto {
     private Short publishYear;
     private Byte PublishNumber;
     private Short pageCount;
+    private Publisher publisher;
     private List<Author> authors = new ArrayList<>();
     private List<Translator> translators = new ArrayList<>();
     private List<Library> libraries = new ArrayList<>();
@@ -33,7 +34,7 @@ public class BookRequestDto {
     public BookRequestDto() {
     }
 
-    public BookRequestDto(Long bookId, String bookTitle, TranslateStatus translateStatus, HistoricalPeriodLevel historicalPeriodLevel, String isbn, String description, Short publishYear, Byte publishNumber, Short pageCount, List<Author> authors, List<Translator> translators, List<Library> libraries, BookSubject bookSubject, LocalDate createdDate, LocalTime createdTime, String createdBy) {
+    public BookRequestDto(Long bookId, String bookTitle, TranslateStatus translateStatus, HistoricalPeriodLevel historicalPeriodLevel, String isbn, String description, Short publishYear, Byte publishNumber, Short pageCount, Publisher publisher, List<Author> authors, List<Translator> translators, List<Library> libraries, BookSubject bookSubject, LocalDate createdDate, LocalTime createdTime, String createdBy) {
         this.bookId = bookId;
         this.bookTitle = bookTitle;
         this.translateStatus = translateStatus;
@@ -43,6 +44,7 @@ public class BookRequestDto {
         this.publishYear = publishYear;
         PublishNumber = publishNumber;
         this.pageCount = pageCount;
+        this.publisher = publisher;
         this.authors = authors;
         this.translators = translators;
         this.libraries = libraries;
@@ -130,6 +132,15 @@ public class BookRequestDto {
 
     public BookRequestDto setPageCount(Short pageCount) {
         this.pageCount = pageCount;
+        return this;
+    }
+
+    public Publisher getPublisher() {
+        return publisher;
+    }
+
+    public BookRequestDto setPublisher(Publisher publisher) {
+        this.publisher = publisher;
         return this;
     }
 
