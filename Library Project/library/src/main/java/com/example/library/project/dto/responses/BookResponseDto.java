@@ -1,9 +1,9 @@
 package com.example.library.project.dto.responses;
 
-import com.example.library.project.model.entities.Author;
-import com.example.library.project.model.entities.BookType;
-import com.example.library.project.model.entities.Library;
-import com.example.library.project.model.entities.Publisher;
+import com.example.library.project.model.entities.*;
+import com.example.library.project.model.enums.HistoricalPeriodLevel;
+import com.example.library.project.model.enums.TranslateStatus;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -13,13 +13,17 @@ public class BookResponseDto {
 
     private Long bookId;
     private String bookTitle;
+    private TranslateStatus translateStatus;
+    private HistoricalPeriodLevel historicalPeriodLevel;
     private String isbn;
-    private LocalDate publishDate;
-    private Integer bookCount;
+    private String description;
+    private Short publishYear;
+    private Byte PublishNumber;
+    private Short pageCount;
     private List<Author> authors = new ArrayList<>();
+    private List<Translator> translators = new ArrayList<>();
     private List<Library> libraries = new ArrayList<>();
-    private BookType bookType;
-    private Publisher publisher;
+    private BookSubject bookSubject;
     private LocalDate createdDate;
     private LocalTime createdTime;
     private String createdBy;
@@ -27,16 +31,20 @@ public class BookResponseDto {
     public BookResponseDto() {
     }
 
-    public BookResponseDto(Long bookId, String bookTitle, String isbn, LocalDate publishDate, Integer bookCount, List<Author> authors, List<Library> libraries, BookType bookType, Publisher publisher, LocalDate createdDate, LocalTime createdTime, String createdBy) {
+    public BookResponseDto(Long bookId, String bookTitle, TranslateStatus translateStatus, HistoricalPeriodLevel historicalPeriodLevel, String isbn, String description, Short publishYear, Byte publishNumber, Short pageCount, List<Author> authors, List<Translator> translators, List<Library> libraries, BookSubject bookSubject, LocalDate createdDate, LocalTime createdTime, String createdBy) {
         this.bookId = bookId;
         this.bookTitle = bookTitle;
+        this.translateStatus = translateStatus;
+        this.historicalPeriodLevel = historicalPeriodLevel;
         this.isbn = isbn;
-        this.publishDate = publishDate;
-        this.bookCount = bookCount;
+        this.description = description;
+        this.publishYear = publishYear;
+        PublishNumber = publishNumber;
+        this.pageCount = pageCount;
         this.authors = authors;
+        this.translators = translators;
         this.libraries = libraries;
-        this.bookType = bookType;
-        this.publisher = publisher;
+        this.bookSubject = bookSubject;
         this.createdDate = createdDate;
         this.createdTime = createdTime;
         this.createdBy = createdBy;
@@ -60,6 +68,24 @@ public class BookResponseDto {
         return this;
     }
 
+    public TranslateStatus getTranslateStatus() {
+        return translateStatus;
+    }
+
+    public BookResponseDto setTranslateStatus(TranslateStatus translateStatus) {
+        this.translateStatus = translateStatus;
+        return this;
+    }
+
+    public HistoricalPeriodLevel getHistoricalPeriodLevel() {
+        return historicalPeriodLevel;
+    }
+
+    public BookResponseDto setHistoricalPeriodLevel(HistoricalPeriodLevel historicalPeriodLevel) {
+        this.historicalPeriodLevel = historicalPeriodLevel;
+        return this;
+    }
+
     public String getIsbn() {
         return isbn;
     }
@@ -69,21 +95,39 @@ public class BookResponseDto {
         return this;
     }
 
-    public LocalDate getPublishDate() {
-        return publishDate;
+    public String getDescription() {
+        return description;
     }
 
-    public BookResponseDto setPublishDate(LocalDate publishDate) {
-        this.publishDate = publishDate;
+    public BookResponseDto setDescription(String description) {
+        this.description = description;
         return this;
     }
 
-    public Integer getBookCount() {
-        return bookCount;
+    public Short getPublishYear() {
+        return publishYear;
     }
 
-    public BookResponseDto setBookCount(Integer bookCount) {
-        this.bookCount = bookCount;
+    public BookResponseDto setPublishYear(Short publishYear) {
+        this.publishYear = publishYear;
+        return this;
+    }
+
+    public Byte getPublishNumber() {
+        return PublishNumber;
+    }
+
+    public BookResponseDto setPublishNumber(Byte publishNumber) {
+        PublishNumber = publishNumber;
+        return this;
+    }
+
+    public Short getPageCount() {
+        return pageCount;
+    }
+
+    public BookResponseDto setPageCount(Short pageCount) {
+        this.pageCount = pageCount;
         return this;
     }
 
@@ -96,6 +140,15 @@ public class BookResponseDto {
         return this;
     }
 
+    public List<Translator> getTranslators() {
+        return translators;
+    }
+
+    public BookResponseDto setTranslators(List<Translator> translators) {
+        this.translators = translators;
+        return this;
+    }
+
     public List<Library> getLibraries() {
         return libraries;
     }
@@ -105,21 +158,12 @@ public class BookResponseDto {
         return this;
     }
 
-    public BookType getBookType() {
-        return bookType;
+    public BookSubject getBookSubject() {
+        return bookSubject;
     }
 
-    public BookResponseDto setBookType(BookType bookType) {
-        this.bookType = bookType;
-        return this;
-    }
-
-    public Publisher getPublisher() {
-        return publisher;
-    }
-
-    public BookResponseDto setPublisher(Publisher publisher) {
-        this.publisher = publisher;
+    public BookResponseDto setBookSubject(BookSubject bookSubject) {
+        this.bookSubject = bookSubject;
         return this;
     }
 

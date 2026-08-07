@@ -1,11 +1,14 @@
 package com.example.library.project.model.entities;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Entity
 @Table(name = "author")
+@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public class Author {
 
     @Id
@@ -13,9 +16,13 @@ public class Author {
     @Column(name = "AUTHOR_ID")
     private Long authorId;
 
-    @OneToOne
-    @JoinColumn(name = "PERSON_ID")
-    private Person person;
+    @Column(name = "FIRST_NAME", columnDefinition = "nvarchar(50)", nullable = false)
+    @NotNull(message = "Author first name is required")
+    private String firstName;
+
+    @Column(name = "LAST_NAME", columnDefinition = "nvarchar(50)", nullable = false)
+    @NotNull(message = "Author last name is required")
+    private String lastName;
 
     @OneToOne
     @JoinColumn(name = "AUTHOR_TYPE_ID")
@@ -33,9 +40,10 @@ public class Author {
     public Author() {
     }
 
-    public Author(Long authorId, Person person, AuthorType authorType, LocalDate createdDate, LocalTime createdTime, String createdBy) {
+    public Author(Long authorId, String firstName, String lastName, AuthorType authorType, LocalDate createdDate, LocalTime createdTime, String createdBy) {
         this.authorId = authorId;
-        this.person = person;
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.authorType = authorType;
         this.createdDate = createdDate;
         this.createdTime = createdTime;
@@ -51,12 +59,21 @@ public class Author {
         return this;
     }
 
-    public Person getPerson() {
-        return person;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public Author setPerson(Person person) {
-        this.person = person;
+    public Author setFirstName(String firstName) {
+        this.firstName = firstName;
+        return this;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public Author setLastName(String lastName) {
+        this.lastName = lastName;
         return this;
     }
 
@@ -100,7 +117,8 @@ public class Author {
     public String toString() {
         return "Author{" +
                 "authorId=" + authorId +
-                ", person=" + person +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
                 ", authorType=" + authorType +
                 ", createdDate=" + createdDate +
                 ", createdTime=" + createdTime +

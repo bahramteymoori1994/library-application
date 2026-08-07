@@ -1,5 +1,7 @@
 package com.example.library.project.model.entities;
 
+import com.example.library.project.model.enums.HistoricalPeriodLevel;
+import com.example.library.project.model.enums.TranslateStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
@@ -16,67 +18,86 @@ public class Book {
     @Column(name = "BOOK_ID")
     private Long bookId;
 
-    @Column(name = "BOOK_TITLE", columnDefinition = "nvarchar(50)", nullable = false)
+    @Column(name = "BOOK_TITLE", columnDefinition = "nvarchar(50)", nullable = false, unique = true)
     @NotNull(message = "Book title is required")
     private String bookTitle;
 
-    @Column(name = "ISBN", columnDefinition = "nvarchar(10)", nullable = false, unique = true)
-    @NotNull(message = "ISBN is required")
+    @Column(name = "TRASNLATE_STATUS", nullable = false)
+    @Enumerated(value = EnumType.STRING)
+    private TranslateStatus translateStatus;
+
+    @Column(name = "HISTORICAL_PERIOD_LEVEL",  nullable = false)
+    @Enumerated(value = EnumType.STRING)
+    @NotNull(message = "Historical period level is required")
+    private HistoricalPeriodLevel historicalPeriodLevel;
+
+    @Column(name = "ISBN", columnDefinition = "varchar(10)", nullable = false, unique = true)
+    @NotNull(message = "Isbn is required")
     private String isbn;
 
-    @Column(name = "PUBLISH_DATE", columnDefinition = "date", nullable = false)
-    @NotNull(message = "Publish date is required")
-    private LocalDate publishDate;
+    @Column(name = "BOOK_DESCRIPTION", columnDefinition = "nvarchar(2000)")
+    private String description;
 
-    @Column(name = "BOOK_COUNT", nullable = false)
-    @NotNull(message = "Book count is required")
-    private Integer bookCount;
+    @Column(name = "PUBLISH_YEAR", nullable = false)
+    @NotNull(message = "Publish year is required")
+    private Short publishYear;
+
+    @Column(name = "PUBLISH_NUMBER", nullable = false)
+    @NotNull(message = "Publish number is required")
+    private Byte PublishNumber;
+
+    @Column(name = "PAGE_COUNT", nullable = false)
+    @NotNull(message = "Page count is required")
+    private Short pageCount;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     @JoinTable(name = "author_book", joinColumns = @JoinColumn(name = "BOOK_ID", referencedColumnName = "BOOK_ID",
-    foreignKey = @ForeignKey(name = "FK_BOOK_ID")), inverseJoinColumns = @JoinColumn(name = "AUTHOR_ID",
-    referencedColumnName = "AUTHOR_ID"), foreignKey = @ForeignKey(name = "FK_AUTHOR_ID"))
+    foreignKey = @ForeignKey(name = "FK_BOOK_AUTHOR_ID")), inverseJoinColumns = @JoinColumn(name = "AUTHOR_ID",
+    referencedColumnName = "AUTHOR_ID", foreignKey = @ForeignKey(name = "FK_AUTHOR_ID")))
     private List<Author> authors = new ArrayList<>();
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
-    @JoinTable(name = "library_book", joinColumns = @JoinColumn(name = "BOOK_ID", referencedColumnName = "BOOK_ID",
-            foreignKey = @ForeignKey(name = "FK_BOOK_ID")), inverseJoinColumns = @JoinColumn(name = "LIBRARY_ID",
-            referencedColumnName = "LIBRARY_ID"), foreignKey = @ForeignKey(name = "FK_LIBRARY_ID"))
+    @JoinTable(name = "author_book", joinColumns = @JoinColumn(name = "BOOK_ID", referencedColumnName = "BOOK_ID",
+            foreignKey = @ForeignKey(name = "FK_TRANSLATOR_BOOK_ID")), inverseJoinColumns = @JoinColumn(name = "AUTHOR_ID",
+            referencedColumnName = "AUTHOR_ID", foreignKey = @ForeignKey(name = "FK_TRANSLATOR_ID")))
+    private List<Translator> translators = new ArrayList<>();
+
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+    @JoinTable(name = "author_book", joinColumns = @JoinColumn(name = "BOOK_ID", referencedColumnName = "BOOK_ID",
+            foreignKey = @ForeignKey(name = "FK_BOOK_LIBRARY_ID")), inverseJoinColumns = @JoinColumn(name = "LIBRARY_ID",
+            referencedColumnName = "LIBRARY_ID", foreignKey = @ForeignKey(name = "FK_LIBRARY_ID")))
     private List<Library> libraries = new ArrayList<>();
 
-    @OneToOne
-    @JoinColumn(name = "BOOK_TYPE_ID")
-    private BookType bookType;
-
     @ManyToOne
-    @JoinColumn(name = "PUBLISHER_ID")
-    private Publisher publisher;
+    @JoinColumn(name = "BOOK_SUBJECT_ID")
+    private BookSubject bookSubject;
 
-    @Column(name = "CREATED_DATE", nullable = false, columnDefinition = "date")
-    @NotNull(message = "Created Date is required")
+    @Column(name = "CREATED_DATE", columnDefinition = "date", nullable = false)
     private LocalDate createdDate;
 
-    @Column(name = "CREATED_TIME", nullable = false, columnDefinition = "time")
-    @NotNull(message = "Created Time is required")
+    @Column(name = "CREATED_TIME", columnDefinition = "time", nullable = false)
     private LocalTime createdTime;
 
     @Column(name = "CREATED_BY", nullable = false, columnDefinition = "varchar(50)")
-    @NotNull(message = "Created By is required")
     private String createdBy;
 
     public Book() {
     }
 
-    public Book(Long bookId, String bookTitle, String isbn, LocalDate publishDate, Integer bookCount, List<Author> authors, List<Library> libraries, BookType bookType, Publisher publisher, LocalDate createdDate, LocalTime createdTime, String createdBy) {
+    public Book(Long bookId, String bookTitle, TranslateStatus translateStatus, HistoricalPeriodLevel historicalPeriodLevel, String isbn, String description, Short publishYear, Byte publishNumber, Short pageCount, List<Author> authors, List<Translator> translators, List<Library> libraries, BookSubject bookSubject, LocalDate createdDate, LocalTime createdTime, String createdBy) {
         this.bookId = bookId;
         this.bookTitle = bookTitle;
+        this.translateStatus = translateStatus;
+        this.historicalPeriodLevel = historicalPeriodLevel;
         this.isbn = isbn;
-        this.publishDate = publishDate;
-        this.bookCount = bookCount;
+        this.description = description;
+        this.publishYear = publishYear;
+        PublishNumber = publishNumber;
+        this.pageCount = pageCount;
         this.authors = authors;
+        this.translators = translators;
         this.libraries = libraries;
-        this.bookType = bookType;
-        this.publisher = publisher;
+        this.bookSubject = bookSubject;
         this.createdDate = createdDate;
         this.createdTime = createdTime;
         this.createdBy = createdBy;
@@ -100,6 +121,24 @@ public class Book {
         return this;
     }
 
+    public TranslateStatus getTranslateStatus() {
+        return translateStatus;
+    }
+
+    public Book setTranslateStatus(TranslateStatus translateStatus) {
+        this.translateStatus = translateStatus;
+        return this;
+    }
+
+    public HistoricalPeriodLevel getHistoricalPeriodLevel() {
+        return historicalPeriodLevel;
+    }
+
+    public Book setHistoricalPeriodLevel(HistoricalPeriodLevel historicalPeriodLevel) {
+        this.historicalPeriodLevel = historicalPeriodLevel;
+        return this;
+    }
+
     public String getIsbn() {
         return isbn;
     }
@@ -109,21 +148,39 @@ public class Book {
         return this;
     }
 
-    public LocalDate getPublishDate() {
-        return publishDate;
+    public String getDescription() {
+        return description;
     }
 
-    public Book setPublishDate(LocalDate publishDate) {
-        this.publishDate = publishDate;
+    public Book setDescription(String description) {
+        this.description = description;
         return this;
     }
 
-    public Integer getBookCount() {
-        return bookCount;
+    public Short getPublishYear() {
+        return publishYear;
     }
 
-    public Book setBookCount(Integer bookCount) {
-        this.bookCount = bookCount;
+    public Book setPublishYear(Short publishYear) {
+        this.publishYear = publishYear;
+        return this;
+    }
+
+    public Byte getPublishNumber() {
+        return PublishNumber;
+    }
+
+    public Book setPublishNumber(Byte publishNumber) {
+        PublishNumber = publishNumber;
+        return this;
+    }
+
+    public Short getPageCount() {
+        return pageCount;
+    }
+
+    public Book setPageCount(Short pageCount) {
+        this.pageCount = pageCount;
         return this;
     }
 
@@ -136,6 +193,15 @@ public class Book {
         return this;
     }
 
+    public List<Translator> getTranslators() {
+        return translators;
+    }
+
+    public Book setTranslators(List<Translator> translators) {
+        this.translators = translators;
+        return this;
+    }
+
     public List<Library> getLibraries() {
         return libraries;
     }
@@ -145,21 +211,12 @@ public class Book {
         return this;
     }
 
-    public BookType getBookType() {
-        return bookType;
+    public BookSubject getBookSubject() {
+        return bookSubject;
     }
 
-    public Book setBookType(BookType bookType) {
-        this.bookType = bookType;
-        return this;
-    }
-
-    public Publisher getPublisher() {
-        return publisher;
-    }
-
-    public Book setPublisher(Publisher publisher) {
-        this.publisher = publisher;
+    public Book setBookSubject(BookSubject bookSubject) {
+        this.bookSubject = bookSubject;
         return this;
     }
 
@@ -195,13 +252,17 @@ public class Book {
         return "Book{" +
                 "bookId=" + bookId +
                 ", bookTitle='" + bookTitle + '\'' +
+                ", translateStatus=" + translateStatus +
+                ", historicalPeriodLevel=" + historicalPeriodLevel +
                 ", isbn='" + isbn + '\'' +
-                ", publishDate=" + publishDate +
-                ", bookCount=" + bookCount +
+                ", description='" + description + '\'' +
+                ", publishYear=" + publishYear +
+                ", PublishNumber=" + PublishNumber +
+                ", pageCount=" + pageCount +
                 ", authors=" + authors +
+                ", translators=" + translators +
                 ", libraries=" + libraries +
-                ", bookType=" + bookType +
-                ", publisher=" + publisher +
+                ", bookSubject=" + bookSubject +
                 ", createdDate=" + createdDate +
                 ", createdTime=" + createdTime +
                 ", createdBy='" + createdBy + '\'' +

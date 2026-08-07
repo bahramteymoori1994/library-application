@@ -9,7 +9,8 @@ import java.time.LocalTime;
 public class AuthorResponseDto {
 
     private Long authorId;
-    private Person person;
+    private String firstName;
+    private String lastName;
     private AuthorType authorType;
     private LocalDate createdDate;
     private LocalTime createdTime;
@@ -18,9 +19,10 @@ public class AuthorResponseDto {
     public AuthorResponseDto() {
     }
 
-    public AuthorResponseDto(Long authorId, Person person, AuthorType authorType, LocalDate createdDate, LocalTime createdTime, String createdBy) {
+    public AuthorResponseDto(Long authorId, String firstName, String lastName, AuthorType authorType, LocalDate createdDate, LocalTime createdTime, String createdBy) {
         this.authorId = authorId;
-        this.person = person;
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.authorType = authorType;
         this.createdDate = createdDate;
         this.createdTime = createdTime;
@@ -36,12 +38,21 @@ public class AuthorResponseDto {
         return this;
     }
 
-    public Person getPerson() {
-        return person;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public AuthorResponseDto setPerson(Person person) {
-        this.person = person;
+    public AuthorResponseDto setFirstName(String firstName) {
+        this.firstName = firstName;
+        return this;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public AuthorResponseDto setLastName(String lastName) {
+        this.lastName = lastName;
         return this;
     }
 

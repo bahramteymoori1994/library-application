@@ -2,13 +2,17 @@ package com.example.library.project.dto.requests;
 
 import com.example.library.project.model.entities.AuthorType;
 import com.example.library.project.model.entities.Person;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 public class AuthorRequestDto {
 
     private Long authorId;
-    private Person person;
+    private String firstName;
+    private String lastName;
     private AuthorType authorType;
     private LocalDate createdDate;
     private LocalTime createdTime;
@@ -17,9 +21,10 @@ public class AuthorRequestDto {
     public AuthorRequestDto() {
     }
 
-    public AuthorRequestDto(Long authorId, Person person, AuthorType authorType, LocalDate createdDate, LocalTime createdTime, String createdBy) {
+    public AuthorRequestDto(Long authorId, String firstName, String lastName, AuthorType authorType, LocalDate createdDate, LocalTime createdTime, String createdBy) {
         this.authorId = authorId;
-        this.person = person;
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.authorType = authorType;
         this.createdDate = createdDate;
         this.createdTime = createdTime;
@@ -35,12 +40,21 @@ public class AuthorRequestDto {
         return this;
     }
 
-    public Person getPerson() {
-        return person;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public AuthorRequestDto setPerson(Person person) {
-        this.person = person;
+    public AuthorRequestDto setFirstName(String firstName) {
+        this.firstName = firstName;
+        return this;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public AuthorRequestDto setLastName(String lastName) {
+        this.lastName = lastName;
         return this;
     }
 

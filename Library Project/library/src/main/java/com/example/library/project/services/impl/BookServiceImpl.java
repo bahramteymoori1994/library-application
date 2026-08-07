@@ -34,25 +34,25 @@ public class BookServiceImpl implements BookService {
 
         Book book = new Book();
 
-        // کپی کردن فیلدهای ساده
-        book.setBookTitle(bookRequestDto.getBookTitle());
-        book.setIsbn(bookRequestDto.getIsbn());
-        book.setPublishDate(bookRequestDto.getPublishDate());
-        book.setBookCount(bookRequestDto.getBookCount());
-
-        // تنظیم Publisher از روی Object دریافتی
-        if (bookRequestDto.getPublisher() != null && bookRequestDto.getPublisher().getPublisherId() != null) {
-            Publisher publisher = new Publisher();
-            publisher.setPublisherId(bookRequestDto.getPublisher().getPublisherId());
-            book.setPublisher(publisher);
-        }
-
-        // تنظیم BookType از روی Object دریافتی
-        if (bookRequestDto.getBookType() != null && bookRequestDto.getBookType().getBookTypeId() != null) {
-            BookType bookType = new BookType();
-            bookType.setBookTypeId(bookRequestDto.getBookType().getBookTypeId());
-            book.setBookType(bookType);
-        }
+//        // کپی کردن فیلدهای ساده
+//        book.setBookTitle(bookRequestDto.getBookTitle());
+//        book.setIsbn(bookRequestDto.getIsbn());
+//        book.setPublishDate(bookRequestDto.getPublishDate());
+//        book.setBookCount(bookRequestDto.getBookCount());
+//
+//        // تنظیم Publisher از روی Object دریافتی
+//        if (bookRequestDto.getPublisher() != null && bookRequestDto.getPublisher().getPublisherId() != null) {
+//            Publisher publisher = new Publisher();
+//            publisher.setPublisherId(bookRequestDto.getPublisher().getPublisherId());
+//            book.setPublisher(publisher);
+//        }
+//
+//        // تنظیم BookType از روی Object دریافتی
+//        if (bookRequestDto.getBookType() != null && bookRequestDto.getBookType().getBookTypeId() != null) {
+//            BookType bookType = new BookType();
+//            bookType.setBookTypeId(bookRequestDto.getBookType().getBookTypeId());
+//            book.setBookType(bookType);
+//        }
 
         // تنظیم Authors از روی List دریافتی
         if (bookRequestDto.getAuthors() != null && !bookRequestDto.getAuthors().isEmpty()) {
@@ -109,28 +109,28 @@ public class BookServiceImpl implements BookService {
                 .orElseThrow(() -> new Exception("Book not found"));
 
         // به‌روزرسانی فیلدها
-        existingBook.setBookTitle(bookRequestDto.getBookTitle());
-        existingBook.setIsbn(bookRequestDto.getIsbn());
-        existingBook.setPublishDate(bookRequestDto.getPublishDate());
-        existingBook.setBookCount(bookRequestDto.getBookCount());
-
-        // به‌روزرسانی Publisher
-        if (bookRequestDto.getPublisher() != null && bookRequestDto.getPublisher().getPublisherId() != null) {
-            Publisher publisher = new Publisher();
-            publisher.setPublisherId(bookRequestDto.getPublisher().getPublisherId());
-            existingBook.setPublisher(publisher);
-        } else {
-            existingBook.setPublisher(null);
-        }
-
-        // به‌روزرسانی BookType
-        if (bookRequestDto.getBookType() != null && bookRequestDto.getBookType().getBookTypeId() != null) {
-            BookType bookType = new BookType();
-            bookType.setBookTypeId(bookRequestDto.getBookType().getBookTypeId());
-            existingBook.setBookType(bookType);
-        } else {
-            existingBook.setBookType(null);
-        }
+//        existingBook.setBookTitle(bookRequestDto.getBookTitle());
+//        existingBook.setIsbn(bookRequestDto.getIsbn());
+//        existingBook.setPublishDate(bookRequestDto.getPublishDate());
+//        existingBook.setBookCount(bookRequestDto.getBookCount());
+//
+//        // به‌روزرسانی Publisher
+//        if (bookRequestDto.getPublisher() != null && bookRequestDto.getPublisher().getPublisherId() != null) {
+//            Publisher publisher = new Publisher();
+//            publisher.setPublisherId(bookRequestDto.getPublisher().getPublisherId());
+//            existingBook.setPublisher(publisher);
+//        } else {
+//            existingBook.setPublisher(null);
+//        }
+//
+//        // به‌روزرسانی BookType
+//        if (bookRequestDto.getBookType() != null && bookRequestDto.getBookType().getBookTypeId() != null) {
+//            BookType bookType = new BookType();
+//            bookType.setBookTypeId(bookRequestDto.getBookType().getBookTypeId());
+//            existingBook.setBookType(bookType);
+//        } else {
+//            existingBook.setBookType(null);
+//        }
 
         // به‌روزرسانی Authors
         if (bookRequestDto.getAuthors() != null && !bookRequestDto.getAuthors().isEmpty()) {
