@@ -24,50 +24,6 @@
 
     <hr>
 
-    <!-- Search Panel (اختیاری) -->
-    <div class="search-panel">
-        <h3>🔍 جستجوی انواع نویسنده</h3>
-        <form id="searchForm" onsubmit="searchAuthorTypes(event)">
-            <div class="search-grid">
-                <div class="search-group">
-                    <label for="searchExpertise">تخصص نویسنده:</label>
-                    <select id="searchExpertise" name="expertise">
-                        <option value="">همه</option>
-                        <option value="HUMANITIES">علوم انسانی</option>
-                        <option value="ENGINEERING">مهندسی</option>
-                        <option value="ARTS">هنر</option>
-                        <option value="LITERATURE">ادبیات</option>
-                    </select>
-                </div>
-
-                <div class="search-group">
-                    <label for="searchRole">نقش نویسنده:</label>
-                    <select id="searchRole" name="role">
-                        <option value="">همه</option>
-                        <option value="AUTHOR">نویسنده</option>
-                        <option value="CO_AUTHOR">نویسنده همکار</option>
-                        <option value="TRANSLATOR">مترجم</option>
-                        <option value="EDITOR">ویراستار</option>
-                        <option value="FOREWORD_WRITER">نویسنده مقدمه</option>
-                        <option value="COMPILER">گردآورنده</option>
-                        <option value="ILLUSTRATOR">تصویرگر</option>
-                        <option value="PROOF_READER">ویرایشگر فنی</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="search-buttons">
-                <button type="submit" class="btn btn-primary">🔍 جستجو</button>
-                <button type="reset" class="btn btn-secondary" onclick="resetSearch()">🔄 پاک کردن</button>
-            </div>
-        </form>
-    </div>
-
-    <!-- Result Count -->
-    <div th:if="${authorTypes != null}" class="result-count">
-        تعداد نتایج: <strong th:text="${#lists.size(authorTypes)}"></strong>
-    </div>
-
     <h2>لیست انواع نویسنده ثبت شده</h2>
 
     <!-- Table -->
@@ -134,12 +90,13 @@
         <span class="close" onclick="closeModal()">×</span>
         <h2 class="modal-title" id="modalTitle">ثبت نوع نویسنده جدید</h2>
 
-        <form id="authorTypeForm" th:action="@{/authorType/saveAuthorType}" method="post" th:object="${authorTypeDto}">
-            <input type="hidden" id="authorTypeId" th:field="*{authorTypeId}" />
+        <form id="authorTypeForm" method="post" th:object="${authorTypeDto}">
+            <input type="hidden" id="authorTypeId" name="authorTypeId" />
+            <input type="hidden" id="formAction" name="formAction" value="save" />
 
             <div class="form-group">
                 <label for="authorExpertise">تخصص نویسنده <span class="required">*</span></label>
-                <select id="authorExpertise" th:field="*{authorExpertise}" required>
+                <select id="authorExpertise" name="authorExpertise" required>
                     <option value="">انتخاب کنید</option>
                     <option value="HUMANITIES">علوم انسانی</option>
                     <option value="ENGINEERING">مهندسی</option>
@@ -150,7 +107,7 @@
 
             <div class="form-group">
                 <label for="authorTypeRole">نقش نویسنده <span class="required">*</span></label>
-                <select id="authorTypeRole" th:field="*{authorTypeRole}" required>
+                <select id="authorTypeRole" name="authorTypeRole" required>
                     <option value="">انتخاب کنید</option>
                     <option value="AUTHOR">نویسنده</option>
                     <option value="CO_AUTHOR">نویسنده همکار</option>
@@ -165,7 +122,7 @@
 
             <div class="form-group">
                 <label for="authorWritingStyle">سبک نوشتاری:</label>
-                <select id="authorWritingStyle" th:field="*{authorWritingStyle}">
+                <select id="authorWritingStyle" name="authorWritingStyle">
                     <option value="">انتخاب کنید</option>
                     <option value="FICTION_WRITER">داستان‌نویس</option>
                     <option value="NON_FICTION_WRITER">غیر داستانی</option>
@@ -179,9 +136,9 @@
             </div>
 
             <!-- تخصص هنری (فقط برای ARTS) -->
-            <div id="artGroup" class="form-group conditional">
+            <div id="artGroup" class="form-group conditional" style="display:none;">
                 <label for="artExpertise">تخصص هنری:</label>
-                <select id="artExpertise" th:field="*{artExpertise}">
+                <select id="artExpertise" name="artExpertise">
                     <option value="">انتخاب کنید</option>
                     <option value="PAINTER">نقاش</option>
                     <option value="MUSICIAN">موسیقیدان</option>
@@ -191,9 +148,9 @@
             </div>
 
             <!-- تخصص مهندسی (فقط برای ENGINEERING) -->
-            <div id="engineeringGroup" class="form-group conditional">
+            <div id="engineeringGroup" class="form-group conditional" style="display:none;">
                 <label for="engineeringExpertise">تخصص مهندسی:</label>
-                <select id="engineeringExpertise" th:field="*{engineeringExpertise}">
+                <select id="engineeringExpertise" name="engineeringExpertise">
                     <option value="">انتخاب کنید</option>
                     <option value="SCIENTIST">دانشمند</option>
                     <option value="MATHEMATICIAN">ریاضیدان</option>
@@ -204,9 +161,9 @@
             </div>
 
             <!-- تخصص علوم انسانی (فقط برای HUMANITIES) -->
-            <div id="humanitiesGroup" class="form-group conditional">
+            <div id="humanitiesGroup" class="form-group conditional" style="display:none;">
                 <label for="humanitiesExpertise">تخصص علوم انسانی:</label>
-                <select id="humanitiesExpertise" th:field="*{humanitiesExpertise}">
+                <select id="humanitiesExpertise" name="humanitiesExpertise">
                     <option value="">انتخاب کنید</option>
                     <option value="HISTORIAN">مورخ</option>
                     <option value="PHILOSOPHER">فیلسوف</option>
@@ -218,9 +175,9 @@
             </div>
 
             <!-- دوره تاریخی -->
-            <div id="historicalGroup" class="form-group conditional">
+            <div id="historicalGroup" class="form-group conditional" style="display:none;">
                 <label for="historicalPeriodLevel">دوره تاریخی:</label>
-                <select id="historicalPeriodLevel" th:field="*{historicalPeriodLevel}">
+                <select id="historicalPeriodLevel" name="historicalPeriodLevel">
                     <option value="">انتخاب کنید</option>
                     <option value="ANCIENT">باستان</option>
                     <option value="MEDIEVAL">قرون وسطی</option>

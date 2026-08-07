@@ -22,18 +22,16 @@ public class AuthorTypeController {
     }
 
     @GetMapping
-    public String getAllAuthorTypes(Model model){
-
+    public String getAllAuthorTypes(Model model) {
         List<AuthorTypeResponseDto> authorTypes = findAllAuthorTypes();
-
         model.addAttribute("authorTypes", authorTypes);
         model.addAttribute("authorTypeDto", new AuthorTypeRequestDto());
-
         return "authorType";
     }
 
     @PostMapping("/saveAuthorType")
-    public String saveAuthorType(@ModelAttribute("authorTypeDto") AuthorTypeRequestDto authorTypeRequestDto, RedirectAttributes redirectAttributes) {
+    public String saveAuthorType(@ModelAttribute("authorTypeDto") AuthorTypeRequestDto authorTypeRequestDto,
+                                 RedirectAttributes redirectAttributes) {
         try {
             authorTypeService.save(authorTypeRequestDto);
             redirectAttributes.addFlashAttribute("message", "نوع نویسنده با موفقیت ثبت شد.");
@@ -43,24 +41,29 @@ public class AuthorTypeController {
         return "redirect:/authorType";
     }
 
-
-    @PutMapping("/updateAuthorType")
-    @ResponseStatus(value = HttpStatus.OK)
-    public AuthorTypeResponseDto update(@RequestBody AuthorTypeRequestDto authorTypeRequestDto) throws Exception {
-        return authorTypeService.update(authorTypeRequestDto);
+    @PostMapping("/updateAuthorType")
+    public String updateAuthorType(@ModelAttribute("authorTypeDto") AuthorTypeRequestDto authorTypeRequestDto,
+                                   RedirectAttributes redirectAttributes) {
+        try {
+            authorTypeService.update(authorTypeRequestDto);
+            redirectAttributes.addFlashAttribute("message", "نوع نویسنده با موفقیت به‌روزرسانی شد.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("message", "خطا در به‌روزرسانی: " + e.getMessage());
+        }
+        return "redirect:/authorType";
     }
 
     @GetMapping("/findAuthorTypeById/{id}")
+    @ResponseBody
     @ResponseStatus(value = HttpStatus.OK)
     public AuthorTypeResponseDto findAuthorTypeById(@PathVariable Long id) throws Exception {
         return authorTypeService.findById(id);
     }
 
-
     @GetMapping("/findAllAuthorTypes")
     @ResponseBody
     @ResponseStatus(value = HttpStatus.OK)
-    public List<AuthorTypeResponseDto> findAllAuthorTypes(){
+    public List<AuthorTypeResponseDto> findAllAuthorTypes() {
         return authorTypeService.findAll();
     }
 }

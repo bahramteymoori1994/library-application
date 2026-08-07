@@ -5,7 +5,6 @@
 // ============================
 
 let isEditMode = false;
-let searchTimeout = null;
 
 // ============================
 // توابع مدیریت فیلدهای شرطی
@@ -19,41 +18,22 @@ function toggleConditionalFields() {
     const humanitiesGroup = document.getElementById('humanitiesGroup');
     const historicalGroup = document.getElementById('historicalGroup');
 
-    // نمایش فیلدها بر اساس تخصص
-    if (artGroup) {
-        artGroup.style.display = (expertise === 'ARTS') ? 'block' : 'none';
-        if (expertise === 'ARTS') artGroup.classList.add('visible');
-        else artGroup.classList.remove('visible');
+    // مخفی کردن همه گروه‌ها
+    if (artGroup) artGroup.style.display = 'none';
+    if (engineeringGroup) engineeringGroup.style.display = 'none';
+    if (humanitiesGroup) humanitiesGroup.style.display = 'none';
+    if (historicalGroup) historicalGroup.style.display = 'none';
+
+
+    if (expertise === 'ARTS' && artGroup) {
+        artGroup.style.display = 'block';
+    } else if (expertise === 'ENGINEERING' && engineeringGroup) {
+        engineeringGroup.style.display = 'block';
+    } else if (expertise === 'HUMANITIES' && humanitiesGroup) {
+        humanitiesGroup.style.display = 'block';
+    } else if (expertise === 'LITERATURE' && historicalGroup) {
+        historicalGroup.style.display = 'block';
     }
-
-    if (engineeringGroup) {
-        engineeringGroup.style.display = (expertise === 'ENGINEERING') ? 'block' : 'none';
-        if (expertise === 'ENGINEERING') engineeringGroup.classList.add('visible');
-        else engineeringGroup.classList.remove('visible');
-    }
-
-    if (humanitiesGroup) {
-        humanitiesGroup.style.display = (expertise === 'HUMANITIES') ? 'block' : 'none';
-        if (expertise === 'HUMANITIES') humanitiesGroup.classList.add('visible');
-        else humanitiesGroup.classList.remove('visible');
-    }
-
-    if (historicalGroup) {
-        historicalGroup.style.display = (expertise === 'LITERATURE') ? 'block' : 'none';
-        if (expertise === 'LITERATURE') historicalGroup.classList.add('visible');
-        else historicalGroup.classList.remove('visible');
-    }
-
-    // پاک کردن مقادیر فیلدهای غیرفعال
-    const artExpertise = document.getElementById('artExpertise');
-    const engineeringExpertise = document.getElementById('engineeringExpertise');
-    const humanitiesExpertise = document.getElementById('humanitiesExpertise');
-    const historicalPeriod = document.getElementById('historicalPeriodLevel');
-
-    if (expertise !== 'ARTS' && artExpertise) artExpertise.value = '';
-    if (expertise !== 'ENGINEERING' && engineeringExpertise) engineeringExpertise.value = '';
-    if (expertise !== 'HUMANITIES' && humanitiesExpertise) humanitiesExpertise.value = '';
-    if (expertise !== 'LITERATURE' && historicalPeriod) historicalPeriod.value = '';
 }
 
 // ============================
@@ -76,13 +56,19 @@ function openCreateModal() {
     submitBtn.className = 'btn btn-success';
     form.reset();
     document.getElementById('authorTypeId').value = '';
+    document.getElementById('formAction').value = 'save';
     isEditMode = false;
 
-    // تغییر اکشن فرم برای ذخیره
+    // مخفی کردن همه گروه‌های شرطی
+    document.querySelectorAll('.conditional').forEach(el => {
+        el.style.display = 'none';
+    });
+
+    // تغییر action فرم برای ذخیره
     form.action = '/authorType/saveAuthorType';
+    form.method = 'post';
 
     modal.style.display = 'block';
-    toggleConditionalFields();
 
     setTimeout(() => {
         const expertise = document.getElementById('authorExpertise');
@@ -118,6 +104,7 @@ function openEditModal(button) {
 
     // پر کردن فرم با داده‌های ردیف
     document.getElementById('authorTypeId').value = row.dataset.id || '';
+    document.getElementById('formAction').value = 'update';
     document.getElementById('authorExpertise').value = row.dataset.authorExpertise || '';
     document.getElementById('authorTypeRole').value = row.dataset.authorRole || '';
     document.getElementById('authorWritingStyle').value = row.dataset.writingStyle || '';
@@ -128,8 +115,9 @@ function openEditModal(button) {
 
     isEditMode = true;
 
-    // تغییر اکشن فرم برای آپدیت
+    // تغییر action فرم برای آپدیت
     form.action = '/authorType/updateAuthorType';
+    form.method = 'post';
 
     modal.style.display = 'block';
 
@@ -203,7 +191,7 @@ function validateAuthorTypeForm() {
 }
 
 // ============================
-// ارسال فرم با AJAX
+// ارسال فرم
 // ============================
 
 function submitAuthorTypeForm(event) {
@@ -215,139 +203,8 @@ function submitAuthorTypeForm(event) {
         return false;
     }
 
-    const form = document.getElementById('authorTypeForm');
-    const formData = new FormData(form);
-    const data = {};
-
-    formData.forEach((value, key) => {
-        data[key] = value;
-    });
-
-    const id = document.getElementById('authorTypeId').value;
-    const url = id ? '/authorType/updateAuthorType' : '/authorType/saveAuthorType';
-    const method = id ? 'PUT' : 'POST';
-
-    // نمایش وضعیت بارگذاری
-    showMessage('در حال ذخیره اطلاعات...', 'info');
-
-    fetch(url, {
-        method: method,
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data)
-    })
-        .then(r => {
-            if (!r.ok) throw new Error('خطا در ذخیره اطلاعات');
-            return r.json();
-        })
-        .then(data => {
-            closeModal();
-            showMessage('نوع نویسنده با موفقیت ذخیره شد', 'success');
-            setTimeout(() => {
-                location.reload();
-            }, 1500);
-        })
-        .catch(err => {
-            console.error('Error saving author type:', err);
-            showMessage('خطا در ذخیره اطلاعات: ' + err.message, 'error');
-        });
-}
-
-// ============================
-// توابع جستجو (اختیاری)
-// ============================
-
-function searchAuthorTypes(event) {
-    if (event) {
-        event.preventDefault();
-    }
-
-    const form = document.getElementById('searchForm');
-    if (!form) {
-        showMessage('فرم جستجو یافت نشد', 'error');
-        return;
-    }
-
-    const formData = new FormData(form);
-    const searchData = {};
-
-    formData.forEach((value, key) => {
-        if (value && value.trim() !== '') {
-            searchData[key] = value.trim();
-        }
-    });
-
-    // نمایش وضعیت بارگذاری
-    const tableBody = document.querySelector('table tbody');
-    if (tableBody) {
-        tableBody.innerHTML = `<tr><td colspan="12" style="text-align:center; padding:20px;">در حال جستجو...</td></tr>`;
-    }
-
-    fetch('/authorType/search', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(searchData)
-    })
-        .then(r => {
-            if (!r.ok) throw new Error('خطا در جستجو');
-            return r.json();
-        })
-        .then(data => {
-            updateTable(data);
-            updateResultCount(data.length);
-            showMessage(`${data.length} نتیجه یافت شد`, 'success');
-        })
-        .catch(err => {
-            console.error('Error searching:', err);
-            showMessage('خطا در جستجو: ' + err.message, 'error');
-        });
-}
-
-function resetSearch() {
-    const form = document.getElementById('searchForm');
-    if (form) {
-        const inputs = form.querySelectorAll('input, select');
-        inputs.forEach(input => {
-            input.value = '';
-        });
-        form.submit();
-    }
-}
-
-// ============================
-// توابع حذف
-// ============================
-
-function deleteAuthorType(id) {
-    if (!id) {
-        showMessage('شناسه معتبر نیست', 'error');
-        return;
-    }
-
-    if (!confirm('آیا از حذف این نوع نویسنده اطمینان دارید؟')) {
-        return;
-    }
-
-    fetch(`/authorType/deleteAuthorType/${id}`, {
-        method: 'DELETE'
-    })
-        .then(r => {
-            if (!r.ok) throw new Error('خطا در حذف');
-            return r.json();
-        })
-        .then(data => {
-            showMessage('نوع نویسنده با موفقیت حذف شد', 'success');
-            setTimeout(() => {
-                location.reload();
-            }, 1500);
-        })
-        .catch(err => {
-            console.error('Error deleting:', err);
-            showMessage('خطا در حذف: ' + err.message, 'error');
-        });
+    // ارسال فرم به صورت معمولی
+    document.getElementById('authorTypeForm').submit();
 }
 
 // ============================
@@ -390,65 +247,6 @@ function showMessage(message, type = 'success') {
     }, 5000);
 }
 
-function updateTable(data) {
-    const tbody = document.querySelector('table tbody');
-    if (!tbody) return;
-
-    if (!data || data.length === 0) {
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="12" class="empty-state">
-                    <span class="icon">📭</span>
-                    <div class="message">هیچ نوع نویسنده‌ای یافت نشد</div>
-                </td>
-            </tr>
-        `;
-        return;
-    }
-
-    let html = '';
-    data.forEach(item => {
-        html += `
-            <tr data-id="${item.authorTypeId || ''}"
-                data-author-expertise="${item.authorExpertise || ''}"
-                data-author-role="${item.authorTypeRole || ''}"
-                data-writing-style="${item.authorWritingStyle || ''}"
-                data-art-expertise="${item.artExpertise || ''}"
-                data-engineering-expertise="${item.engineeringExpertise || ''}"
-                data-humanities-expertise="${item.humanitiesExpertise || ''}"
-                data-historical="${item.historicalPeriodLevel || ''}">
-                <td>${item.authorTypeId || ''}</td>
-                <td>${item.authorExpertise || ''}</td>
-                <td>${item.authorTypeRole || ''}</td>
-                <td>${item.authorWritingStyle || ''}</td>
-                <td>${item.artExpertise || '-'}</td>
-                <td>${item.engineeringExpertise || '-'}</td>
-                <td>${item.humanitiesExpertise || '-'}</td>
-                <td>${item.historicalPeriodLevel || '-'}</td>
-                <td>${item.createdDate || ''}</td>
-                <td>${item.createdTime || ''}</td>
-                <td>${item.createdBy || ''}</td>
-                <td>
-                    <button onclick="openEditModal(this)" class="btn btn-warning btn-sm">
-                        ✏️ ویرایش
-                    </button>
-                    <button onclick="deleteAuthorType(${item.authorTypeId})" class="btn btn-danger btn-sm">
-                        🗑️ حذف
-                    </button>
-                </td>
-            </tr>
-        `;
-    });
-    tbody.innerHTML = html;
-}
-
-function updateResultCount(count) {
-    const resultDiv = document.querySelector('.result-count');
-    if (resultDiv) {
-        resultDiv.innerHTML = `تعداد نتایج: <strong>${count}</strong>`;
-    }
-}
-
 // ============================
 // رویدادها
 // ============================
@@ -477,7 +275,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // اضافه کردن event listener برای فرم (اگر می‌خواهید از AJAX استفاده کنید)
+    // اضافه کردن event listener برای فرم
     const form = document.getElementById('authorTypeForm');
     if (form) {
         form.addEventListener('submit', submitAuthorTypeForm);

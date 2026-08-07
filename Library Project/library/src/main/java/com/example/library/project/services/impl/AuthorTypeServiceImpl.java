@@ -6,6 +6,7 @@ import com.example.library.project.model.entities.AuthorType;
 import com.example.library.project.repositories.AuthorTypeRepository;
 import com.example.library.project.services.interfaces.AuthorTypeService;
 import org.springframework.beans.BeanUtils;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
@@ -24,6 +25,7 @@ public class AuthorTypeServiceImpl implements AuthorTypeService {
     }
 
     @Override
+    @CacheEvict(value = CACHE_NAME, allEntries = true)
     public AuthorTypeResponseDto save(AuthorTypeRequestDto authorTypeRequestDto) throws Exception {
 
         AuthorTypeResponseDto authorTypeResponseDto = new AuthorTypeResponseDto();
@@ -51,6 +53,7 @@ public class AuthorTypeServiceImpl implements AuthorTypeService {
     }
 
     @Override
+    @CacheEvict(value = CACHE_NAME, allEntries = true)
     public AuthorTypeResponseDto update(AuthorTypeRequestDto authorTypeRequestDto) throws Exception {
 
         AuthorTypeResponseDto authorTypeResponseDto = new AuthorTypeResponseDto();

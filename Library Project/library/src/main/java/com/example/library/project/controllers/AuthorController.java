@@ -21,19 +21,17 @@ import java.util.List;
 public class AuthorController {
 
     private final AuthorService authorService;
-    private final PersonService personService;
     private final AuthorTypeService authorTypeService;
 
-    public AuthorController(AuthorService authorService, PersonService personService, AuthorTypeService authorTypeService) {
+    public AuthorController(AuthorService authorService, AuthorTypeService authorTypeService) {
         this.authorService = authorService;
-        this.personService = personService;
         this.authorTypeService = authorTypeService;
     }
 
     @GetMapping
     public String getAllAuthorTypes(Model model){
 
-        List<AuthorViewResponseDto> authors = findAllAuthorsView();
+        List<AuthorResponseDto> authors = findAllAuthors();
 
         model.addAttribute("authors", authors);
         model.addAttribute("authorDto", new AuthorRequestDto());
@@ -78,13 +76,6 @@ public class AuthorController {
     @ResponseStatus(value = HttpStatus.OK)
     public List<AuthorViewResponseDto> findAllAuthorsView(){
         return authorService.findAllUsersView();
-    }
-
-    @GetMapping("/findAllPeople")
-    @ResponseBody
-    @ResponseStatus(value = HttpStatus.OK)
-    public List<PersonResponseDto> findAllPeople(){
-        return personService.findAll();
     }
 
     @GetMapping("/findAllAuthorTypes")

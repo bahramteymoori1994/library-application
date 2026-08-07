@@ -1,100 +1,7 @@
 // author.js - مدیریت صفحه نویسندگان
 
-let allPersons = [];
 let allAuthorTypes = [];
-let personSearchTimeout = null;
 let authorTypeSearchTimeout = null;
-
-// =============================================
-// ================ اشخاص ======================
-// =============================================
-
-function loadPersons() {
-    fetch('/author/findAllPeople')
-        .then(r => r.json())
-        .then(data => {
-            allPersons = data;
-            displayPersons(data);
-        })
-        .catch(err => showMessage('خطا در بارگذاری اشخاص', 'error'));
-}
-
-function displayPersons(persons) {
-    const tbody = document.getElementById('personTableBody');
-    if (!tbody) return;
-
-    let html = '';
-    if (!persons || persons.length === 0) {
-        html = `<tr><td colspan="5" class="empty-state">موردی یافت نشد</td></tr>`;
-    } else {
-        persons.forEach(p => {
-            const firstName = p.firstName || '';
-            const lastName = p.lastName || '';
-            const nationalCode = p.nationalCode || '';
-            html += `
-                <tr onclick="selectPerson('${p.personId}','${firstName.replace(/'/g, "\\'")}','${lastName.replace(/'/g, "\\'")}','${nationalCode}')">
-                    <td>${p.personId}</td>
-                    <td>${firstName}</td>
-                    <td>${lastName}</td>
-                    <td>${nationalCode}</td>
-                    <td><button class="btn btn-success btn-sm">انتخاب</button></td>
-                </tr>
-            `;
-        });
-    }
-    tbody.innerHTML = html;
-}
-
-function selectPerson(id, firstName, lastName, nationalCode) {
-    document.getElementById('personId').value = id;
-    const infoDiv = document.getElementById('selectedPersonInfo');
-    infoDiv.classList.add('show');
-    document.getElementById('selectedFirstName').textContent = firstName;
-    document.getElementById('selectedLastName').textContent = lastName;
-    document.getElementById('selectedNationalCode').textContent = nationalCode;
-    closePersonSearch();
-    showMessage('شخص با موفقیت انتخاب شد', 'success');
-}
-
-function openPersonSearch() {
-    const modal = document.getElementById('personSearchModal');
-    modal.style.display = 'block';
-
-    if (!allPersons.length) {
-        loadPersons();
-    } else {
-        displayPersons(allPersons);
-    }
-
-    setTimeout(() => {
-        document.getElementById('personSearchInput').focus();
-    }, 100);
-}
-
-function closePersonSearch() {
-    document.getElementById('personSearchModal').style.display = 'none';
-}
-
-function searchPersons() {
-    const term = document.getElementById('personSearchInput').value.toLowerCase().trim();
-    if (term === '') {
-        displayPersons(allPersons);
-        return;
-    }
-
-    const filtered = allPersons.filter(p => {
-        const fullName = (p.firstName || '').toLowerCase() + ' ' + (p.lastName || '').toLowerCase();
-        const nationalCode = (p.nationalCode || '').toLowerCase();
-        return fullName.includes(term) || nationalCode.includes(term);
-    });
-    displayPersons(filtered);
-}
-
-function clearPersonSearch() {
-    document.getElementById('personSearchInput').value = '';
-    displayPersons(allPersons);
-    document.getElementById('personSearchInput').focus();
-}
 
 // =============================================
 // ================ نوع نویسنده ================
@@ -102,16 +9,18 @@ function clearPersonSearch() {
 
 function loadAuthorTypes() {
     fetch('/author/findAllAuthorTypes')
-        .then(r => r.json())
+        .then(r => {
+            if (!r.ok) throw new Error('خطا در دریافت لیست نوع نویسنده');
+            return r.json();
+        })
         .then(data => {
             allAuthorTypes = data;
             displayAuthorTypes(data);
         })
-        .catch(err => console.error('Error loading author types:', err));
-}
-
-function getAuthorTypeDisplayName(type) {
-    return type.authorTypeRole || type.authorExpertise || type.role || 'نامشخص';
+        .catch(err => {
+            console.error('Error loading author types:', err);
+            showMessage('خطا در بارگذاری نوع نویسنده', 'error');
+        });
 }
 
 function displayAuthorTypes(types) {
@@ -124,13 +33,13 @@ function displayAuthorTypes(types) {
     } else {
         types.forEach(t => {
             const id = t.authorTypeId || t.id || '';
-            const displayName = getAuthorTypeDisplayName(t);
-            const createdBy = t.createdBy || 'نامشخص';
+            const title = t.role || t.authorTypeRole || t.title || 'بدون عنوان';
+            const description = t.description || t.authorTypeDescription || '—';
             html += `
-                <tr onclick="selectAuthorType('${id}','${displayName.replace(/'/g, "\\'")}')">
+                <tr onclick="selectAuthorType('${id}','${title.replace(/'/g, "\\'")}')">
                     <td>${id}</td>
-                    <td>${displayName}</td>
-                    <td>${createdBy}</td>
+                    <td>${title}</td>
+                    <td>${description}</td>
                     <td><button class="btn btn-success btn-sm">انتخاب</button></td>
                 </tr>
             `;
@@ -139,11 +48,11 @@ function displayAuthorTypes(types) {
     tbody.innerHTML = html;
 }
 
-function selectAuthorType(id, displayName) {
+function selectAuthorType(id, title) {
     document.getElementById('authorTypeId').value = id;
     const infoDiv = document.getElementById('selectedAuthorTypeInfo');
     infoDiv.classList.add('show');
-    document.getElementById('selectedAuthorTypeTitle').textContent = displayName;
+    document.getElementById('selectedAuthorTypeTitle').textContent = title;
     closeAuthorTypeSearch();
     showMessage('نوع نویسنده با موفقیت انتخاب شد', 'success');
 }
@@ -175,8 +84,9 @@ function searchAuthorTypes() {
     }
 
     const filtered = allAuthorTypes.filter(t => {
-        const displayName = getAuthorTypeDisplayName(t).toLowerCase();
-        return displayName.includes(term);
+        const title = (t.role || t.authorTypeRole || t.title || '').toLowerCase();
+        const description = (t.description || t.authorTypeDescription || '').toLowerCase();
+        return title.includes(term) || description.includes(term);
     });
     displayAuthorTypes(filtered);
 }
@@ -188,27 +98,33 @@ function clearAuthorTypeSearch() {
 }
 
 // =============================================
-// ================ ویرایش =====================
+// ================ مدیریت فرم =================
 // =============================================
 
 function openCreateModal() {
-    document.getElementById('modalTitle').textContent = 'ثبت نویسنده جدید';
-    document.getElementById('authorForm').reset();
-    document.getElementById('selectedPersonInfo').classList.remove('show');
-    document.getElementById('selectedAuthorTypeInfo').classList.remove('show');
+    const modal = document.getElementById('authorModal');
+    const title = document.getElementById('modalTitle');
+    const form = document.getElementById('authorForm');
+
+    title.textContent = 'ثبت نویسنده جدید';
+    form.reset();
     document.getElementById('authorId').value = '';
-    document.getElementById('authorModal').style.display = 'block';
+    document.getElementById('selectedAuthorTypeInfo').classList.remove('show');
+
+    modal.style.display = 'block';
+
+    setTimeout(() => {
+        document.getElementById('firstName').focus();
+    }, 100);
 }
 
 function openEditModal(button) {
-    // پیدا کردن ردیف و شناسه نویسنده
     const row = button.closest('tr');
     if (!row) {
         showMessage('ردیف مورد نظر یافت نشد', 'error');
         return;
     }
 
-    // روش دقیق‌تر برای گرفتن شناسه
     const cells = row.querySelectorAll('td');
     if (cells.length < 1) {
         showMessage('داده‌های ردیف نامعتبر است', 'error');
@@ -225,7 +141,6 @@ function openEditModal(button) {
 
     showMessage('در حال بارگذاری اطلاعات نویسنده...', 'info');
 
-    // درخواست به سرور
     fetch(`/author/findAuthorById/${authorId}`)
         .then(response => {
             console.log('📡 وضعیت پاسخ:', response.status);
@@ -237,7 +152,6 @@ function openEditModal(button) {
         .then(author => {
             console.log('✅ داده دریافت شده:', author);
 
-            // بررسی وجود داده
             if (!author || Object.keys(author).length === 0) {
                 throw new Error('داده‌ای دریافت نشد');
             }
@@ -245,52 +159,23 @@ function openEditModal(button) {
             // تغییر عنوان مودال
             document.getElementById('modalTitle').textContent = 'ویرایش نویسنده';
 
-            // تنظیم شناسه نویسنده (hidden field)
-            const authorIdField = document.getElementById('authorId');
-            if (authorIdField) {
-                authorIdField.value = author.authorId || author.id || '';
-            }
+            // تنظیم شناسه نویسنده
+            document.getElementById('authorId').value = author.authorId || '';
 
-            // ========== نمایش اطلاعات شخص ==========
-            const personId = author.personId || author.person?.personId || '';
-            document.getElementById('personId').value = personId;
-
-            // اطلاعات شخص (با چندین روش مختلف)
-            const firstName = author.authorFirstName ||
-                author.firstName ||
-                author.person?.firstName ||
-                '';
-            const lastName = author.authorLastName ||
-                author.lastName ||
-                author.person?.lastName ||
-                '';
-            const nationalCode = author.authorNationalCode ||
-                author.nationalCode ||
-                author.person?.nationalCode ||
-                '';
-
-            // نمایش اطلاعات شخص
-            const pInfo = document.getElementById('selectedPersonInfo');
-            if (pInfo) {
-                pInfo.classList.add('show');
-                document.getElementById('selectedFirstName').textContent = firstName;
-                document.getElementById('selectedLastName').textContent = lastName;
-                document.getElementById('selectedNationalCode').textContent = nationalCode;
-            }
+            // تنظیم نام و نام خانوادگی
+            document.getElementById('firstName').value = author.firstName || '';
+            document.getElementById('lastName').value = author.lastName || '';
 
             // ========== نمایش نوع نویسنده ==========
-            const typeId = author.authorTypeId ||
-                author.authorType?.authorTypeId ||
-                author.authorType?.id ||
+            const typeId = author.authorType?.authorTypeId ||
+                author.authorTypeId ||
                 '';
             document.getElementById('authorTypeId').value = typeId;
 
-            // اطلاعات نوع نویسنده (با چندین روش مختلف)
-            const typeName = author.authorTypeRole ||
-                author.authorExpertise ||
-                author.authorType?.role ||
+            // اطلاعات نوع نویسنده
+            const typeName = author.authorType?.role ||
                 author.authorType?.authorTypeRole ||
-                author.authorType?.name ||
+                author.authorType?.title ||
                 'نامشخص';
 
             // نمایش اطلاعات نوع نویسنده
@@ -357,20 +242,7 @@ function showMessage(message, type = 'success') {
 // =============================================
 
 document.addEventListener('DOMContentLoaded', () => {
-    loadPersons();
     loadAuthorTypes();
-
-    // جستجوی خودکار برای شخص
-    const personInput = document.getElementById('personSearchInput');
-    if (personInput) {
-        personInput.addEventListener('input', function() {
-            if (personSearchTimeout) clearTimeout(personSearchTimeout);
-            const term = this.value.trim();
-            if (term.length >= 2 || term.length === 0) {
-                personSearchTimeout = setTimeout(searchPersons, 400);
-            }
-        });
-    }
 
     // جستجوی خودکار برای نوع نویسنده
     const authorTypeInput = document.getElementById('authorTypeSearchInput');
