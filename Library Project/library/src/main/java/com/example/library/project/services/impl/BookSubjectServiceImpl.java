@@ -2,10 +2,14 @@ package com.example.library.project.services.impl;
 
 import com.example.library.project.dto.requests.BookSubjectRequestDto;
 import com.example.library.project.dto.responses.BookSubjectResponseDto;
+import com.example.library.project.model.entities.BookSubject;
 import com.example.library.project.repositories.BookSubjectRepository;
 import com.example.library.project.services.interfaces.BookSubjectService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
-
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -19,21 +23,105 @@ public class BookSubjectServiceImpl implements BookSubjectService {
 
     @Override
     public BookSubjectResponseDto save(BookSubjectRequestDto bookSubjectRequestDto) throws Exception {
-        return null;
+
+        BookSubject bookSubject = new BookSubject();
+        BookSubjectResponseDto bookSubjectResponseDto = new BookSubjectResponseDto();
+
+        if( bookSubjectRequestDto == null )
+        {
+            throw new Exception("Book subject request object is null");
+        }
+
+        if (bookSubjectRequestDto.getBookSubject() != null && bookSubjectRequestDto.getBookSubject().getBookSubjectId() != null)
+        {
+            BookSubject bookSubjectParent = new BookSubject();
+            bookSubjectParent.setBookSubjectId(bookSubjectRequestDto.getBookSubject().getBookSubjectId());
+            bookSubject.setBookSubject(bookSubjectParent);
+        }
+
+        bookSubjectRequestDto
+                .setCreatedDate(LocalDate.now())
+                .setCreatedTime(LocalTime.now())
+                .setCreatedBy("admin");
+
+        BeanUtils.copyProperties(bookSubjectRequestDto, bookSubject);
+
+        BookSubject bookSubjectSaved = bookSubjectRepository.saveAndFlush(bookSubject);
+
+        if( bookSubjectSaved == null )
+        {
+            throw new Exception("Book subject saved object is null");
+        }
+
+        BeanUtils.copyProperties(bookSubjectResponseDto, bookSubjectSaved);
+        return  bookSubjectResponseDto;
     }
 
     @Override
     public BookSubjectResponseDto update(BookSubjectRequestDto bookSubjectRequestDto) throws Exception {
-        return null;
+
+        BookSubject bookSubject = new BookSubject();
+        BookSubjectResponseDto bookSubjectResponseDto = new BookSubjectResponseDto();
+
+        if( bookSubjectRequestDto == null )
+        {
+            throw new Exception("Book subject request object is null");
+        }
+
+        if (bookSubjectRequestDto.getBookSubject() != null && bookSubjectRequestDto.getBookSubject().getBookSubjectId() != null)
+        {
+            BookSubject bookSubjectParent = new BookSubject();
+            bookSubjectParent.setBookSubjectId(bookSubjectRequestDto.getBookSubject().getBookSubjectId());
+            bookSubject.setBookSubject(bookSubjectParent);
+        }
+
+        bookSubjectRequestDto
+                .setCreatedDate(LocalDate.now())
+                .setCreatedTime(LocalTime.now())
+                .setCreatedBy("admin");
+
+        BeanUtils.copyProperties(bookSubjectRequestDto, bookSubject);
+
+        BookSubject bookSubjectUpdated = bookSubjectRepository.save(bookSubject);
+
+        if( bookSubjectUpdated == null )
+        {
+            throw new Exception("Book subject updated object is null");
+        }
+
+        BeanUtils.copyProperties(bookSubjectResponseDto, bookSubjectUpdated);
+        return  bookSubjectResponseDto;
     }
 
     @Override
     public BookSubjectResponseDto findById(Long id) throws Exception {
-        return null;
+
+        BookSubjectResponseDto bookSubjectResponseDto = new BookSubjectResponseDto();
+        BookSubject findBookSubjectById = bookSubjectRepository.findById(id).orElse(null);
+
+        if( findBookSubjectById == null )
+        {
+            throw new Exception("Book subject id not found");
+        }
+
+        BeanUtils.copyProperties(findBookSubjectById, bookSubjectResponseDto);
+        return  bookSubjectResponseDto;
     }
 
     @Override
     public List<BookSubjectResponseDto> findAll() {
-        return List.of();
+
+        List<BookSubjectResponseDto> bookSubjectResponseDtoList = new ArrayList<>();
+        List<BookSubject> bookSubjectList = bookSubjectRepository.findAll();
+
+        bookSubjectList.stream()
+                .forEach(bookSubject ->
+                {
+                    BookSubjectResponseDto bookSubjectResponseDto = new BookSubjectResponseDto();
+                    BeanUtils.copyProperties(bookSubject, bookSubjectResponseDto);
+                    bookSubjectResponseDtoList.add(bookSubjectResponseDto);
+                });
+
+        return bookSubjectResponseDtoList;
     }
 }

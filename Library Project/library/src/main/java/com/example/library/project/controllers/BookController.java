@@ -20,14 +20,17 @@ public class BookController {
     private final AuthorService authorService;
     private final BookTypeService bookTypeService;
     private final LibraryService libraryService;
+    private final BookSubjectService bookSubjectService;
+    private final TranslatorService translatorService;
 
-    public BookController(BookService bookService, PublisherService publisherService, AuthorService authorService, BookTypeService bookTypeService,
-                          LibraryService libraryService) {
+    public BookController(BookService bookService, PublisherService publisherService, AuthorService authorService, BookTypeService bookTypeService, LibraryService libraryService, BookSubjectService bookSubjectService, TranslatorService translatorService) {
         this.bookService = bookService;
         this.publisherService = publisherService;
         this.authorService = authorService;
         this.bookTypeService = bookTypeService;
         this.libraryService = libraryService;
+        this.bookSubjectService = bookSubjectService;
+        this.translatorService = translatorService;
     }
 
     @GetMapping
@@ -100,5 +103,19 @@ public class BookController {
     @ResponseStatus(value = HttpStatus.OK)
     public List<LibraryResponseDto> findAllLibraries(){
         return libraryService.findAll();
+    }
+
+    @GetMapping("/findAllBookSubjects")
+    @ResponseBody
+    @ResponseStatus(value = HttpStatus.OK)
+    public List<BookSubjectResponseDto> findAllBookSubjects(){
+        return bookSubjectService.findAll();
+    }
+
+    @GetMapping("/findAllTranslators")
+    @ResponseBody
+    @ResponseStatus(value = HttpStatus.OK)
+    public List<TranslatorResponseDto> findAllTranslators(){
+        return translatorService.findAll();
     }
 }

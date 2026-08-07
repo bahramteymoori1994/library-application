@@ -1,10 +1,141 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fa" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مدیریت موضوعات کتاب</title>
+
+    <!-- لینک به فایل CSS -->
+    <link rel="stylesheet" th:href="@{/css/bookSubject.css}">
 </head>
 <body>
-$END$
+
+<div class="container">
+    <!-- Header -->
+    <div class="page-header">
+        <h1>📚 مدیریت موضوعات کتاب</h1>
+        <button onclick="openCreateBookSubjectModal()" class="btn btn-success">
+            ➕ ثبت موضوع جدید
+        </button>
+    </div>
+
+    <!-- نمایش پیام‌ها -->
+    <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+
+    <hr>
+
+    <h2>لیست موضوعات کتاب</h2>
+
+    <!-- Table -->
+    <div class="table-container">
+        <table>
+            <thead>
+            <tr>
+                <th>شناسه</th>
+                <th>عنوان موضوع</th>
+                <th>موضوع والد</th>
+                <th>تاریخ ایجاد</th>
+                <th>عملیات</th>
+            </tr>
+            </thead>
+            <tbody id="bookSubjectMainTableBody">
+            <!-- حلقه برای نمایش داده‌ها -->
+            <tr th:each="s : ${bookSubjects}" th:if="${bookSubjects != null and !bookSubjects.isEmpty()}">
+                <td th:text="${s.bookSubjectId}"></td>
+                <td th:text="${s.subjectTitle}"></td>
+                <td th:text="${s.bookSubject != null ? s.bookSubject.subjectTitle : '—'}"></td>
+                <td th:text="${s.createdDate != null ? #temporals.format(s.createdDate, 'yyyy-MM-dd') : '—'}"></td>
+                <td>
+                    <button onclick="openEditBookSubjectModal(this)" class="btn btn-warning btn-sm">
+                        ✏️ ویرایش
+                    </button>
+                </td>
+            </tr>
+            <!-- پیام خالی بودن لیست -->
+            <tr th:if="${bookSubjects == null or bookSubjects.isEmpty()}">
+                <td colspan="5" class="empty-state">
+                    <div>📭</div>
+                    <div style="margin-top: 10px;">هیچ موضوعی ثبت نشده است</div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>  <!-- بستن container -->
+
+<!-- Modal ثبت/ویرایش موضوع کتاب -->
+<div id="bookSubjectModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeBookSubjectModal()">×</span>
+        <h2 class="modal-title" id="bookSubjectModalTitle">ثبت موضوع کتاب جدید</h2>
+
+        <form id="bookSubjectForm" th:action="@{/bookSubject/saveBookSubject}" method="post" th:object="${bookSubjectDto}">
+            <input type="hidden" id="bookSubjectId" name="bookSubjectId" />
+
+            <div class="form-group">
+                <label for="subjectTitle">عنوان موضوع:</label>
+                <input type="text" id="subjectTitle" name="subjectTitle" required />
+            </div>
+
+            <!-- موضوع والد -->
+            <div class="form-group">
+                <label>موضوع والد (اختیاری):</label>
+                <div class="search-container">
+                    <input type="number" id="parentBookSubjectId" name="bookSubject" style="flex:1;" placeholder="شناسه موضوع والد" />
+                    <button type="button" onclick="openBookSubjectSearch()" class="btn btn-info">
+                        🔍 جستجو
+                    </button>
+                </div>
+                <div id="selectedBookSubjectInfo" class="selected-book-subject-info">
+                    <strong>عنوان:</strong> <span id="selectedSubjectTitle"></span> |
+                    <strong>والد:</strong> <span id="selectedParentTitle"></span>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" id="submitBtn" class="btn btn-success">ذخیره</button>
+                <button type="button" onclick="closeBookSubjectModal()" class="btn btn-danger">انصراف</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal جستجوی موضوع کتاب -->
+<div id="bookSubjectSearchModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeBookSubjectSearch()">×</span>
+        <h2 class="modal-title">جستجوی موضوع کتاب</h2>
+
+        <div class="search-container">
+            <div class="search-input-wrapper">
+                <input type="text" id="bookSubjectSearchInput" placeholder="جستجو بر اساس عنوان موضوع..." />
+                <span class="search-icon">🔍</span>
+            </div>
+            <button onclick="searchBookSubjects()" class="btn btn-primary">جستجو</button>
+            <button onclick="clearBookSubjectSearch()" class="btn btn-secondary">پاک کردن</button>
+        </div>
+
+        <div class="table-container">
+            <table class="table-hover">
+                <thead>
+                <tr>
+                    <th>شناسه</th>
+                    <th>عنوان موضوع</th>
+                    <th>موضوع والد</th>
+                    <th>تاریخ ایجاد</th>
+                    <th>انتخاب</th>
+                </tr>
+                </thead>
+                <tbody id="bookSubjectSearchTableBody">
+                <!-- داده‌ها توسط JavaScript پر می‌شود -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- لینک به فایل JavaScript -->
+<script th:src="@{/js/bookSubject.js}"></script>
+
 </body>
 </html>
