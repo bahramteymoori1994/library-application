@@ -57,13 +57,13 @@ public class Book {
     private List<Author> authors = new ArrayList<>();
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
-    @JoinTable(name = "author_book", joinColumns = @JoinColumn(name = "BOOK_ID", referencedColumnName = "BOOK_ID",
+    @JoinTable(name = "translator_book", joinColumns = @JoinColumn(name = "BOOK_ID", referencedColumnName = "BOOK_ID",
             foreignKey = @ForeignKey(name = "FK_TRANSLATOR_BOOK_ID")), inverseJoinColumns = @JoinColumn(name = "AUTHOR_ID",
             referencedColumnName = "AUTHOR_ID", foreignKey = @ForeignKey(name = "FK_TRANSLATOR_ID")))
     private List<Translator> translators = new ArrayList<>();
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
-    @JoinTable(name = "author_book", joinColumns = @JoinColumn(name = "BOOK_ID", referencedColumnName = "BOOK_ID",
+    @JoinTable(name = "library_book", joinColumns = @JoinColumn(name = "BOOK_ID", referencedColumnName = "BOOK_ID",
             foreignKey = @ForeignKey(name = "FK_BOOK_LIBRARY_ID")), inverseJoinColumns = @JoinColumn(name = "LIBRARY_ID",
             referencedColumnName = "LIBRARY_ID", foreignKey = @ForeignKey(name = "FK_LIBRARY_ID")))
     private List<Library> libraries = new ArrayList<>();
