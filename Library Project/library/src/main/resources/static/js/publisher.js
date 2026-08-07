@@ -22,7 +22,10 @@ function loadPublisherTypes() {
             allPublisherTypes = data;
             displayPublisherTypes(data);
         })
-        .catch(err => console.error('Error loading publisher types:', err));
+        .catch(err => {
+            console.error('Error loading publisher types:', err);
+            showMessage('خطا در بارگذاری لیست انواع ناشر', 'error');
+        });
 }
 
 function displayPublisherTypes(types) {
@@ -31,13 +34,14 @@ function displayPublisherTypes(types) {
 
     let html = '';
     if (!types || types.length === 0) {
-        html = '<tr><td colspan="3" style="text-align:center;color:#888;">موردی یافت نشد</td></tr>';
+        html = `<tr><td colspan="3" class="empty-state">موردی یافت نشد</td></tr>`;
     } else {
         types.forEach(t => {
             const name = t.publisherTypeName || t.typeName || t.name || '';
             const id = t.publisherTypeId || t.id || '';
+            const escapedName = name.replace(/'/g, "\\'");
             html += `
-                <tr onclick="selectPublisherType('${id}','${name.replace(/'/g, "\\'")}')">
+                <tr onclick="selectPublisherType('${id}','${escapedName}')">
                     <td>${id}</td>
                     <td>${name}</td>
                     <td><button class="btn btn-success btn-sm">انتخاب</button></td>
@@ -104,6 +108,7 @@ function openCreateModal() {
     const modal = document.getElementById('publisherModal');
     const title = document.getElementById('modalTitle');
     const form = document.getElementById('publisherForm');
+    const submitBtn = document.getElementById('submitBtn');
 
     if (!modal || !title || !form) {
         console.error('عناصر مودال یافت نشدند');
@@ -111,13 +116,22 @@ function openCreateModal() {
     }
 
     title.textContent = 'ثبت ناشر جدید';
+    submitBtn.textContent = 'ذخیره';
+    submitBtn.className = 'btn btn-success';
     form.reset();
     document.getElementById('publisherId').value = '';
     document.getElementById('selectedTypeInfo').classList.remove('show');
     isEditMode = false;
 
-    // تغییر اکشن فرم برای ذخیره
+    // تنظیم اکشن فرم برای ذخیره
     form.action = '/publisher/savePublisher';
+    form.method = 'post';
+
+    // حذف _method اگر وجود دارد
+    const methodField = document.getElementById('_method');
+    if (methodField) {
+        methodField.remove();
+    }
 
     modal.style.display = 'block';
 
@@ -138,14 +152,19 @@ function openEditModal(button) {
         return;
     }
 
-    const id = row.querySelector('td:first-child').textContent.trim();
+    const cells = row.querySelectorAll('td');
+    if (cells.length < 1) {
+        showMessage('داده‌های ردیف نامعتبر است', 'error');
+        return;
+    }
+
+    const id = cells[0].textContent.trim();
 
     if (!id) {
         showMessage('شناسه ناشر معتبر نیست', 'error');
         return;
     }
 
-    // نمایش وضعیت بارگذاری
     showMessage('در حال بارگذاری اطلاعات ناشر...', 'info');
 
     fetch(`/publisher/findPublisherById/${id}`)
@@ -157,6 +176,7 @@ function openEditModal(button) {
             const modal = document.getElementById('publisherModal');
             const title = document.getElementById('modalTitle');
             const form = document.getElementById('publisherForm');
+            const submitBtn = document.getElementById('submitBtn');
 
             if (!modal || !title || !form) {
                 console.error('عناصر مودال یافت نشدند');
@@ -164,6 +184,8 @@ function openEditModal(button) {
             }
 
             title.textContent = 'ویرایش ناشر';
+            submitBtn.textContent = 'به‌روزرسانی';
+            submitBtn.className = 'btn btn-primary';
 
             // پر کردن فرم
             document.getElementById('publisherId').value = p.publisherId || '';
@@ -176,7 +198,8 @@ function openEditModal(button) {
 
             // تنظیم نوع ناشر
             const typeId = p.publisherTypeId || p.publisherType?.publisherTypeId || '';
-            const typeName = p.publisherTypeName || p.publisherType?.publisherTypeName || '';
+            const typeName = p.publisherTypeName || p.publisherType?.publisherTypeName ||
+                p.publisherType?.name || '';
 
             document.getElementById('publisherTypeId').value = typeId;
 
@@ -189,8 +212,20 @@ function openEditModal(button) {
 
             isEditMode = true;
 
-            // تغییر اکشن فرم برای آپدیت
+            // تنظیم اکشن فرم برای به‌روزرسانی
             form.action = '/publisher/updatePublisher';
+            form.method = 'post';
+
+            // اضافه کردن _method برای شبیه‌سازی PUT
+            let methodField = document.getElementById('_method');
+            if (!methodField) {
+                methodField = document.createElement('input');
+                methodField.type = 'hidden';
+                methodField.id = '_method';
+                methodField.name = '_method';
+                form.appendChild(methodField);
+            }
+            methodField.value = 'PUT';
 
             modal.style.display = 'block';
             showMessage('اطلاعات ناشر بارگذاری شد', 'success');
@@ -256,7 +291,7 @@ function validatePublisherForm() {
 }
 
 // ============================
-// ارسال فرم با AJAX
+// ارسال فرم (ارسال معمولی)
 // ============================
 
 function submitPublisherForm(event) {
@@ -268,47 +303,12 @@ function submitPublisherForm(event) {
         return false;
     }
 
-    const form = document.getElementById('publisherForm');
-    const formData = new FormData(form);
-    const data = {};
-
-    formData.forEach((value, key) => {
-        data[key] = value;
-    });
-
-    const id = document.getElementById('publisherId').value;
-    const url = id ? '/publisher/updatePublisher' : '/publisher/savePublisher';
-    const method = id ? 'PUT' : 'POST';
-
-    // نمایش وضعیت بارگذاری
-    showMessage('در حال ذخیره اطلاعات...', 'info');
-
-    fetch(url, {
-        method: method,
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data)
-    })
-        .then(r => {
-            if (!r.ok) throw new Error('خطا در ذخیره اطلاعات');
-            return r.json();
-        })
-        .then(data => {
-            closeModal();
-            showMessage('ناشر با موفقیت ذخیره شد', 'success');
-            setTimeout(() => {
-                location.reload();
-            }, 1500);
-        })
-        .catch(err => {
-            console.error('Error saving publisher:', err);
-            showMessage('خطا در ذخیره اطلاعات: ' + err.message, 'error');
-        });
+    // ارسال فرم به صورت معمولی
+    document.getElementById('publisherForm').submit();
 }
 
 // ============================
-// توابع جستجو (اختیاری)
+// توابع جستجو
 // ============================
 
 function searchPublishers(event) {
@@ -322,41 +322,8 @@ function searchPublishers(event) {
         return;
     }
 
-    const formData = new FormData(form);
-    const searchData = {};
-
-    formData.forEach((value, key) => {
-        if (value && value.trim() !== '') {
-            searchData[key] = value.trim();
-        }
-    });
-
-    // نمایش وضعیت بارگذاری
-    const tableBody = document.querySelector('table tbody');
-    if (tableBody) {
-        tableBody.innerHTML = `<tr><td colspan="11" style="text-align:center; padding:20px;">در حال جستجو...</td></tr>`;
-    }
-
-    fetch('/publisher/search', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(searchData)
-    })
-        .then(r => {
-            if (!r.ok) throw new Error('خطا در جستجو');
-            return r.json();
-        })
-        .then(data => {
-            updateTable(data);
-            updateResultCount(data.length);
-            showMessage(`${data.length} نتیجه یافت شد`, 'success');
-        })
-        .catch(err => {
-            console.error('Error searching:', err);
-            showMessage('خطا در جستجو: ' + err.message, 'error');
-        });
+    // ارسال فرم جستجو
+    form.submit();
 }
 
 function resetSearch() {
@@ -368,39 +335,6 @@ function resetSearch() {
         });
         form.submit();
     }
-}
-
-// ============================
-// توابع حذف
-// ============================
-
-function deletePublisher(id) {
-    if (!id) {
-        showMessage('شناسه معتبر نیست', 'error');
-        return;
-    }
-
-    if (!confirm('آیا از حذف این ناشر اطمینان دارید؟')) {
-        return;
-    }
-
-    fetch(`/publisher/deletePublisher/${id}`, {
-        method: 'DELETE'
-    })
-        .then(r => {
-            if (!r.ok) throw new Error('خطا در حذف');
-            return r.json();
-        })
-        .then(data => {
-            showMessage('ناشر با موفقیت حذف شد', 'success');
-            setTimeout(() => {
-                location.reload();
-            }, 1500);
-        })
-        .catch(err => {
-            console.error('Error deleting:', err);
-            showMessage('خطا در حذف: ' + err.message, 'error');
-        });
 }
 
 // ============================
@@ -441,57 +375,6 @@ function showMessage(message, type = 'success') {
             }
         }, 500);
     }, 5000);
-}
-
-function updateTable(data) {
-    const tbody = document.querySelector('table tbody');
-    if (!tbody) return;
-
-    if (!data || data.length === 0) {
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="11" class="empty-state">
-                    <span class="icon">📭</span>
-                    <div class="message">هیچ ناشری یافت نشد</div>
-                </td>
-            </tr>
-        `;
-        return;
-    }
-
-    let html = '';
-    data.forEach(item => {
-        html += `
-            <tr>
-                <td>${item.publisherId || ''}</td>
-                <td>${item.publisherName || item.name || ''}</td>
-                <td>${item.publisherTypeName || ''}</td>
-                <td>${item.publisherCode || item.code || ''}</td>
-                <td>${item.publisherCountry || item.country || ''}</td>
-                <td>${item.publisherCity || item.city || ''}</td>
-                <td>${item.publisherAddress || item.address || ''}</td>
-                <td>${item.createdDate || ''}</td>
-                <td>${item.createdTime || ''}</td>
-                <td>${item.createdBy || ''}</td>
-                <td>
-                    <button onclick="openEditModal(this)" class="btn btn-warning btn-sm">
-                        ✏️ ویرایش
-                    </button>
-                    <button onclick="deletePublisher(${item.publisherId})" class="btn btn-danger btn-sm">
-                        🗑️ حذف
-                    </button>
-                </td>
-            </tr>
-        `;
-    });
-    tbody.innerHTML = html;
-}
-
-function updateResultCount(count) {
-    const resultDiv = document.querySelector('.result-count');
-    if (resultDiv) {
-        resultDiv.innerHTML = `تعداد نتایج: <strong>${count}</strong>`;
-    }
 }
 
 // ============================
@@ -539,7 +422,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // اضافه کردن event listener برای فرم (اگر می‌خواهید از AJAX استفاده کنید)
+    // اضافه کردن event listener برای فرم
     const form = document.getElementById('publisherForm');
     if (form) {
         form.addEventListener('submit', submitPublisherForm);

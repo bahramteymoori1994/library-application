@@ -37,7 +37,7 @@ public class PublisherController {
     }
 
     @PostMapping("/savePublisher")
-    public String savePerson(@ModelAttribute("publisherDto") PublisherRequestDto publisherRequestDto, RedirectAttributes redirectAttributes) {
+    public String savePublisher(@ModelAttribute("publisherDto") PublisherRequestDto publisherRequestDto, RedirectAttributes redirectAttributes) {
         try {
             publisherService.save(publisherRequestDto);
             redirectAttributes.addFlashAttribute("message", "ناشر با موفقیت ثبت شد.");
@@ -47,9 +47,15 @@ public class PublisherController {
         return "redirect:/publisher";
     }
 
-    @PutMapping("/updatePublisher")
-    public PublisherResponseDto update(@RequestBody PublisherRequestDto publisherRequestDto) throws Exception {
-        return publisherService.update(publisherRequestDto);
+    @PostMapping("/updatePublisher")
+    public String updatePublisher(@ModelAttribute("publisherDto") PublisherRequestDto publisherRequestDto, RedirectAttributes redirectAttributes) {
+        try {
+            publisherService.save(publisherRequestDto);
+            redirectAttributes.addFlashAttribute("message", "ناشر با موفقیت ثبت شد.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("message", "خطا در ثبت: " + e.getMessage());
+        }
+        return "redirect:/publisher";
     }
 
     @GetMapping("/findPublisherById/{id}")
