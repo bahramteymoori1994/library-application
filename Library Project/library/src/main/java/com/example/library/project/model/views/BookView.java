@@ -13,6 +13,9 @@ import java.time.LocalDate;
 @Immutable
 @Table(name = "book_view")
 public class BookView {
+
+    //TODO : Entity view must be rewritten
+
     @Id
     @NotNull
     @Column(name = "book_id", nullable = false)
