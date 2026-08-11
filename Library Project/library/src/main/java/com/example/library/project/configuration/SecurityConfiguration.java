@@ -39,11 +39,7 @@ public class SecurityConfiguration {
 
                             .defaultSuccessUrl("/welcome");
                 })
-                .sessionManagement(session ->
-                {
-                    session
-                            .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-                })
+                .authenticationProvider(authenticationProvider())
                 .logout(Customizer.withDefaults())
                 .build();
     }
