@@ -9,4 +9,5 @@ import java.util.List;
 public interface UserService extends AbstractBaseService<UserRequestDto, UserResponseDto>{
 
     List<UserViewResponseDto> findUsersView();
+    UserResponseDto findByUsername(String username) throws Exception;
 }

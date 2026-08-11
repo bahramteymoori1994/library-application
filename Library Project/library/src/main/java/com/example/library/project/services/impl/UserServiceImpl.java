@@ -10,6 +10,10 @@ import com.example.library.project.repositories.RoleRepository;
 import com.example.library.project.repositories.UserRepository;
 import com.example.library.project.services.interfaces.UserService;
 import org.springframework.beans.BeanUtils;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,10 +23,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl implements UserService, UserDetailsService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository; // اضافه کردن RoleRepository
+    private BCryptPasswordEncoder bCryptPasswordEncoder = new  BCryptPasswordEncoder();
 
     public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository) {
         this.userRepository = userRepository;
@@ -43,6 +48,7 @@ public class UserServiceImpl implements UserService {
         userRequestDto
                 .setCreatedDate(LocalDate.now())
                 .setCreatedTime(LocalTime.now())
+                .setPassword(bCryptPasswordEncoder.encode(userRequestDto.getPassword()))
                 .setCreatedBy("admin");
 
         // کپی properties
@@ -155,5 +161,32 @@ public class UserServiceImpl implements UserService {
         }
 
         return userResponseDtoList;
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        User user = userRepository.findByUsername(username);
+
+        if (user == null) {
+            throw new UsernameNotFoundException("User not found with username: " + username);
+        }
+
+        return user;
+    }
+
+    @Override
+    public UserResponseDto findByUsername(String username) throws Exception {
+
+        UserResponseDto userResponseDto = new UserResponseDto();
+        User user = userRepository.findByUsername(username);
+
+        if (user == null) {
+            throw new UsernameNotFoundException("Username not found: " + username);
+        }
+
+        BeanUtils.copyProperties(user, userResponseDto);
+        userResponseDto.setRoles(user.getRoles());
+
+        return userResponseDto;
     }
 }

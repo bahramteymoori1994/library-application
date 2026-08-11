@@ -13,4 +13,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query(value = "SELECT * FROM test.user_view",nativeQuery = true)
     List<UserView> findUsersView();
+
+    User findByUsername(String username);
 }
