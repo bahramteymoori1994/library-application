@@ -3,13 +3,14 @@ package com.example.library.project.controllers;
 import com.example.library.project.dto.requests.ReceiptRequestDto;
 import com.example.library.project.dto.responses.BookResponseDto;
 import com.example.library.project.dto.responses.ReceiptResponseDto;
+import com.example.library.project.dto.views.ReceiptViewResponseDto;
 import com.example.library.project.services.interfaces.BookService;
 import com.example.library.project.services.interfaces.ReceiptService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
+import java.security.Principal;
 import java.util.List;
 
 @Controller
@@ -25,8 +26,9 @@ public class ReceiptController {
     }
 
     @GetMapping
-    public String showReceiptPage(Model model) throws Exception {
-        List<ReceiptResponseDto> receipts = receiptService.findAll();
+    public String showReceiptPage(Model model, Principal principal) throws Exception {
+
+        List<ReceiptViewResponseDto> receipts = findAllReceiptsViewByUsername(principal.getName());
         model.addAttribute("receipts", receipts);
         model.addAttribute("receiptDto", new ReceiptRequestDto());
         return "receipt";
@@ -34,7 +36,7 @@ public class ReceiptController {
 
     @GetMapping("/list")
     public String findReceipts(Model model) throws Exception {
-        List<ReceiptResponseDto> receipts = receiptService.findAll();
+        List<ReceiptViewResponseDto> receipts = findAllReceiptsView();
         model.addAttribute("receipts", receipts);
         model.addAttribute("receiptDto", new ReceiptRequestDto());
         return "receipt";
@@ -68,5 +70,19 @@ public class ReceiptController {
     @ResponseBody
     public List<BookResponseDto> findAllBooks() {
         return bookService.findAll();
+    }
+
+    @GetMapping("/findAllReceiptsView")
+    @ResponseBody
+    public List<ReceiptViewResponseDto> findAllReceiptsView()
+    {
+        return receiptService.findAllReceiptsView();
+    }
+
+    @GetMapping("/findAllReceiptsView/{username}")
+    @ResponseBody
+    public List<ReceiptViewResponseDto> findAllReceiptsViewByUsername(@PathVariable String username)
+    {
+        return receiptService.findAllReceiptsViewByUsername(username);
     }
 }

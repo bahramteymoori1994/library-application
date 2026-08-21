@@ -2,10 +2,12 @@ package com.example.library.project.services.impl;
 
 import com.example.library.project.dto.requests.ReceiptRequestDto;
 import com.example.library.project.dto.responses.ReceiptResponseDto;
+import com.example.library.project.dto.views.ReceiptViewResponseDto;
 import com.example.library.project.model.entities.Book;
 import com.example.library.project.model.entities.Receipt;
 import com.example.library.project.model.entities.User;
 import com.example.library.project.model.enums.ReceiptStatus;
+import com.example.library.project.model.views.ReceiptView;
 import com.example.library.project.repositories.ReceiptRepository;
 import com.example.library.project.services.interfaces.ReceiptService;
 import org.springframework.beans.BeanUtils;
@@ -166,5 +168,46 @@ public class ReceiptServiceImpl implements ReceiptService {
                 });
 
         return receiptResponseDtoList;
+    }
+
+    @Override
+    public List<ReceiptViewResponseDto> findAllReceiptsView() {
+
+        List<ReceiptViewResponseDto> receiptViewResponseDtoList = new ArrayList<>();
+        List<ReceiptView> receipts = receiptRepository.findAllReceiptsView();
+
+        receipts.stream()
+                .forEach(receipt ->
+                {
+                    ReceiptViewResponseDto receiptViewResponseDto = new ReceiptViewResponseDto();
+                    BeanUtils.copyProperties(receipt, receiptViewResponseDto);
+                    receiptViewResponseDtoList.add(receiptViewResponseDto);
+                });
+
+        return receiptViewResponseDtoList;
+    }
+
+    @Override
+    public List<ReceiptViewResponseDto> findAllReceiptsViewByUsername(String username) {
+
+        List<ReceiptViewResponseDto> receiptViewResponseDtoList = new ArrayList<>();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) authentication.getPrincipal();
+
+        if( user != null )
+        {
+            username = user.getUsername();
+            List<ReceiptView> findReceiptsByUsername = receiptRepository.findAllReceiptsByUsername(username);
+
+            findReceiptsByUsername.stream()
+                    .forEach(receipt ->
+                    {
+                        ReceiptViewResponseDto receiptViewResponseDto = new ReceiptViewResponseDto();
+                        BeanUtils.copyProperties(receipt, receiptViewResponseDto);
+                        receiptViewResponseDtoList.add(receiptViewResponseDto);
+                    });
+        }
+
+        return  receiptViewResponseDtoList;
     }
 }
