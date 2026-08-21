@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fa" xmlns:th="http://www.thymeleaf.org">
+<html lang="fa" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,7 +12,7 @@
     <!-- Header -->
     <div class="page-header">
         <h1>📚 مدیریت کتاب‌ها</h1>
-        <button onclick="openCreateModal()" class="btn btn-success">
+        <button onclick="openCreateModal()" class="btn btn-success" sec:authorize="hasRole('ADMIN')">
             ➕ ثبت کتاب جدید
         </button>
     </div>
@@ -43,7 +43,7 @@
                 <th>وضعیت ترجمه</th>
                 <th>دوره تاریخی</th>
                 <th>تاریخ ایجاد</th>
-                <th>عملیات</th>
+                <th th:if="${#authorization.expression('hasRole(''ADMIN'')')}">عملیات</th>
             </tr>
             </thead>
             <tbody>
@@ -68,7 +68,7 @@
                 <td th:text="${b.translateStatus}"></td>
                 <td th:text="${b.historicalPeriodLevel}"></td>
                 <td th:text="${#temporals.format(b.createdDate, 'yyyy-MM-dd')}"></td>
-                <td>
+                <td th:if="${#authorization.expression('hasRole(''ADMIN'')')}">
                     <button onclick="openEditModal(this)" class="btn btn-warning btn-sm">
                         ✏️ ویرایش
                     </button>

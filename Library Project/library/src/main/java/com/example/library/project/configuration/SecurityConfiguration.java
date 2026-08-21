@@ -52,7 +52,15 @@ public class SecurityConfiguration {
                             .defaultSuccessUrl("/welcome");
                 })
                 .authenticationProvider(authenticationProvider())
-                .logout(Customizer.withDefaults())
+                .logout(logout ->
+                {
+                    logout
+                            .logoutUrl("/logout")
+                            .logoutSuccessUrl("/login?logout")
+                            .invalidateHttpSession(true)
+                            .deleteCookies("JSESSIONID")
+                            .permitAll();
+                })
                 .build();
     }
 
