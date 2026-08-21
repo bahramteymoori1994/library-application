@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fa" xmlns:th="http://www.thymeleaf.org">
+<html lang="fa" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -23,14 +23,15 @@
 <div class="nav-bar">
     <div class="nav-menu">
         <a href="/" class="nav-item">🏠 صفحه اصلی</a>
-        <a href="/user" class="nav-item">👥 مدیریت کاربران</a>
-        <a href="/role" class="nav-item">🔑 مدیریت نقش‌ها</a>
-        <a href="/person" class="nav-item">🧑‍🤝‍🧑 مدیریت اشخاص</a>
-        <a href="/publisherTypes" class="nav-item">📑 انواع ناشران</a>
-        <a href="/publisher" class="nav-item">🏢 ناشران</a>
-        <a href="/bookType" class="nav-item">📖 انواع کتاب</a>
-        <a href="/authorType" class="nav-item">🧑‍🤝‍🧑 انواع نویسنده</a>
-        <a href="/libraryType" class="nav-item">📖 انواع کتاب خانه</a>
+        <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/user" class="nav-item">👥 مدیریت کاربران</a>
+        <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/role" class="nav-item">🔑 مدیریت نقش‌ها</a>
+        <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/person" class="nav-item">🧑‍🤝‍🧑 مدیریت اشخاص</a>
+        <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/publisherTypes" class="nav-item">📑 انواع ناشران</a>
+        <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/publisher" class="nav-item">🏢 ناشران</a>
+        <a th:if="${#authorization.expression('hasRole(''USER'')')}" href="/book" class="nav-item">🏢 کتاب ها</a>
+        <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/bookType" class="nav-item"> 📖 انواع کتاب</a>
+        <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/authorType" class="nav-item">🧑‍🤝‍🧑 انواع نویسنده</a>
+        <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/libraryType" class="nav-item">📖 انواع کتاب خانه</a>
     </div>
 </div>
 
@@ -43,7 +44,7 @@
 
     <div class="dashboard-grid">
 
-        <div class="card">
+        <div class="card" sec:authorize="hasRole('ADMIN')">
             <div class="card-icon">👥</div>
             <div class="card-content">
                 <h3>مدیریت کاربران</h3>
@@ -55,7 +56,7 @@
             </div>
         </div>
 
-        <div class="card">
+        <div class="card" sec:authorize="hasRole('ADMIN')">
             <div class="card-icon">🔑</div>
             <div class="card-content">
                 <h3>مدیریت نقش‌ها</h3>
@@ -67,7 +68,7 @@
             </div>
         </div>
 
-        <div class="card">
+        <div class="card" sec:authorize="hasRole('ADMIN')">
             <div class="card-icon">🧑‍🤝‍🧑</div>
             <div class="card-content">
                 <h3>مدیریت اشخاص</h3>
@@ -79,7 +80,7 @@
             </div>
         </div>
 
-        <div class="card">
+        <div class="card" sec:authorize="hasRole('ADMIN')">
             <div class="card-icon">📑</div>
             <div class="card-content">
                 <h3>انواع ناشران</h3>
@@ -90,7 +91,18 @@
             </div>
         </div>
 
-        <div class="card">
+        <div class="card" sec:authorize="hasRole('USER')">
+            <div class="card-icon">📑</div>
+            <div class="card-content">
+                <h3>کتاب ها</h3>
+                <p>مدیریت کتاب های کتاب خانه</p>
+                <div class="card-footer">
+                    <a href="/book" class="btn">ورود به بخش کتاب ها</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" sec:authorize="hasRole('ADMIN')">
             <div class="card-icon">🏢</div>
             <div class="card-content">
                 <h3>مدیریت ناشران</h3>
@@ -101,7 +113,7 @@
             </div>
         </div>
 
-        <div class="card">
+        <div class="card" sec:authorize="hasRole('ADMIN')">
             <div class="card-icon">📖</div>
             <div class="card-content">
                 <h3>انواع کتاب</h3>
@@ -112,7 +124,7 @@
             </div>
         </div>
 
-        <div class="card">
+        <div class="card" sec:authorize="hasRole('ADMIN')">
             <div class="card-icon">🧑‍🤝‍🧑</div>
             <div class="card-content">
                 <h3>انواع نویسنده</h3>
@@ -123,7 +135,7 @@
             </div>
         </div>
 
-        <div class="card">
+        <div class="card" sec:authorize="hasRole('ADMIN')">
             <div class="card-icon">📖</div>
             <div class="card-content">
                 <h3>انواع کتاب خانه</h3>

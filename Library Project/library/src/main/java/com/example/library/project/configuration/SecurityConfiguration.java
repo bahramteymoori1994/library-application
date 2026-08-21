@@ -30,7 +30,20 @@ public class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request -> {
                     request
-                            .requestMatchers("/", "/login").permitAll()
+                            .requestMatchers("/", "/login", "/css/**", "/js/**").permitAll()
+                            .requestMatchers("/welcome").hasAnyRole("USER", "ADMIN")
+                            .requestMatchers("/book/**").hasAnyRole("USER", "ADMIN")
+                            .requestMatchers("/author/**",
+                                    "/authorType/**",
+                                    "/bookSubject/**",
+                                    "/bookType/**",
+                                    "/library/**",
+                                    "/libraryType/**",
+                                    "/person/**",
+                                    "/publisher/**",
+                                    "/publisherType/**",
+                                    "/role/**",
+                                    "/user/**").hasRole("ADMIN")
                             .anyRequest().authenticated();
                 })
                 .formLogin(form ->

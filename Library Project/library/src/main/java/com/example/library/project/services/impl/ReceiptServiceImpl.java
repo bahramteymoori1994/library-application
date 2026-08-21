@@ -45,8 +45,8 @@ public class ReceiptServiceImpl implements ReceiptService {
             List<Book> bookList = new ArrayList<>();
 
             books.stream()
-                    .forEach(book -> {
-
+                    .forEach(book ->
+                    {
                         Book newBook = new Book();
                         book.setBookId(book.getBookId());
                         bookList.add(newBook);
@@ -60,7 +60,8 @@ public class ReceiptServiceImpl implements ReceiptService {
         BeanUtils.copyProperties(receiptRequestDto, receipt);
         Receipt receiptSaved = receiptRepository.saveAndFlush(receipt);
 
-        if( receiptSaved == null ){
+        if( receiptSaved == null )
+        {
             throw new Exception("Receipt saved object is null");
         }
 
@@ -81,7 +82,8 @@ public class ReceiptServiceImpl implements ReceiptService {
                 .setCreatedBy("admin")
                 .setReceiptStatus(ReceiptStatus.INIT_REGISTRATION);
 
-        if( receiptRequestDto == null ){
+        if( receiptRequestDto == null )
+        {
             throw new Exception("Receipt request object is null");
         }
 
@@ -90,8 +92,8 @@ public class ReceiptServiceImpl implements ReceiptService {
             List<Book> bookList = new ArrayList<>();
 
             books.stream()
-                    .forEach(book -> {
-
+                    .forEach(book ->
+                    {
                         Book newBook = new Book();
                         book.setBookId(book.getBookId());
                         bookList.add(newBook);
@@ -103,7 +105,8 @@ public class ReceiptServiceImpl implements ReceiptService {
         BeanUtils.copyProperties(receiptRequestDto, receipt);
         Receipt receiptUpdated = receiptRepository.save(receipt);
 
-        if( receiptUpdated == null ){
+        if( receiptUpdated == null )
+        {
             throw new Exception("Receipt updated object is null");
         }
 
@@ -117,7 +120,8 @@ public class ReceiptServiceImpl implements ReceiptService {
         ReceiptResponseDto receiptResponseDto = new ReceiptResponseDto();
         Receipt receipt = receiptRepository.findById(id).orElse(null);
 
-        if( receipt == null ){
+        if( receipt == null )
+        {
             throw new Exception("Receipt id not found");
         }
 
@@ -132,7 +136,8 @@ public class ReceiptServiceImpl implements ReceiptService {
         List<Receipt> receipts = receiptRepository.findAll();
 
         receipts.stream()
-                .forEach(receipt -> {
+                .forEach(receipt ->
+                {
                     ReceiptResponseDto receiptResponseDto = new ReceiptResponseDto();
                     BeanUtils.copyProperties(receipt, receiptResponseDto);
                     receiptResponseDtoList.add(receiptResponseDto);

@@ -82,8 +82,9 @@ public class User implements UserDetails {
 
         if (roles != null) {
             for (Role role : roles) {
-                // فرض بر اینه که Role فیلدی به اسم roleName یا name داره
-                authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getEnglishRoleTitle()));
+                // تبدیل به حروف بزرگ برای هماهنگی با hasRole
+                String roleName = role.getEnglishRoleTitle().toUpperCase();
+                authorities.add(new SimpleGrantedAuthority("ROLE_" + roleName));
             }
         }
 
