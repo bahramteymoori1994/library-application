@@ -36,6 +36,7 @@
         <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/bookType" class="nav-item"> 📖 انواع کتاب</a>
         <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/authorType" class="nav-item">🧑‍🤝‍🧑 انواع نویسنده</a>
         <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/libraryType" class="nav-item">📖 انواع کتاب خانه</a>
+        <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/receipt" class="nav-item">📖 ثبت و مدیریت درخواست های کتاب</a>
     </div>
 </div>
 
@@ -80,6 +81,18 @@
                 <div class="card-footer">
                     <a href="/person" class="btn">ورود به بخش اشخاص</a>
                     <span class="small-info" id="personStat">۰ شخص</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" sec:authorize="hasRole('ADMIN')">
+            <div class="card-icon">🧑‍🤝‍🧑</div>
+            <div class="card-content">
+                <h3>مدیریت درخواست های کتاب</h3>
+                <p>ثبت و مدیریت درخواست های کتاب از سوی کاربر</p>
+                <div class="card-footer">
+                    <a href="/receipt" class="btn">ورود به بخش درخواست های کتاب</a>
+                    <span class="small-info" id="receiptStat">۰ درخواست</span>
                 </div>
             </div>
         </div>

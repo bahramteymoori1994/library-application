@@ -4,10 +4,13 @@ import com.example.library.project.dto.requests.ReceiptRequestDto;
 import com.example.library.project.dto.responses.ReceiptResponseDto;
 import com.example.library.project.model.entities.Book;
 import com.example.library.project.model.entities.Receipt;
+import com.example.library.project.model.entities.User;
 import com.example.library.project.model.enums.ReceiptStatus;
 import com.example.library.project.repositories.ReceiptRepository;
 import com.example.library.project.services.interfaces.ReceiptService;
 import org.springframework.beans.BeanUtils;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -30,11 +33,20 @@ public class ReceiptServiceImpl implements ReceiptService {
         Receipt receipt = new Receipt();
         List<Book> books = receiptRequestDto.getBooks();
 
-        receiptRequestDto
-                .setCreatedDate(LocalDate.now())
-                .setCreatedTime(LocalTime.now())
-                .setCreatedBy("admin")
-                .setReceiptStatus(ReceiptStatus.INIT_REGISTRATION);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) authentication.getPrincipal();
+
+        if( user != null )
+        {
+            receiptRequestDto
+                    .setCreatedDate(LocalDate.now())
+                    .setCreatedTime(LocalTime.now())
+                    .setReceiptDate(LocalDate.now())
+                    .setReceiptTime(LocalTime.now())
+                    .setUser(user)
+                    .setCreatedBy(user.getUsername())
+                    .setReceiptStatus(ReceiptStatus.INIT_REGISTRATION);
+        }
 
         if( receiptRequestDto == null ){
             throw new Exception("Receipt request object is null");
@@ -66,6 +78,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         }
 
         BeanUtils.copyProperties(receiptSaved, receiptResponseDto);
+
         return receiptResponseDto;
     }
 
@@ -76,11 +89,20 @@ public class ReceiptServiceImpl implements ReceiptService {
         Receipt receipt = new Receipt();
         List<Book> books = receiptResponseDto.getBooks();
 
-        receiptRequestDto
-                .setCreatedDate(LocalDate.now())
-                .setCreatedTime(LocalTime.now())
-                .setCreatedBy("admin")
-                .setReceiptStatus(ReceiptStatus.INIT_REGISTRATION);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) authentication.getPrincipal();
+
+        if( user != null )
+        {
+            receiptRequestDto
+                    .setCreatedDate(LocalDate.now())
+                    .setCreatedTime(LocalTime.now())
+                    .setReceiptDate(LocalDate.now())
+                    .setReceiptTime(LocalTime.now())
+                    .setUser(user)
+                    .setCreatedBy(user.getUsername())
+                    .setReceiptStatus(ReceiptStatus.INIT_REGISTRATION);
+        }
 
         if( receiptRequestDto == null )
         {

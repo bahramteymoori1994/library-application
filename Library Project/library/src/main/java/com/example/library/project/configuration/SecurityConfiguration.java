@@ -42,6 +42,7 @@ public class SecurityConfiguration {
                                     "/publisher/**",
                                     "/publisherType/**",
                                     "/role/**",
+                                    "/receipt/**",
                                     "/user/**").hasRole("ADMIN")
                             .anyRequest().authenticated();
                 })

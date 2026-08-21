@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="fa" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مدیریت رسیدها</title>
+    <link rel="stylesheet" th:href="@{/css/receipt.css}">
+</head>
+<body>
+
+<div class="container">
+    <!-- Header -->
+    <div class="page-header">
+        <h1>🧾 مدیریت رسیدها</h1>
+        <button onclick="openCreateModal()" class="btn btn-success">
+            ➕ ثبت رسید جدید
+        </button>
+    </div>
+
+    <!-- نمایش پیام‌ها -->
+    <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+
+    <hr>
+
+    <h2>لیست رسیدهای ثبت شده</h2>
+
+    <!-- Table -->
+    <div class="table-container">
+        <table>
+            <thead>
+            <tr>
+                <th>شناسه رسید</th>
+                <th>تاریخ رسید</th>
+                <th>زمان رسید</th>
+                <th>کاربر</th>
+                <th>کتاب‌ها</th>
+                <th>تعداد کتاب</th>
+                <th>وضعیت</th>
+                <th>تاریخ ایجاد</th>
+                <th>ایجاد کننده</th>
+                <th>عملیات</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="r : ${receipts}" th:if="${receipts != null and not #lists.isEmpty(receipts)}">
+                <td th:text="${r.receiptId}"></td>
+                <td th:text="${#temporals.format(r.receiptDate, 'yyyy-MM-dd')}"></td>
+                <td th:text="${#temporals.format(r.receiptTime, 'HH:mm')}"></td>
+                <td th:text="${r.user != null ? r.user.username : '—'}"></td>
+                <td>
+                    <span th:each="book : ${r.books}" class="book-tag" th:text="${book.bookTitle}"></span>
+                    <span th:if="${r.books == null or #lists.isEmpty(r.books)}" style="color:#888;">—</span>
+                </td>
+                <td th:text="${r.receiptBookCount != null ? r.receiptBookCount : '0'}"></td>
+                <td>
+                    <span class="status-badge"
+                          th:classappend="${r.receiptStatus == 'INIT_REGISTRATION'} ? 'status-init' : (${r.receiptStatus == 'REGISTERED'} ? 'status-registered' : (${r.receiptStatus == 'CANCELED'} ? 'status-canceled' : 'status-unknown'))"
+                          th:text="${r.receiptStatus != null ? r.receiptStatus : '—'}">
+                    </span>
+                </td>
+                <td th:text="${#temporals.format(r.createdDate, 'yyyy-MM-dd')}"></td>
+                <td th:text="${r.createdBy}"></td>
+                <td>
+                    <button class="btn btn-warning btn-sm" th:data-id="${r.receiptId}" onclick="openEditModal(this)">
+                        ✏️ ویرایش
+                    </button>
+                </td>
+            </tr>
+            <tr th:if="${receipts == null or #lists.isEmpty(receipts)}">
+                <td colspan="10" class="empty-state">
+                    <div>📭</div>
+                    <div style="margin-top: 10px;">هیچ رسیدی ثبت نشده است</div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal ثبت/ویرایش رسید -->
+<div id="receiptModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">×</span>
+        <h2 class="modal-title" id="modalTitle">ثبت رسید جدید</h2>
+
+        <form id="receiptForm" method="post" th:object="${receiptDto}" th:action="@{/receipt/saveReceipt}">
+            <input type="hidden" id="receiptId" name="receiptId" />
+            <input type="hidden" id="formAction" name="formAction" value="save" />
+
+            <!-- انتخاب کتاب‌ها (چندگانه) -->
+            <div class="form-group">
+                <label>کتاب‌ها <span class="required">*</span></label>
+                <div class="search-container">
+                    <input type="text" id="booksDisplay" readonly placeholder="هیچ کتابی انتخاب نشده"
+                           style="flex:1; background:#f8f9fa;">
+                    <button type="button" onclick="openBookSearch()" class="btn btn-info">
+                        🔍 جستجو و انتخاب کتاب
+                    </button>
+                </div>
+                <div id="selectedBooksContainer"></div>
+                <div id="bookIdsContainer"></div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" id="submitBtn" class="btn btn-success">ذخیره</button>
+                <button type="button" onclick="closeModal()" class="btn btn-danger">انصراف</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal جستجوی کتاب (چندگانه) -->
+<div id="bookSearchModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeBookSearch()">×</span>
+        <h2 class="modal-title">انتخاب کتاب‌ها</h2>
+
+        <div class="search-container">
+            <div class="search-input-wrapper">
+                <input type="text" id="bookSearchInput" placeholder="جستجو بر اساس عنوان کتاب..." />
+                <span class="search-icon">🔍</span>
+            </div>
+            <button onclick="searchBooks()" class="btn btn-primary">جستجو</button>
+            <button onclick="clearBookSearch()" class="btn btn-secondary">پاک کردن</button>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                <tr>
+                    <th>شناسه</th>
+                    <th>عنوان کتاب</th>
+                    <th>شابک</th>
+                    <th>نویسندگان</th>
+                    <th>انتخاب</th>
+                </tr>
+                </thead>
+                <tbody id="bookTableBody"></tbody>
+            </table>
+        </div>
+
+        <div class="form-actions">
+            <button onclick="closeBookSearch()" class="btn btn-danger">بستن</button>
+            <button onclick="confirmSelectedBooks()" class="btn btn-success">تایید انتخاب‌ها</button>
+        </div>
+    </div>
+</div>
+
+<!-- لینک به فایل JavaScript -->
+<script th:src="@{/js/receipt.js}"></script>
+
+</body>
+</html>
