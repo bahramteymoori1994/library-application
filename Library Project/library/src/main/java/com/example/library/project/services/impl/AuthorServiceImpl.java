@@ -4,10 +4,13 @@ import com.example.library.project.dto.requests.AuthorRequestDto;
 import com.example.library.project.dto.responses.AuthorResponseDto;
 import com.example.library.project.dto.views.AuthorViewResponseDto;
 import com.example.library.project.model.entities.Author;
+import com.example.library.project.model.entities.User;
 import com.example.library.project.model.views.AuthorView;
 import com.example.library.project.repositories.AuthorRepository;
 import com.example.library.project.services.interfaces.AuthorService;
 import org.springframework.beans.BeanUtils;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -28,11 +31,16 @@ public class AuthorServiceImpl implements AuthorService {
 
         AuthorResponseDto authorResponseDto = new AuthorResponseDto();
         Author author = new Author();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) authentication.getPrincipal();
 
-        authorRequestDto
-                .setCreatedDate(LocalDate.now())
-                .setCreatedTime(LocalTime.now())
-                .setCreatedBy("admin");
+        if( user != null )
+        {
+            authorRequestDto
+                            .setCreatedDate(LocalDate.now())
+                            .setCreatedTime(LocalTime.now())
+                            .setCreatedBy(user.getUsername());
+        }
 
         if( authorRequestDto == null ){
             throw new Exception("Author request object is null");
@@ -55,11 +63,16 @@ public class AuthorServiceImpl implements AuthorService {
 
         AuthorResponseDto authorResponseDto = new AuthorResponseDto();
         Author author = new Author();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) authentication.getPrincipal();
 
-        authorRequestDto
-                .setCreatedDate(LocalDate.now())
-                .setCreatedTime(LocalTime.now())
-                .setCreatedBy("admin");
+        if( user != null )
+        {
+            authorRequestDto
+                    .setCreatedDate(LocalDate.now())
+                    .setCreatedTime(LocalTime.now())
+                    .setCreatedBy(user.getUsername());
+        }
 
         if( authorRequestDto == null ){
             throw new Exception("Author request object is null");

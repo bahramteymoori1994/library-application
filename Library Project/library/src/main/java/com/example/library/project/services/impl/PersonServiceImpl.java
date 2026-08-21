@@ -3,11 +3,14 @@ package com.example.library.project.services.impl;
 import com.example.library.project.dto.requests.PersonRequestDto;
 import com.example.library.project.dto.responses.PersonResponseDto;
 import com.example.library.project.model.entities.Person;
+import com.example.library.project.model.entities.User;
 import com.example.library.project.repositories.PersonRepository;
 import com.example.library.project.services.interfaces.PersonService;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import java.time.LocalDate;
@@ -30,11 +33,16 @@ public class PersonServiceImpl implements PersonService {
 
         PersonResponseDto personResponseDto = new PersonResponseDto();
         Person person = new Person();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) authentication.getPrincipal();
 
-        personRequestDto
-                .setCreatedDate(LocalDate.now())
-                .setCreatedTime(LocalTime.now())
-                .setCreatedBy("admin");
+        if( user != null )
+        {
+            personRequestDto
+                    .setCreatedDate(LocalDate.now())
+                    .setCreatedTime(LocalTime.now())
+                    .setCreatedBy(user.getUsername());
+        }
 
         if( personRequestDto == null ){
             throw new Exception("Person request object is null");
@@ -57,6 +65,16 @@ public class PersonServiceImpl implements PersonService {
 
         PersonResponseDto personResponseDto = new PersonResponseDto();
         Person person = new Person();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) authentication.getPrincipal();
+
+        if( user != null )
+        {
+            personRequestDto
+                    .setCreatedDate(LocalDate.now())
+                    .setCreatedTime(LocalTime.now())
+                    .setCreatedBy(user.getUsername());
+        }
 
         if( personRequestDto == null ){
             throw new Exception("Person request object is null");
@@ -64,13 +82,13 @@ public class PersonServiceImpl implements PersonService {
 
         BeanUtils.copyProperties(personRequestDto, person);
 
-        Person personUpdated = personRepository.save(person);
+        Person personSaved = personRepository.save(person);
 
-        if( personUpdated == null ){
+        if( personSaved == null ){
             throw new Exception("Person saved is null");
         }
 
-        BeanUtils.copyProperties(personUpdated, personResponseDto);
+        BeanUtils.copyProperties(personSaved, personResponseDto);
         return personResponseDto;
     }
 

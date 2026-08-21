@@ -8,6 +8,8 @@ import com.example.library.project.model.views.BookView;
 import com.example.library.project.repositories.BookRepository;
 import com.example.library.project.services.interfaces.BookService;
 import org.springframework.beans.BeanUtils;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
@@ -30,11 +32,16 @@ public class BookServiceImpl implements BookService {
 
         Book book = new Book();
         BookResponseDto bookResponseDto = new BookResponseDto();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) authentication.getPrincipal();
 
-        bookRequestDto
-                        .setCreatedTime(LocalTime.now())
-                        .setCreatedDate(LocalDate.now())
-                        .setCreatedBy("admin");
+        if( user != null )
+        {
+            bookRequestDto
+                    .setCreatedTime(LocalTime.now())
+                    .setCreatedDate(LocalDate.now())
+                    .setCreatedBy(user.getUsername());
+        }
 
         if (bookRequestDto == null)
         {
@@ -91,11 +98,16 @@ public class BookServiceImpl implements BookService {
 
         Book book = new Book();
         BookResponseDto bookResponseDto = new BookResponseDto();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) authentication.getPrincipal();
 
-        bookRequestDto
-                        .setCreatedTime(LocalTime.now())
-                        .setCreatedDate(LocalDate.now())
-                        .setCreatedBy("admin");
+        if( user != null )
+        {
+            bookRequestDto
+                    .setCreatedTime(LocalTime.now())
+                    .setCreatedDate(LocalDate.now())
+                    .setCreatedBy(user.getUsername());
+        }
 
         if (bookRequestDto == null)
         {

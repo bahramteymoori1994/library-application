@@ -10,6 +10,8 @@ import com.example.library.project.repositories.RoleRepository;
 import com.example.library.project.repositories.UserRepository;
 import com.example.library.project.services.interfaces.UserService;
 import org.springframework.beans.BeanUtils;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -43,13 +45,18 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         }
 
         User user = new User();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User userLogin = (User) authentication.getPrincipal();
 
-        // تنظیم تاریخ و زمان
-        userRequestDto
-                .setCreatedDate(LocalDate.now())
-                .setCreatedTime(LocalTime.now())
-                .setPassword(bCryptPasswordEncoder.encode(userRequestDto.getPassword()))
-                .setCreatedBy("admin");
+        if( userLogin != null )
+        {
+            // تنظیم تاریخ و زمان
+            userRequestDto
+                    .setCreatedDate(LocalDate.now())
+                    .setCreatedTime(LocalTime.now())
+                    .setPassword(bCryptPasswordEncoder.encode(userRequestDto.getPassword()))
+                    .setCreatedBy(userLogin.getUsername());
+        }
 
         // کپی properties
         BeanUtils.copyProperties(userRequestDto, user);
@@ -81,27 +88,38 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             throw new Exception("User request object is null");
         }
 
-        // بررسی وجود کاربر
-        User existingUser = userRepository.findById(userRequestDto.getUserId())
-                .orElseThrow(() -> new Exception("User not found with id: " + userRequestDto.getUserId()));
+        User user = new User();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User userLogin = (User) authentication.getPrincipal();
 
-        // به‌روزرسانی فیلدها
-        existingUser.setUsername(userRequestDto.getUsername());
-        existingUser.setPassword(userRequestDto.getPassword());
-        existingUser.setEmail(userRequestDto.getEmail());
-        existingUser.setPerson(userRequestDto.getPerson());
-
-        // به‌روزرسانی نقش‌ها
-        if (userRequestDto.getRoleIds() != null) {
-            List<Role> roles = roleRepository.findAllById(userRequestDto.getRoleIds());
-            existingUser.setRoles(roles);
+        if( userLogin != null )
+        {
+            // تنظیم تاریخ و زمان
+            userRequestDto
+                    .setCreatedDate(LocalDate.now())
+                    .setCreatedTime(LocalTime.now())
+                    .setPassword(bCryptPasswordEncoder.encode(userRequestDto.getPassword()))
+                    .setCreatedBy(userLogin.getUsername());
         }
 
-        User userUpdated = userRepository.save(existingUser);
+        // کپی properties
+        BeanUtils.copyProperties(userRequestDto, user);
+
+        // بارگذاری نقش‌ها از دیتابیس بر اساس IDها
+        if (userRequestDto.getRoleIds() != null && !userRequestDto.getRoleIds().isEmpty()) {
+            List<Role> roles = roleRepository.findAllById(userRequestDto.getRoleIds());
+            user.setRoles(roles);
+        }
+
+        User userSaved = userRepository.save(user);
+
+        if (userSaved == null) {
+            throw new Exception("User saved object is null");
+        }
 
         UserResponseDto userResponseDto = new UserResponseDto();
-        BeanUtils.copyProperties(userUpdated, userResponseDto);
-        userResponseDto.setRoles(userUpdated.getRoles());
+        BeanUtils.copyProperties(userSaved, userResponseDto);
+        userResponseDto.setRoles(userSaved.getRoles());
 
         return userResponseDto;
     }

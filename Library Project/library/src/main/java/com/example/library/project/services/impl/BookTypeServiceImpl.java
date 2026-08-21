@@ -3,10 +3,13 @@ package com.example.library.project.services.impl;
 import com.example.library.project.dto.requests.BookTypeRequestDto;
 import com.example.library.project.dto.responses.BookTypeResponseDto;
 import com.example.library.project.model.entities.BookType;
+import com.example.library.project.model.entities.User;
 import com.example.library.project.repositories.BookTypeRepository;
 import com.example.library.project.services.interfaces.BookTypeService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -28,11 +31,16 @@ public class BookTypeServiceImpl implements BookTypeService {
 
         BookTypeResponseDto bookTypeResponseDto = new BookTypeResponseDto();
         BookType bookType = new BookType();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) authentication.getPrincipal();
 
-        bookTypeRequestDto
-                .setCreatedDate(LocalDate.now())
-                .setCreatedTime(LocalTime.now())
-                .setCreatedBy("admin");
+        if( user != null )
+        {
+            bookTypeRequestDto
+                    .setCreatedDate(LocalDate.now())
+                    .setCreatedTime(LocalTime.now())
+                    .setCreatedBy(user.getUsername());
+        }
 
         if( bookTypeRequestDto == null ){
             throw new Exception("Book Type request object is null");
@@ -55,11 +63,16 @@ public class BookTypeServiceImpl implements BookTypeService {
 
         BookTypeResponseDto bookTypeResponseDto = new BookTypeResponseDto();
         BookType bookType = new BookType();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) authentication.getPrincipal();
 
-        bookTypeRequestDto
-                .setCreatedDate(LocalDate.now())
-                .setCreatedTime(LocalTime.now())
-                .setCreatedBy("admin");
+        if( user != null )
+        {
+            bookTypeRequestDto
+                    .setCreatedDate(LocalDate.now())
+                    .setCreatedTime(LocalTime.now())
+                    .setCreatedBy(user.getUsername());
+        }
 
         if( bookTypeRequestDto == null ){
             throw new Exception("Book Type request object is null");

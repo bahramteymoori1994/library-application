@@ -4,10 +4,13 @@ import com.example.library.project.dto.requests.LibraryRequestDto;
 import com.example.library.project.dto.responses.LibraryResponseDto;
 import com.example.library.project.dto.views.LibraryViewResponseDto;
 import com.example.library.project.model.entities.Library;
+import com.example.library.project.model.entities.User;
 import com.example.library.project.model.views.LibraryView;
 import com.example.library.project.repositories.LibraryRepository;
 import com.example.library.project.services.interfaces.LibraryService;
 import org.springframework.beans.BeanUtils;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -28,11 +31,16 @@ public class LibraryServiceImpl implements LibraryService {
 
         LibraryResponseDto libraryResponseDto = new LibraryResponseDto();
         Library library = new Library();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) authentication.getPrincipal();
 
-        libraryRequestDto
-                .setCreatedDate(LocalDate.now())
-                .setCreatedTime(LocalTime.now())
-                .setCreatedBy("admin");
+        if( user != null )
+        {
+            libraryRequestDto
+                    .setCreatedDate(LocalDate.now())
+                    .setCreatedTime(LocalTime.now())
+                    .setCreatedBy(user.getUsername());
+        }
 
         if( libraryRequestDto == null ){
             throw new Exception("Library request object is null");
@@ -55,11 +63,16 @@ public class LibraryServiceImpl implements LibraryService {
 
         LibraryResponseDto libraryResponseDto = new LibraryResponseDto();
         Library library = new Library();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) authentication.getPrincipal();
 
-        libraryRequestDto
-                .setCreatedDate(LocalDate.now())
-                .setCreatedTime(LocalTime.now())
-                .setCreatedBy("admin");
+        if( user != null )
+        {
+            libraryRequestDto
+                    .setCreatedDate(LocalDate.now())
+                    .setCreatedTime(LocalTime.now())
+                    .setCreatedBy(user.getUsername());
+        }
 
         if( libraryRequestDto == null ){
             throw new Exception("Library request object is null");

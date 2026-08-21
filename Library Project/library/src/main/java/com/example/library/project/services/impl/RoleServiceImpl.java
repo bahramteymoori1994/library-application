@@ -3,10 +3,13 @@ package com.example.library.project.services.impl;
 import com.example.library.project.dto.requests.RoleRequestDto;
 import com.example.library.project.dto.responses.RoleResponseDto;
 import com.example.library.project.model.entities.Role;
+import com.example.library.project.model.entities.User;
 import com.example.library.project.repositories.RoleRepository;
 import com.example.library.project.services.interfaces.RoleService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -30,11 +33,16 @@ public class RoleServiceImpl implements RoleService {
 
         RoleResponseDto roleResponseDto = new RoleResponseDto();
         Role role = new Role();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) authentication.getPrincipal();
 
-        roleRequestDto
-                .setCreatedDate(LocalDate.now())
-                .setCreatedTime(LocalTime.now())
-                .setCreatedBy("admin");
+        if( user != null )
+        {
+            roleRequestDto
+                    .setCreatedDate(LocalDate.now())
+                    .setCreatedTime(LocalTime.now())
+                    .setCreatedBy(user.getUsername());
+        }
 
         if( roleRequestDto == null ){
             throw new Exception("Role request object is null");
@@ -57,6 +65,16 @@ public class RoleServiceImpl implements RoleService {
 
         RoleResponseDto roleResponseDto = new RoleResponseDto();
         Role role = new Role();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) authentication.getPrincipal();
+
+        if( user != null )
+        {
+            roleRequestDto
+                    .setCreatedDate(LocalDate.now())
+                    .setCreatedTime(LocalTime.now())
+                    .setCreatedBy(user.getUsername());
+        }
 
         if( roleRequestDto == null ){
             throw new Exception("Role request object is null");
@@ -64,13 +82,13 @@ public class RoleServiceImpl implements RoleService {
 
         BeanUtils.copyProperties(roleRequestDto, role);
 
-        Role roleUpdated = roleRepository.save(role);
+        Role roleSaved = roleRepository.save(role);
 
-        if( roleUpdated == null ){
-            throw new Exception("Role updated object is null");
+        if( roleSaved == null ){
+            throw new Exception("Role saved object is null");
         }
 
-        BeanUtils.copyProperties(roleUpdated, roleResponseDto);
+        BeanUtils.copyProperties(roleSaved, roleResponseDto);
         return roleResponseDto;
     }
 

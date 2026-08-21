@@ -4,10 +4,13 @@ import com.example.library.project.dto.requests.PublisherRequestDto;
 import com.example.library.project.dto.responses.PublisherResponseDto;
 import com.example.library.project.dto.views.PublisherViewResponseDto;
 import com.example.library.project.model.entities.Publisher;
+import com.example.library.project.model.entities.User;
 import com.example.library.project.model.views.PublisherView;
 import com.example.library.project.repositories.PublisherRepository;
 import com.example.library.project.services.interfaces.PublisherService;
 import org.springframework.beans.BeanUtils;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -28,11 +31,16 @@ public class PublisherServiceImpl implements PublisherService {
 
         PublisherResponseDto response = new PublisherResponseDto();
         Publisher publisher = new Publisher();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) authentication.getPrincipal();
 
-        publisherRequestDto
-                .setCreatedDate(LocalDate.now())
-                .setCreatedTime(LocalTime.now())
-                .setCreatedBy("admin");
+        if( user != null )
+        {
+            publisherRequestDto
+                    .setCreatedDate(LocalDate.now())
+                    .setCreatedTime(LocalTime.now())
+                    .setCreatedBy(user.getUsername());
+        }
 
         if( publisherRequestDto == null ){
             throw new Exception("Publisher request object is null");
@@ -58,11 +66,16 @@ public class PublisherServiceImpl implements PublisherService {
 
         PublisherResponseDto response = new PublisherResponseDto();
         Publisher publisher = new Publisher();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) authentication.getPrincipal();
 
-        publisherRequestDto
-                .setCreatedDate(LocalDate.now())
-                .setCreatedTime(LocalTime.now())
-                .setCreatedBy("admin");
+        if( user != null )
+        {
+            publisherRequestDto
+                    .setCreatedDate(LocalDate.now())
+                    .setCreatedTime(LocalTime.now())
+                    .setCreatedBy(user.getUsername());
+        }
 
         if( publisherRequestDto == null ){
             throw new Exception("Publisher request object is null");

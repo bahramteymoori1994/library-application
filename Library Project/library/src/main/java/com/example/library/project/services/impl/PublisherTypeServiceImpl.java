@@ -3,10 +3,13 @@ package com.example.library.project.services.impl;
 import com.example.library.project.dto.requests.PublisherTypeRequestDto;
 import com.example.library.project.dto.responses.PublisherTypeResponseDto;
 import com.example.library.project.model.entities.PublisherType;
+import com.example.library.project.model.entities.User;
 import com.example.library.project.repositories.PublisherTypeRepository;
 import com.example.library.project.services.interfaces.PublisherTypeService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -28,11 +31,16 @@ public class PublisherTypeServiceImpl implements PublisherTypeService {
 
         PublisherTypeResponseDto publisherTypeResponseDto = new PublisherTypeResponseDto();
         PublisherType publisherType = new PublisherType();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) authentication.getPrincipal();
 
-        publisherTypeRequestDto
-                .setCreatedDate(LocalDate.now())
-                .setCreatedTime(LocalTime.now())
-                .setCreatedBy("admin");
+        if( user != null )
+        {
+            publisherTypeRequestDto
+                    .setCreatedDate(LocalDate.now())
+                    .setCreatedTime(LocalTime.now())
+                    .setCreatedBy(user.getUsername());
+        }
 
         if( publisherTypeRequestDto == null ){
             throw new Exception("Publisher type request object is null");
@@ -55,11 +63,16 @@ public class PublisherTypeServiceImpl implements PublisherTypeService {
 
         PublisherTypeResponseDto publisherTypeResponseDto = new PublisherTypeResponseDto();
         PublisherType publisherType = new PublisherType();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) authentication.getPrincipal();
 
-        publisherTypeRequestDto
-                .setCreatedDate(LocalDate.now())
-                .setCreatedTime(LocalTime.now())
-                .setCreatedBy("admin");
+        if( user != null )
+        {
+            publisherTypeRequestDto
+                    .setCreatedDate(LocalDate.now())
+                    .setCreatedTime(LocalTime.now())
+                    .setCreatedBy(user.getUsername());
+        }
 
         if( publisherTypeRequestDto == null ){
             throw new Exception("Publisher type request object is null");

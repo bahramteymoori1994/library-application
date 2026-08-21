@@ -3,9 +3,12 @@ package com.example.library.project.services.impl;
 import com.example.library.project.dto.requests.BookSubjectRequestDto;
 import com.example.library.project.dto.responses.BookSubjectResponseDto;
 import com.example.library.project.model.entities.BookSubject;
+import com.example.library.project.model.entities.User;
 import com.example.library.project.repositories.BookSubjectRepository;
 import com.example.library.project.services.interfaces.BookSubjectService;
 import org.springframework.beans.BeanUtils;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -26,6 +29,8 @@ public class BookSubjectServiceImpl implements BookSubjectService {
 
         BookSubject bookSubject = new BookSubject();
         BookSubjectResponseDto bookSubjectResponseDto = new BookSubjectResponseDto();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) authentication.getPrincipal();
 
         if( bookSubjectRequestDto == null )
         {
@@ -39,10 +44,13 @@ public class BookSubjectServiceImpl implements BookSubjectService {
             bookSubject.setBookSubject(bookSubjectParent);
         }
 
-        bookSubjectRequestDto
-                .setCreatedDate(LocalDate.now())
-                .setCreatedTime(LocalTime.now())
-                .setCreatedBy("admin");
+        if( user != null )
+        {
+            bookSubjectRequestDto
+                    .setCreatedDate(LocalDate.now())
+                    .setCreatedTime(LocalTime.now())
+                    .setCreatedBy(user.getUsername());
+        }
 
         BeanUtils.copyProperties(bookSubjectRequestDto, bookSubject);
 
@@ -62,6 +70,8 @@ public class BookSubjectServiceImpl implements BookSubjectService {
 
         BookSubject bookSubject = new BookSubject();
         BookSubjectResponseDto bookSubjectResponseDto = new BookSubjectResponseDto();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) authentication.getPrincipal();
 
         if( bookSubjectRequestDto == null )
         {
@@ -75,10 +85,13 @@ public class BookSubjectServiceImpl implements BookSubjectService {
             bookSubject.setBookSubject(bookSubjectParent);
         }
 
-        bookSubjectRequestDto
-                .setCreatedDate(LocalDate.now())
-                .setCreatedTime(LocalTime.now())
-                .setCreatedBy("admin");
+        if( user != null )
+        {
+            bookSubjectRequestDto
+                    .setCreatedDate(LocalDate.now())
+                    .setCreatedTime(LocalTime.now())
+                    .setCreatedBy(user.getUsername());
+        }
 
         BeanUtils.copyProperties(bookSubjectRequestDto, bookSubject);
 

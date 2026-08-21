@@ -3,11 +3,14 @@ package com.example.library.project.services.impl;
 import com.example.library.project.dto.requests.AuthorTypeRequestDto;
 import com.example.library.project.dto.responses.AuthorTypeResponseDto;
 import com.example.library.project.model.entities.AuthorType;
+import com.example.library.project.model.entities.User;
 import com.example.library.project.repositories.AuthorTypeRepository;
 import com.example.library.project.services.interfaces.AuthorTypeService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -30,11 +33,16 @@ public class AuthorTypeServiceImpl implements AuthorTypeService {
 
         AuthorTypeResponseDto authorTypeResponseDto = new AuthorTypeResponseDto();
         AuthorType authorType = new AuthorType();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) authentication.getPrincipal();
 
-        authorTypeRequestDto
-                .setCreatedDate(LocalDate.now())
-                .setCreatedTime(LocalTime.now())
-                .setCreatedBy("admin");
+        if( user != null )
+        {
+            authorTypeRequestDto
+                                .setCreatedDate(LocalDate.now())
+                                .setCreatedTime(LocalTime.now())
+                                .setCreatedBy(user.getUsername());
+        }
 
         if( authorTypeRequestDto == null ){
             throw new Exception("Author Type request object is null");
@@ -58,11 +66,16 @@ public class AuthorTypeServiceImpl implements AuthorTypeService {
 
         AuthorTypeResponseDto authorTypeResponseDto = new AuthorTypeResponseDto();
         AuthorType authorType = new AuthorType();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) authentication.getPrincipal();
 
-        authorTypeRequestDto
-                .setCreatedDate(LocalDate.now())
-                .setCreatedTime(LocalTime.now())
-                .setCreatedBy("admin");
+        if( user != null )
+        {
+            authorTypeRequestDto
+                    .setCreatedDate(LocalDate.now())
+                    .setCreatedTime(LocalTime.now())
+                    .setCreatedBy(user.getUsername());
+        }
 
         if( authorTypeRequestDto == null ){
             throw new Exception("Author Type request object is null");

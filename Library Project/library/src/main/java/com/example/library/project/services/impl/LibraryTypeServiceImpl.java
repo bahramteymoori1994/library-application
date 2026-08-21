@@ -3,10 +3,13 @@ package com.example.library.project.services.impl;
 import com.example.library.project.dto.requests.LibraryTypeRequestDto;
 import com.example.library.project.dto.responses.LibraryTypeResponseDto;
 import com.example.library.project.model.entities.LibraryType;
+import com.example.library.project.model.entities.User;
 import com.example.library.project.repositories.LibraryTypeRepository;
 import com.example.library.project.services.interfaces.LibraryTypeService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -28,11 +31,16 @@ public class LibraryTypeServiceImpl implements LibraryTypeService {
 
         LibraryTypeResponseDto libraryTypeResponseDto = new LibraryTypeResponseDto();
         LibraryType libraryType = new LibraryType();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) authentication.getPrincipal();
 
-        libraryTypeRequestDto
-                .setCreatedDate(LocalDate.now())
-                .setCreatedTime(LocalTime.now())
-                .setCreatedBy("admin");
+        if( user != null )
+        {
+            libraryTypeRequestDto
+                    .setCreatedDate(LocalDate.now())
+                    .setCreatedTime(LocalTime.now())
+                    .setCreatedBy(user.getUsername());
+        }
 
         if( libraryTypeRequestDto == null ){
             throw new Exception("Library Type request object is null");
@@ -55,11 +63,16 @@ public class LibraryTypeServiceImpl implements LibraryTypeService {
 
         LibraryTypeResponseDto libraryTypeResponseDto = new LibraryTypeResponseDto();
         LibraryType libraryType = new LibraryType();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) authentication.getPrincipal();
 
-        libraryTypeRequestDto
-                .setCreatedDate(LocalDate.now())
-                .setCreatedTime(LocalTime.now())
-                .setCreatedBy("admin");
+        if( user != null )
+        {
+            libraryTypeRequestDto
+                    .setCreatedDate(LocalDate.now())
+                    .setCreatedTime(LocalTime.now())
+                    .setCreatedBy(user.getUsername());
+        }
 
         if( libraryTypeRequestDto == null ){
             throw new Exception("Library Type request object is null");
