@@ -20,6 +20,7 @@ public class ReceiptViewResponseDto {
     private String bookSubjectTitle;
     private Integer receiptBookCount;
     private String receiptStatus;
+    private String description;
     private LocalDate createdDate;
     private LocalTime createdTime;
     private String createdBy;
@@ -27,7 +28,7 @@ public class ReceiptViewResponseDto {
     public ReceiptViewResponseDto() {
     }
 
-    public ReceiptViewResponseDto(Long receiptId, Long userId, String username, LocalDate receiptDate, LocalTime receiptTime, Long bookId, String bookTitle, String isbn, Short bookPublishYear, Long publisherId, String publisherName, Long bookSubjectId, String bookSubjectTitle, Integer receiptBookCount, String receiptStatus, LocalDate createdDate, LocalTime createdTime, String createdBy) {
+    public ReceiptViewResponseDto(Long receiptId, Long userId, String username, LocalDate receiptDate, LocalTime receiptTime, Long bookId, String bookTitle, String isbn, Short bookPublishYear, Long publisherId, String publisherName, Long bookSubjectId, String bookSubjectTitle, Integer receiptBookCount, String receiptStatus, String description, LocalDate createdDate, LocalTime createdTime, String createdBy) {
         this.receiptId = receiptId;
         this.userId = userId;
         this.username = username;
@@ -37,6 +38,7 @@ public class ReceiptViewResponseDto {
         this.bookTitle = bookTitle;
         this.isbn = isbn;
         this.bookPublishYear = bookPublishYear;
+        this.description = description;
         this.publisherId = publisherId;
         this.publisherName = publisherName;
         this.bookSubjectId = bookSubjectId;
@@ -81,6 +83,15 @@ public class ReceiptViewResponseDto {
 
     public ReceiptViewResponseDto setReceiptDate(LocalDate receiptDate) {
         this.receiptDate = receiptDate;
+        return this;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public ReceiptViewResponseDto setDescription(String description) {
+        this.description = description;
         return this;
     }
 

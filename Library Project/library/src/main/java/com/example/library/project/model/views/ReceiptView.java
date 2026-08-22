@@ -80,6 +80,10 @@ public class ReceiptView {
     @Column(name = "receipt_status", nullable = false)
     private String receiptStatus;
 
+    @Size(max = 2000)
+    @Column(name = "description", nullable = true,  length = 2000)
+    private String description;
+
     @NotNull
     @Column(name = "created_date", nullable = false)
     private LocalDate createdDate;
@@ -96,7 +100,7 @@ public class ReceiptView {
     public ReceiptView() {
     }
 
-    public ReceiptView(Long receiptId, Long userId, String username, LocalDate receiptDate, LocalTime receiptTime, Long bookId, String bookTitle, String isbn, Short bookPublishYear, Long publisherId, String publisherName, Long bookSubjectId, String bookSubjectTitle, Integer receiptBookCount, String receiptStatus, LocalDate createdDate, LocalTime createdTime, String createdBy) {
+    public ReceiptView(Long receiptId, Long userId, String username, LocalDate receiptDate, LocalTime receiptTime, Long bookId, String bookTitle, String isbn, Short bookPublishYear, Long publisherId, String publisherName, Long bookSubjectId, String bookSubjectTitle, Integer receiptBookCount, String receiptStatus, String description, LocalDate createdDate, LocalTime createdTime, String createdBy) {
         this.receiptId = receiptId;
         this.userId = userId;
         this.username = username;
@@ -112,6 +116,7 @@ public class ReceiptView {
         this.bookSubjectTitle = bookSubjectTitle;
         this.receiptBookCount = receiptBookCount;
         this.receiptStatus = receiptStatus;
+        this.description = description;
         this.createdDate = createdDate;
         this.createdTime = createdTime;
         this.createdBy = createdBy;
@@ -252,6 +257,15 @@ public class ReceiptView {
         return this;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public ReceiptView setDescription(String description) {
+        this.description = description;
+        return this;
+    }
+
     public LocalDate getCreatedDate() {
         return createdDate;
     }
@@ -297,6 +311,7 @@ public class ReceiptView {
                 ", bookSubjectTitle='" + bookSubjectTitle + '\'' +
                 ", receiptBookCount=" + receiptBookCount +
                 ", receiptStatus='" + receiptStatus + '\'' +
+                ", description='" + description + '\'' +
                 ", createdDate=" + createdDate +
                 ", createdTime=" + createdTime +
                 ", createdBy='" + createdBy + '\'' +

@@ -43,6 +43,9 @@ public class Receipt {
     @Column(name = "RECEIPT_BOOK_COUNT")
     private Integer ReceiptBookCount;
 
+    @Column(name = "DESCRIPTION", columnDefinition = "nvarchar(2000)", nullable = true)
+    private String description;
+
     @Column(name = "CREATED_DATE", nullable = false, columnDefinition = "date")
     @NotNull(message = "Created Date is required")
     private LocalDate createdDate;
@@ -67,7 +70,7 @@ public class Receipt {
     public Receipt() {
     }
 
-    public Receipt(Long receiptId, LocalDate receiptDate, LocalTime receiptTime, User user, List<Book> books, ReceiptStatus receiptStatus, Integer receiptBookCount, LocalDate createdDate, LocalTime createdTime, String createdBy, LocalDate modifiedDate, LocalTime modifiedTime, String modifiedBy) {
+    public Receipt(Long receiptId, LocalDate receiptDate, LocalTime receiptTime, User user, List<Book> books, ReceiptStatus receiptStatus, Integer receiptBookCount, String description, LocalDate createdDate, LocalTime createdTime, String createdBy, LocalDate modifiedDate, LocalTime modifiedTime, String modifiedBy) {
         this.receiptId = receiptId;
         this.receiptDate = receiptDate;
         this.receiptTime = receiptTime;
@@ -75,6 +78,7 @@ public class Receipt {
         this.books = books;
         this.receiptStatus = receiptStatus;
         ReceiptBookCount = receiptBookCount;
+        this.description = description;
         this.createdDate = createdDate;
         this.createdTime = createdTime;
         this.createdBy = createdBy;
@@ -146,6 +150,15 @@ public class Receipt {
         return this;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public Receipt setDescription(String description) {
+        this.description = description;
+        return this;
+    }
+
     public LocalDate getCreatedDate() {
         return createdDate;
     }
@@ -210,6 +223,7 @@ public class Receipt {
                 ", books=" + books +
                 ", receiptStatus=" + receiptStatus +
                 ", ReceiptBookCount=" + ReceiptBookCount +
+                ", description='" + description + '\'' +
                 ", createdDate=" + createdDate +
                 ", createdTime=" + createdTime +
                 ", createdBy='" + createdBy + '\'' +

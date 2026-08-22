@@ -18,6 +18,7 @@ public class ReceiptResponseDto {
     private List<Book> books = new ArrayList<>();
     private ReceiptStatus receiptStatus;
     private Integer ReceiptBookCount;
+    private String description;
     private LocalDate createdDate;
     private LocalTime createdTime;
     private String createdBy;
@@ -29,7 +30,7 @@ public class ReceiptResponseDto {
     public ReceiptResponseDto() {
     }
 
-    public ReceiptResponseDto(Long receiptId, LocalDate receiptDate, LocalTime receiptTime, User user, List<Book> books, ReceiptStatus receiptStatus, Integer receiptBookCount, LocalDate createdDate, LocalTime createdTime, String createdBy, LocalDate modifiedDate, LocalTime modifiedTime, String modifiedBy) {
+    public ReceiptResponseDto(Long receiptId, LocalDate receiptDate, LocalTime receiptTime, User user, List<Book> books, ReceiptStatus receiptStatus, Integer receiptBookCount, String description, LocalDate createdDate, LocalTime createdTime, String createdBy, LocalDate modifiedDate, LocalTime modifiedTime, String modifiedBy) {
         this.receiptId = receiptId;
         this.receiptDate = receiptDate;
         this.receiptTime = receiptTime;
@@ -37,6 +38,7 @@ public class ReceiptResponseDto {
         this.books = books;
         this.receiptStatus = receiptStatus;
         ReceiptBookCount = receiptBookCount;
+        this.description = description;
         this.createdDate = createdDate;
         this.createdTime = createdTime;
         this.createdBy = createdBy;
@@ -78,6 +80,15 @@ public class ReceiptResponseDto {
 
     public ReceiptResponseDto setUser(User user) {
         this.user = user;
+        return this;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public ReceiptResponseDto setDescription(String description) {
+        this.description = description;
         return this;
     }
 
