@@ -7,6 +7,8 @@ import com.example.library.project.model.entities.User;
 import com.example.library.project.repositories.BookSubjectRepository;
 import com.example.library.project.services.interfaces.BookSubjectService;
 import org.springframework.beans.BeanUtils;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -19,12 +21,14 @@ import java.util.List;
 public class BookSubjectServiceImpl implements BookSubjectService {
 
     private final BookSubjectRepository bookSubjectRepository;
+    public final String CACHE_NAME = "bookSubject";
 
     public BookSubjectServiceImpl(BookSubjectRepository bookSubjectRepository) {
         this.bookSubjectRepository = bookSubjectRepository;
     }
 
     @Override
+    @CacheEvict(value = CACHE_NAME, allEntries = true)
     public BookSubjectResponseDto save(BookSubjectRequestDto bookSubjectRequestDto) throws Exception {
 
         BookSubject bookSubject = new BookSubject();
@@ -66,6 +70,7 @@ public class BookSubjectServiceImpl implements BookSubjectService {
     }
 
     @Override
+    @CacheEvict(value = CACHE_NAME, allEntries = true)
     public BookSubjectResponseDto update(BookSubjectRequestDto bookSubjectRequestDto) throws Exception {
 
         BookSubject bookSubject = new BookSubject();
@@ -107,6 +112,7 @@ public class BookSubjectServiceImpl implements BookSubjectService {
     }
 
     @Override
+    @Cacheable(cacheNames = CACHE_NAME)
     public BookSubjectResponseDto findById(Long id) throws Exception {
 
         BookSubjectResponseDto bookSubjectResponseDto = new BookSubjectResponseDto();
@@ -122,6 +128,7 @@ public class BookSubjectServiceImpl implements BookSubjectService {
     }
 
     @Override
+    @Cacheable(cacheNames = CACHE_NAME)
     public List<BookSubjectResponseDto> findAll() {
 
         List<BookSubjectResponseDto> bookSubjectResponseDtoList = new ArrayList<>();

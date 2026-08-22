@@ -7,6 +7,7 @@ import com.example.library.project.model.entities.User;
 import com.example.library.project.repositories.PublisherTypeRepository;
 import com.example.library.project.services.interfaces.PublisherTypeService;
 import org.springframework.beans.BeanUtils;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,6 +28,7 @@ public class PublisherTypeServiceImpl implements PublisherTypeService {
     }
 
     @Override
+    @CacheEvict(value = CACHE_NAME, allEntries = true)
     public PublisherTypeResponseDto save(PublisherTypeRequestDto publisherTypeRequestDto) throws Exception {
 
         PublisherTypeResponseDto publisherTypeResponseDto = new PublisherTypeResponseDto();
@@ -59,6 +61,7 @@ public class PublisherTypeServiceImpl implements PublisherTypeService {
     }
 
     @Override
+    @CacheEvict(value = CACHE_NAME, allEntries = true)
     public PublisherTypeResponseDto update(PublisherTypeRequestDto publisherTypeRequestDto) throws Exception {
 
         PublisherTypeResponseDto publisherTypeResponseDto = new PublisherTypeResponseDto();

@@ -7,6 +7,7 @@ import com.example.library.project.model.entities.User;
 import com.example.library.project.repositories.BookTypeRepository;
 import com.example.library.project.services.interfaces.BookTypeService;
 import org.springframework.beans.BeanUtils;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,6 +28,7 @@ public class BookTypeServiceImpl implements BookTypeService {
     }
 
     @Override
+    @CacheEvict(value = CACHE_NAME, allEntries = true)
     public BookTypeResponseDto save(BookTypeRequestDto bookTypeRequestDto) throws Exception {
 
         BookTypeResponseDto bookTypeResponseDto = new BookTypeResponseDto();
@@ -59,6 +61,7 @@ public class BookTypeServiceImpl implements BookTypeService {
     }
 
     @Override
+    @CacheEvict(value = CACHE_NAME, allEntries = true)
     public BookTypeResponseDto update(BookTypeRequestDto bookTypeRequestDto) throws Exception {
 
         BookTypeResponseDto bookTypeResponseDto = new BookTypeResponseDto();
