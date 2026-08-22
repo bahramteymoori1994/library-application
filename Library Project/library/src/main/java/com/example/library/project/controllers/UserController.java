@@ -54,33 +54,30 @@ public class UserController {
     }
 
     @PutMapping("/updateUser")
-    @ResponseStatus(value = HttpStatus.OK)
     public UserResponseDto update(@RequestBody UserRequestDto userRequestDto) throws Exception {
         return userService.update(userRequestDto);
     }
 
     @GetMapping("/findUserById/{id}")
-    @ResponseStatus(value = HttpStatus.OK)
+    @ResponseBody
     public UserResponseDto findById(@PathVariable Long id) throws Exception {
         return userService.findById(id);
     }
 
     @GetMapping("/findAllUsers")
-    @ResponseStatus(value = HttpStatus.OK)
+    @ResponseBody
     public List<UserResponseDto> findAll() throws Exception {
         return userService.findAll();
     }
 
     @GetMapping("/findAllPeople")
     @ResponseBody
-    @ResponseStatus(value = HttpStatus.OK)
     public List<PersonResponseDto> findAllPeople() {
         return personService.findAll();
     }
 
     @GetMapping("/findAllRoles")
     @ResponseBody
-    @ResponseStatus(value = HttpStatus.OK)
     public List<RoleResponseDto> findAllRoles() {
         return roleService.findAll();
     }

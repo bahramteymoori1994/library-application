@@ -4,12 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>مدیریت نقش‌ها</title>
-
-    <!-- لینک به فایل CSS -->
     <link rel="stylesheet" th:href="@{/css/role.css}">
 </head>
 <body>
-
 <div class="container">
     <!-- Header -->
     <div class="page-header">
@@ -21,9 +18,7 @@
 
     <!-- نمایش پیام‌ها -->
     <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
-
     <hr>
-
     <h2>لیست نقش‌های ثبت شده</h2>
 
     <!-- Table -->
@@ -45,7 +40,6 @@
                 th:data-id="${r.roleId}"
                 th:data-englishtitle="${r.englishRoleTitle}"
                 th:data-farsititle="${r.farsiRoleTitle}">
-
                 <td th:text="${r.roleId}"></td>
                 <td th:text="${r.englishRoleTitle}"></td>
                 <td th:text="${r.farsiRoleTitle}"></td>
@@ -75,17 +69,17 @@
         <span class="close" onclick="closeModal()">&times;</span>
         <h2 class="modal-title" id="modalTitle">ثبت نقش جدید</h2>
 
-        <form id="roleForm" th:action="@{/role/saveRole}" method="post" th:object="${roleDto}">
-            <input type="hidden" id="roleId" th:field="*{roleId}" />
+        <form id="roleForm" th:object="${roleDto}">
+            <input type="hidden" id="roleId" th:field="*{roleId}" name="roleId" />
 
             <div class="form-group">
                 <label for="englishRoleTitle">عنوان نقش (انگلیسی):</label>
-                <input type="text" id="englishRoleTitle" th:field="*{englishRoleTitle}" required placeholder="مثال: ADMIN" />
+                <input type="text" id="englishRoleTitle" th:field="*{englishRoleTitle}" name="englishRoleTitle" required placeholder="مثال: ADMIN" />
             </div>
 
             <div class="form-group">
                 <label for="farsiRoleTitle">عنوان نقش (فارسی):</label>
-                <input type="text" id="farsiRoleTitle" th:field="*{farsiRoleTitle}" required placeholder="مثال: مدیر سیستم" />
+                <input type="text" id="farsiRoleTitle" th:field="*{farsiRoleTitle}" name="farsiRoleTitle" required placeholder="مثال: مدیر سیستم" />
             </div>
 
             <div class="form-actions">
@@ -96,8 +90,6 @@
     </div>
 </div>
 
-<!-- لینک به فایل JavaScript -->
 <script th:src="@{/js/role.js}"></script>
-
 </body>
 </html>

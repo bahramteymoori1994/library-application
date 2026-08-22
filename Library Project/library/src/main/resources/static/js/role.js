@@ -1,15 +1,12 @@
 // role.js - مدیریت صفحه نقش‌ها
-
 // ============================
 // متغیرهای سراسری
 // ============================
-
 let isEditMode = false;
 
 // ============================
 // توابع مدیریت مودال
 // ============================
-
 function openCreateModal() {
     const modal = document.getElementById('roleModal');
     const title = document.getElementById('modalTitle');
@@ -24,12 +21,10 @@ function openCreateModal() {
     title.textContent = 'ثبت نقش جدید';
     submitBtn.textContent = 'ذخیره';
     submitBtn.className = 'btn btn-success';
+
     form.reset();
     document.getElementById('roleId').value = '';
     isEditMode = false;
-
-    // تغییر اکشن فرم برای ذخیره
-    form.action = '/role/saveRole';
 
     modal.style.display = 'block';
 
@@ -65,15 +60,11 @@ function openEditModal(button) {
     submitBtn.textContent = 'به‌روزرسانی';
     submitBtn.className = 'btn btn-primary';
 
-    // پر کردن فرم با داده‌های ردیف
     document.getElementById('roleId').value = row.dataset.id || '';
     document.getElementById('englishRoleTitle').value = row.dataset.englishtitle || '';
     document.getElementById('farsiRoleTitle').value = row.dataset.farsititle || '';
 
     isEditMode = true;
-
-    // تغییر اکشن فرم برای آپدیت
-    form.action = '/role/updateRole';
 
     modal.style.display = 'block';
 
@@ -93,7 +84,6 @@ function closeModal() {
 // ============================
 // اعتبارسنجی فرم
 // ============================
-
 function validateRoleForm() {
     const englishTitle = document.getElementById('englishRoleTitle');
     const farsiTitle = document.getElementById('farsiRoleTitle');
@@ -114,9 +104,8 @@ function validateRoleForm() {
 }
 
 // ============================
-// ارسال فرم با AJAX (اختیاری)
+// ارسال فرم
 // ============================
-
 function submitRoleForm(event) {
     if (event) {
         event.preventDefault();
@@ -126,48 +115,70 @@ function submitRoleForm(event) {
         return false;
     }
 
-    const form = document.getElementById('roleForm');
-    const formData = new FormData(form);
-    const roleData = {};
-
-    formData.forEach((value, key) => {
-        roleData[key] = value;
-    });
-
     const roleId = document.getElementById('roleId').value;
-    const url = roleId ? '/role/updateRole' : '/role/saveRole';
-    const method = roleId ? 'PUT' : 'POST';
+    const isUpdate = !!roleId;
 
     showMessage('در حال ذخیره اطلاعات...', 'info');
 
-    fetch(url, {
-        method: method,
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(roleData)
-    })
-        .then(r => {
-            if (!r.ok) throw new Error('خطا در ذخیره اطلاعات');
-            return r.json();
+    if (isUpdate) {
+        // ===== ویرایش (PUT + JSON) =====
+        const roleData = {
+            roleId: roleId,
+            englishRoleTitle: document.getElementById('englishRoleTitle').value.trim(),
+            farsiRoleTitle: document.getElementById('farsiRoleTitle').value.trim()
+        };
+
+        fetch('/role/updateRole', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(roleData)
         })
-        .then(data => {
-            closeModal();
-            showMessage('نقش با موفقیت ذخیره شد', 'success');
-            setTimeout(() => {
-                location.reload();
-            }, 1500);
+            .then(r => {
+                if (!r.ok) throw new Error('خطا در به‌روزرسانی');
+                return r.json();
+            })
+            .then(data => {
+                closeModal();
+                showMessage('نقش با موفقیت به‌روزرسانی شد', 'success');
+                setTimeout(() => location.reload(), 1200);
+            })
+            .catch(err => {
+                console.error(err);
+                showMessage('خطا در به‌روزرسانی: ' + err.message, 'error');
+            });
+
+    } else {
+        // ===== ثبت جدید (POST + FormData) =====
+        // چون کنترلر با @ModelAttribute کار می‌کند
+        const form = document.getElementById('roleForm');
+        const formData = new FormData(form);
+
+        fetch('/role/saveRole', {
+            method: 'POST',
+            body: formData          // بدون Content-Type تا مرورگر خودش تنظیم کند
         })
-        .catch(err => {
-            console.error('Error saving role:', err);
-            showMessage('خطا در ذخیره اطلاعات: ' + err.message, 'error');
-        });
+            .then(r => {
+                if (!r.ok) throw new Error('خطا در ثبت');
+                // کنترلر redirect برمی‌گرداند → نیازی به json نیست
+                return r.text();
+            })
+            .then(() => {
+                closeModal();
+                showMessage('نقش با موفقیت ثبت شد', 'success');
+                setTimeout(() => location.reload(), 1200);
+            })
+            .catch(err => {
+                console.error(err);
+                showMessage('خطا در ثبت: ' + err.message, 'error');
+            });
+    }
 }
 
 // ============================
 // توابع کمکی
 // ============================
-
 function showMessage(message, type = 'success') {
     const container = document.querySelector('.container');
     if (!container) {
@@ -179,12 +190,10 @@ function showMessage(message, type = 'success') {
     const existingAlerts = container.querySelectorAll('.alert');
     existingAlerts.forEach(el => el.remove());
 
-    // ایجاد پیام جدید
     const alertDiv = document.createElement('div');
     alertDiv.className = `alert alert-${type}`;
     alertDiv.textContent = message;
 
-    // اضافه کردن به صفحه
     const header = container.querySelector('h1');
     if (header) {
         header.parentNode.insertBefore(alertDiv, header.nextSibling);
@@ -192,14 +201,11 @@ function showMessage(message, type = 'success') {
         container.insertBefore(alertDiv, container.firstChild);
     }
 
-    // حذف خودکار بعد از 5 ثانیه
     setTimeout(() => {
         alertDiv.style.opacity = '0';
         alertDiv.style.transition = 'opacity 0.5s ease';
         setTimeout(() => {
-            if (alertDiv.parentNode) {
-                alertDiv.remove();
-            }
+            if (alertDiv.parentNode) alertDiv.remove();
         }, 500);
     }, 5000);
 }
@@ -207,17 +213,16 @@ function showMessage(message, type = 'success') {
 // ============================
 // رویدادها
 // ============================
-
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // بستن مودال با کلیک خارج
-    window.onclick = function(event) {
+    window.onclick = function (event) {
         if (event.target.classList.contains('modal')) {
             event.target.style.display = 'none';
         }
     };
 
     // بستن مودال با کلید Escape
-    document.addEventListener('keydown', function(event) {
+    document.addEventListener('keydown', function (event) {
         if (event.key === 'Escape') {
             const modal = document.getElementById('roleModal');
             if (modal && modal.style.display === 'block') {
@@ -226,7 +231,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // اضافه کردن event listener برای فرم (اگر می‌خواهید از AJAX استفاده کنید)
+    // اتصال فرم به تابع submit
     const form = document.getElementById('roleForm');
     if (form) {
         form.addEventListener('submit', submitRoleForm);
@@ -236,9 +241,8 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ============================
-// تابع برای حذف نقش (اختیاری)
+// تابع حذف نقش (اختیاری)
 // ============================
-
 function deleteRole(roleId) {
     if (!roleId) {
         showMessage('شناسه نقش معتبر نیست', 'error');
@@ -256,14 +260,12 @@ function deleteRole(roleId) {
             if (!r.ok) throw new Error('خطا در حذف نقش');
             return r.json();
         })
-        .then(data => {
+        .then(() => {
             showMessage('نقش با موفقیت حذف شد', 'success');
-            setTimeout(() => {
-                location.reload();
-            }, 1500);
+            setTimeout(() => location.reload(), 1200);
         })
         .catch(err => {
-            console.error('Error deleting role:', err);
+            console.error(err);
             showMessage('خطا در حذف نقش: ' + err.message, 'error');
         });
 }

@@ -7,6 +7,7 @@ import com.example.library.project.model.entities.User;
 import com.example.library.project.repositories.RoleRepository;
 import com.example.library.project.services.interfaces.RoleService;
 import org.springframework.beans.BeanUtils;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -29,6 +30,7 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
+    @CacheEvict(value = CACHE_NAME, allEntries = true)
     public RoleResponseDto save(RoleRequestDto roleRequestDto) throws Exception {
 
         RoleResponseDto roleResponseDto = new RoleResponseDto();
@@ -61,6 +63,7 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
+    @CacheEvict(value = CACHE_NAME, allEntries = true)
     public RoleResponseDto update(RoleRequestDto roleRequestDto) throws Exception {
 
         RoleResponseDto roleResponseDto = new RoleResponseDto();

@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.List;
 
-@RestController
+@Controller
 @RequestMapping("/role")
 public class RoleController {
 
@@ -20,6 +20,7 @@ public class RoleController {
     }
 
     @PostMapping("/saveRole")
+    @ResponseBody
     public String save(@ModelAttribute("roleDto") RoleRequestDto roleRequestDto, RedirectAttributes redirectAttributes) throws Exception {
 
         try{
@@ -35,16 +36,19 @@ public class RoleController {
     }
 
     @PutMapping("/updateRole")
+    @ResponseBody
     public RoleResponseDto update(@RequestBody RoleRequestDto roleRequestDto) throws Exception {
         return roleService.update(roleRequestDto);
     }
 
     @GetMapping("/findRoleById/{id}")
+    @ResponseBody
     public RoleResponseDto findRoleById(@PathVariable Long id) throws Exception {
         return roleService.findById(id);
     }
 
     @GetMapping("/findAllRoles")
+    @ResponseBody
     public List<RoleResponseDto> findAllRoles(){
         return roleService.findAll();
     }
