@@ -1,10 +1,13 @@
 package com.example.library.project.services.impl;
 
+import com.example.library.project.dto.requests.ReceiptLogRequestDto;
 import com.example.library.project.dto.requests.ReceiptRequestDto;
+import com.example.library.project.dto.responses.ReceiptLogResponseDto;
 import com.example.library.project.dto.responses.ReceiptResponseDto;
 import com.example.library.project.dto.views.ReceiptViewResponseDto;
 import com.example.library.project.model.entities.Book;
 import com.example.library.project.model.entities.Receipt;
+import com.example.library.project.model.entities.ReceiptLog;
 import com.example.library.project.model.entities.User;
 import com.example.library.project.model.enums.ReceiptStatus;
 import com.example.library.project.model.views.ReceiptView;
@@ -35,6 +38,7 @@ public class ReceiptServiceImpl implements ReceiptService {
     public ReceiptResponseDto save(ReceiptRequestDto receiptRequestDto) throws Exception {
 
         ReceiptResponseDto receiptResponseDto = new ReceiptResponseDto();
+        ReceiptLogRequestDto receiptLogRequestDto = new  ReceiptLogRequestDto();
         Receipt receipt = new Receipt();
         List<Book> books = receiptRequestDto.getBooks();
 
@@ -83,6 +87,15 @@ public class ReceiptServiceImpl implements ReceiptService {
         }
 
         BeanUtils.copyProperties(receiptSaved, receiptResponseDto);
+
+        receiptLogRequestDto
+                .setCreatedBy(receiptResponseDto.getCreatedBy())
+                .setCreatedDate(receiptResponseDto.getCreatedDate())
+                .setReceiptStatus(ReceiptStatus.INIT_REGISTRATION)
+                .setReceipt(receiptSaved)
+                .setCreatedTime(receiptResponseDto.getCreatedTime());
+
+        receiptLogService.save(receiptLogRequestDto);
 
         return receiptResponseDto;
     }
@@ -222,26 +235,38 @@ public class ReceiptServiceImpl implements ReceiptService {
 
     }
 
-    @Override
-    public void rejectAction(ReceiptResponseDto receiptResponseDto) throws Exception {
+        @Override
+        public void rejectAction(ReceiptResponseDto receiptResponseDto) throws Exception {
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = (User) authentication.getPrincipal();
-        Receipt findReceiptById = receiptRepository.findById(receiptResponseDto.getReceiptId()).orElse(null);
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            User user = (User) authentication.getPrincipal();
+            ReceiptLogRequestDto receiptLogRequestDto = new ReceiptLogRequestDto();
+            Receipt findReceiptById = receiptRepository.findById(receiptResponseDto.getReceiptId()).orElse(null);
 
-        if( findReceiptById == null ){
-            throw new Exception("Receipt id not found");
+            if( findReceiptById == null ){
+                throw new Exception("Receipt id not found");
+            }
+
+            findReceiptById
+                            .setReceiptStatus(ReceiptStatus.REJECTED)
+                            .setModifiedDate(LocalDate.now())
+                            .setModifiedTime(LocalTime.now())
+                            .setDescription(receiptResponseDto.getDescription())
+                            .setModifiedBy(user.getUsername());
+
+            Receipt receipt = receiptRepository.save(findReceiptById);
+            ReceiptLogResponseDto findReceiptLogByReceipt = receiptLogService.findReceiptLogByReceipt(receipt.getReceiptId());
+
+            receiptLogRequestDto
+                    .setReceiptLogId(findReceiptLogByReceipt.getReceiptLogId())
+                    .setCreatedDate(LocalDate.now())
+                    .setCreatedTime(LocalTime.now())
+                    .setCreatedBy(user.getUsername())
+                    .setReceipt(receipt)
+                    .setReceiptStatus(ReceiptStatus.REJECTED);
+
+            receiptLogService.save(receiptLogRequestDto);
         }
-
-        findReceiptById
-                        .setReceiptStatus(ReceiptStatus.REJECTED)
-                        .setModifiedDate(LocalDate.now())
-                        .setModifiedTime(LocalTime.now())
-                        .setDescription(receiptResponseDto.getDescription())
-                        .setModifiedBy(user.getUsername());
-
-        receiptRepository.save(findReceiptById);
-    }
 
     @Override
     public void returnAction(ReceiptResponseDto receiptResponseDto) {

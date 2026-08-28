@@ -2,6 +2,7 @@ package com.example.library.project.services.impl;
 
 import com.example.library.project.dto.requests.ReceiptLogRequestDto;
 import com.example.library.project.dto.responses.ReceiptLogResponseDto;
+import com.example.library.project.dto.responses.ReceiptResponseDto;
 import com.example.library.project.model.entities.ReceiptLog;
 import com.example.library.project.repositories.ReceiptLogRepository;
 import com.example.library.project.services.interfaces.ReceiptLogService;
@@ -30,11 +31,6 @@ public class ReceiptLogServiceImpl implements ReceiptLogService {
             throw new Exception("receiptLog request object is null");
         }
 
-        receiptLogRequestDto
-                .setCreatedDate(LocalDate.now())
-                .setCreatedTime(LocalTime.now())
-                .setCreatedBy("admin");
-
         BeanUtils.copyProperties(receiptLogRequestDto, receiptLog);
         ReceiptLog savedReceiptLog = receiptLogRepository.saveAndFlush(receiptLog);
 
@@ -53,7 +49,30 @@ public class ReceiptLogServiceImpl implements ReceiptLogService {
 
     @Override
     public ReceiptLogResponseDto findById(Long id) throws Exception {
-        return null;
+
+        ReceiptLogResponseDto receiptLogResponseDto = new ReceiptLogResponseDto();
+        ReceiptLog findReceiptLobbyLog = receiptLogRepository.findById(id).orElse(null);
+
+        if( findReceiptLobbyLog == null ){
+            throw new Exception("receiptLog id not found");
+        }
+
+        BeanUtils.copyProperties(findReceiptLobbyLog, receiptLogResponseDto);
+        return receiptLogResponseDto;
+    }
+
+    @Override
+    public ReceiptLogResponseDto findReceiptLogByReceipt(Long receiptId) throws Exception {
+
+        ReceiptLogResponseDto receiptLogResponseDto = new ReceiptLogResponseDto();
+        ReceiptLog findReceiptLogByReceipt = receiptLogRepository.findReceiptLogByReceipt(receiptId).orElse(null);
+
+        if( findReceiptLogByReceipt == null ){
+            throw new Exception("Receipt id not found");
+        }
+
+        BeanUtils.copyProperties(findReceiptLogByReceipt, receiptLogResponseDto);
+        return receiptLogResponseDto;
     }
 
     @Override
