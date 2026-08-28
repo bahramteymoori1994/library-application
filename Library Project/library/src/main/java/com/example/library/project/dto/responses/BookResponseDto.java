@@ -18,7 +18,7 @@ public class BookResponseDto {
     private String isbn;
     private String description;
     private Short publishYear;
-    private Byte PublishNumber;
+    private Byte publishNumber;
     private Short pageCount;
     private Publisher publisher;
     private List<Author> authors = new ArrayList<>();
@@ -41,7 +41,7 @@ public class BookResponseDto {
         this.isbn = isbn;
         this.description = description;
         this.publishYear = publishYear;
-        PublishNumber = publishNumber;
+        this.publishNumber = publishNumber;
         this.pageCount = pageCount;
         this.publisher = publisher;
         this.authors = authors;
@@ -127,11 +127,11 @@ public class BookResponseDto {
     }
 
     public Byte getPublishNumber() {
-        return PublishNumber;
+        return publishNumber;
     }
 
     public BookResponseDto setPublishNumber(Byte publishNumber) {
-        PublishNumber = publishNumber;
+        this.publishNumber = publishNumber;
         return this;
     }
 

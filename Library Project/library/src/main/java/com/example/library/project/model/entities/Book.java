@@ -44,7 +44,7 @@ public class Book {
 
     @Column(name = "PUBLISH_NUMBER", nullable = false)
     @NotNull(message = "Publish number is required")
-    private Byte PublishNumber;
+    private Byte publishNumber;
 
     @Column(name = "PAGE_COUNT", nullable = false)
     @NotNull(message = "Page count is required")
@@ -100,7 +100,7 @@ public class Book {
         this.isbn = isbn;
         this.description = description;
         this.publishYear = publishYear;
-        PublishNumber = publishNumber;
+        this.publishNumber = publishNumber;
         this.pageCount = pageCount;
         this.authors = authors;
         this.translators = translators;
@@ -177,11 +177,11 @@ public class Book {
     }
 
     public Byte getPublishNumber() {
-        return PublishNumber;
+        return publishNumber;
     }
 
     public Book setPublishNumber(Byte publishNumber) {
-        PublishNumber = publishNumber;
+        this.publishNumber = publishNumber;
         return this;
     }
 
@@ -285,7 +285,7 @@ public class Book {
                 ", isbn='" + isbn + '\'' +
                 ", description='" + description + '\'' +
                 ", publishYear=" + publishYear +
-                ", PublishNumber=" + PublishNumber +
+                ", PublishNumber=" + publishNumber +
                 ", pageCount=" + pageCount +
                 ", authors=" + authors +
                 ", translators=" + translators +

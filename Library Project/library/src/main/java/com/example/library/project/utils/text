@@ -1,0 +1,8 @@
+ALTER TABLE receipt
+    MODIFY COLUMN receipt_status ENUM(
+        'INIT_REGISTRATION',
+        'REGISTERED',
+        'CANCELED',
+        'REJECTED',
+        'RETURNED'
+        ) NOT NULL;

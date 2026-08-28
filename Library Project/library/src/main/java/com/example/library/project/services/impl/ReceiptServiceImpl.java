@@ -194,23 +194,57 @@ public class ReceiptServiceImpl implements ReceiptService {
     public List<ReceiptViewResponseDto> findAllReceiptsViewByUsername(String username) {
 
         List<ReceiptViewResponseDto> receiptViewResponseDtoList = new ArrayList<>();
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = (User) authentication.getPrincipal();
 
-        if( user != null )
-        {
-            username = user.getUsername();
-            List<ReceiptView> findReceiptsByUsername = receiptRepository.findAllReceiptsByUsername(username);
+        if (username == null || username.trim().isEmpty()) {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-            findReceiptsByUsername.stream()
-                    .forEach(receipt ->
-                    {
-                        ReceiptViewResponseDto receiptViewResponseDto = new ReceiptViewResponseDto();
-                        BeanUtils.copyProperties(receipt, receiptViewResponseDto);
-                        receiptViewResponseDtoList.add(receiptViewResponseDto);
-                    });
+            if (authentication != null && authentication.getPrincipal() instanceof User) {
+                User user = (User) authentication.getPrincipal();
+                username = user.getUsername();
+            }
         }
 
-        return  receiptViewResponseDtoList;
+        if (username != null && !username.trim().isEmpty()) {
+            List<ReceiptView> findReceiptsByUsername = receiptRepository.findAllReceiptsByUsername(username);
+
+            findReceiptsByUsername.forEach(receipt -> {
+                ReceiptViewResponseDto receiptViewResponseDto = new ReceiptViewResponseDto();
+                BeanUtils.copyProperties(receipt, receiptViewResponseDto);
+                receiptViewResponseDtoList.add(receiptViewResponseDto);
+            });
+        }
+
+        return receiptViewResponseDtoList;
+    }
+
+    @Override
+    public void approveAction(ReceiptResponseDto receiptResponseDto) {
+
+    }
+
+    @Override
+    public void rejectAction(ReceiptResponseDto receiptResponseDto) throws Exception {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) authentication.getPrincipal();
+        Receipt findReceiptById = receiptRepository.findById(receiptResponseDto.getReceiptId()).orElse(null);
+
+        if( findReceiptById == null ){
+            throw new Exception("Receipt id not found");
+        }
+
+        findReceiptById
+                        .setReceiptStatus(ReceiptStatus.REJECTED)
+                        .setModifiedDate(LocalDate.now())
+                        .setModifiedTime(LocalTime.now())
+                        .setDescription(receiptResponseDto.getDescription())
+                        .setModifiedBy(user.getUsername());
+
+        receiptRepository.save(findReceiptById);
+    }
+
+    @Override
+    public void returnAction(ReceiptResponseDto receiptResponseDto) {
+
     }
 }

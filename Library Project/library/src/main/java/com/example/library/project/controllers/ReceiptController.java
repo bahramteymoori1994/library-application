@@ -6,6 +6,7 @@ import com.example.library.project.dto.responses.ReceiptResponseDto;
 import com.example.library.project.dto.views.ReceiptViewResponseDto;
 import com.example.library.project.services.interfaces.BookService;
 import com.example.library.project.services.interfaces.ReceiptService;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -26,11 +27,32 @@ public class ReceiptController {
     }
 
     @GetMapping
-    public String showReceiptPage(Model model, Principal principal) throws Exception {
+    public String showReceiptPage(Model model, Principal principal, Authentication authentication) {
 
-        List<ReceiptViewResponseDto> receipts = findAllReceiptsViewByUsername(principal.getName());
+        String currentUsername = principal != null ? principal.getName() : "";
+        boolean isAdminOrLibrarian = false;
+
+        if (authentication != null && authentication.getAuthorities() != null) {
+            isAdminOrLibrarian = authentication.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN")
+                            || a.getAuthority().equals("ROLE_LIBRARIAN"));
+        }
+
+        List<ReceiptViewResponseDto> receipts;
+
+        if (isAdminOrLibrarian) {
+            // ادمین و کتابدار → همه رسیدها
+            receipts = receiptService.findAllReceiptsView();
+        } else {
+            // کاربر عادی → فقط رسیدهای خودش
+            receipts = receiptService.findAllReceiptsViewByUsername(currentUsername);
+        }
+
         model.addAttribute("receipts", receipts);
         model.addAttribute("receiptDto", new ReceiptRequestDto());
+        model.addAttribute("currentUsername", currentUsername);
+        model.addAttribute("isAdminOrLibrarian", isAdminOrLibrarian);   // برای استفاده در فرانت
+
         return "receipt";
     }
 
@@ -84,5 +106,13 @@ public class ReceiptController {
     public List<ReceiptViewResponseDto> findAllReceiptsViewByUsername(@PathVariable String username)
     {
         return receiptService.findAllReceiptsViewByUsername(username);
+    }
+
+    @PostMapping("/reject")
+    @ResponseBody
+    public ReceiptResponseDto rejectReceipt(@RequestBody ReceiptResponseDto receiptResponseDto) throws Exception {
+
+        receiptService.rejectAction(receiptResponseDto);
+        return receiptService.findById(receiptResponseDto.getReceiptId());
     }
 }

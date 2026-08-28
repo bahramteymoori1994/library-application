@@ -16,7 +16,7 @@
             <button onclick="openCreateModal()" class="btn btn-success">
                 ➕ ثبت رسید جدید
             </button>
-            <button onclick="loadReceiptsByUsername()" class="btn btn-primary">
+            <button onclick="refreshReceipts()" class="btn btn-primary">
                 🔄 بروزرسانی
             </button>
         </div>
@@ -27,14 +27,31 @@
 
     <hr>
 
-    <!-- فیلتر انتخاب کاربر -->
+    <!-- فیلتر کاربر (یک اینپوت برای همه) -->
     <div class="filter-section">
-        <label for="usernameFilter">👤 فیلتر بر اساس کاربر:</label>
-        <input type="text" id="usernameFilter" placeholder="نام کاربری را وارد کنید..."
-               th:value="${currentUsername}" />
-        <button onclick="loadReceiptsByUsername()" class="btn btn-primary">جستجو</button>
-        <button onclick="loadAllReceipts()" class="btn btn-secondary">نمایش همه</button>
-        <button onclick="clearFilter()" class="btn btn-danger">پاک کردن</button>
+        <label for="usernameFilter">
+            <span th:if="${isAdminOrLibrarian}">👤 فیلتر بر اساس کاربر:</span>
+            <span th:unless="${isAdminOrLibrarian}">👤 کاربر فعلی:</span>
+        </label>
+
+        <input type="text" id="usernameFilter"
+               th:value="${currentUsername}"
+               th:placeholder="${isAdminOrLibrarian} ? 'نام کاربری را وارد کنید...' : ''"
+               th:readonly="${!isAdminOrLibrarian}"
+               th:style="${!isAdminOrLibrarian} ? 'background:#f0f0f0; cursor: not-allowed;' : ''" />
+
+        <!-- دکمه‌های ادمین -->
+        <th:block th:if="${isAdminOrLibrarian}">
+            <button onclick="loadReceiptsByUsername()" class="btn btn-primary">جستجو</button>
+            <button onclick="loadAllReceipts()" class="btn btn-secondary">نمایش همه</button>
+            <button onclick="clearFilter()" class="btn btn-danger">پاک کردن</button>
+        </th:block>
+
+        <!-- دکمه کاربر عادی -->
+        <button th:unless="${isAdminOrLibrarian}"
+                onclick="loadReceiptsByUsername()"
+                class="btn btn-primary">بروزرسانی لیست</button>
+
         <span id="resultCount" class="text-muted"></span>
     </div>
 
@@ -78,7 +95,6 @@
             <input type="hidden" id="formAction" name="formAction" value="save" />
             <input type="hidden" id="receiptMethod" name="_method" value="POST" />
 
-            <!-- انتخاب کتاب‌ها (چندگانه) -->
             <div class="form-group">
                 <label>کتاب‌ها <span class="required">*</span></label>
                 <div class="search-container">
@@ -100,7 +116,7 @@
     </div>
 </div>
 
-<!-- Modal جستجوی کتاب (چندگانه) -->
+<!-- Modal جستجوی کتاب -->
 <div id="bookSearchModal" class="modal">
     <div class="modal-content">
         <button class="close" onclick="closeBookSearch()">×</button>
@@ -126,9 +142,7 @@
                     <th style="text-align: center;">انتخاب</th>
                 </tr>
                 </thead>
-                <tbody id="bookTableBody">
-                <!-- کتاب‌ها توسط JavaScript بارگذاری می‌شوند -->
-                </tbody>
+                <tbody id="bookTableBody"></tbody>
             </table>
         </div>
 
@@ -139,35 +153,71 @@
     </div>
 </div>
 
-<!-- لینک به فایل JavaScript -->
+<!-- Modal اکشن‌های تأیید / رد / عودت -->
+<div id="actionModal" class="modal">
+    <div class="modal-content" style="max-width: 500px;">
+        <button class="close" onclick="closeActionModal()">×</button>
+        <h2 class="modal-title" id="actionModalTitle">ثبت توضیحات</h2>
+
+        <input type="hidden" id="actionReceiptId" />
+        <input type="hidden" id="actionType" />
+
+        <div class="form-group">
+            <label for="actionDescription">توضیحات <span class="required">*</span></label>
+            <textarea id="actionDescription" rows="4" placeholder="توضیحات را وارد کنید..."
+                      style="width:100%; padding:10px; border:1px solid #ccc; border-radius:5px; font-family:Tahoma; resize:vertical;"></textarea>
+        </div>
+
+        <div class="form-actions">
+            <button type="button" onclick="submitAction()" class="btn btn-success" id="actionSubmitBtn">✅ تأیید</button>
+            <button type="button" onclick="closeActionModal()" class="btn btn-danger">❌ انصراف</button>
+        </div>
+    </div>
+</div>
+
 <script th:src="@{/js/receipt.js}"></script>
 
-<!-- کد اضافی برای اجرای اولیه -->
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('📄 صفحه رسیدها بارگذاری شد');
+<!-- اسکریپت اولیه -->
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const isAdminOrLibrarian = /*[[${isAdminOrLibrarian}]]*/ false;
+    const currentUsernameFromServer = /*[[${currentUsername}]]*/ '';
+    /*]]>*/
 
-        // بارگذاری کتاب‌ها
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('📄 صفحه رسیدها بارگذاری شد | isAdminOrLibrarian =', isAdminOrLibrarian);
+
         if (typeof loadBooks === 'function') {
             loadBooks('');
         }
 
-        // بارگذاری رسیدها
         setTimeout(function() {
-            var usernameInput = document.getElementById('usernameFilter');
-            var defaultUsername = usernameInput ? usernameInput.value : '';
-
-            if (!defaultUsername || defaultUsername === 'admin') {
+            if (isAdminOrLibrarian) {
+                // ادمین / کتابدار → همه رسیدها بدون فیلتر
                 if (typeof loadAllReceipts === 'function') {
                     loadAllReceipts();
                 }
             } else {
+                // کاربر عادی → فقط رسیدهای خودش
+                const usernameInput = document.getElementById('usernameFilter');
+                if (usernameInput && !usernameInput.value) {
+                    usernameInput.value = currentUsernameFromServer;
+                }
                 if (typeof loadReceiptsByUsername === 'function') {
                     loadReceiptsByUsername();
                 }
             }
         }, 300);
     });
+
+    // تابع کمکی برای دکمه بروزرسانی
+    function refreshReceipts() {
+        if (isAdminOrLibrarian) {
+            loadAllReceipts();
+        } else {
+            loadReceiptsByUsername();
+        }
+    }
 </script>
 
 </body>

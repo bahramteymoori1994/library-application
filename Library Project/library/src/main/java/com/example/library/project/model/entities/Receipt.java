@@ -41,7 +41,7 @@ public class Receipt {
     private ReceiptStatus receiptStatus;
 
     @Column(name = "RECEIPT_BOOK_COUNT")
-    private Integer ReceiptBookCount;
+    private Integer receiptBookCount;
 
     @Column(name = "DESCRIPTION", columnDefinition = "nvarchar(2000)", nullable = true)
     private String description;
@@ -77,7 +77,7 @@ public class Receipt {
         this.user = user;
         this.books = books;
         this.receiptStatus = receiptStatus;
-        ReceiptBookCount = receiptBookCount;
+        this.receiptBookCount = receiptBookCount;
         this.description = description;
         this.createdDate = createdDate;
         this.createdTime = createdTime;
@@ -142,11 +142,11 @@ public class Receipt {
     }
 
     public Integer getReceiptBookCount() {
-        return ReceiptBookCount;
+        return receiptBookCount;
     }
 
     public Receipt setReceiptBookCount(Integer receiptBookCount) {
-        ReceiptBookCount = receiptBookCount;
+        this.receiptBookCount = receiptBookCount;
         return this;
     }
 
@@ -222,7 +222,7 @@ public class Receipt {
                 ", user=" + user +
                 ", books=" + books +
                 ", receiptStatus=" + receiptStatus +
-                ", ReceiptBookCount=" + ReceiptBookCount +
+                ", ReceiptBookCount=" + receiptBookCount +
                 ", description='" + description + '\'' +
                 ", createdDate=" + createdDate +
                 ", createdTime=" + createdTime +

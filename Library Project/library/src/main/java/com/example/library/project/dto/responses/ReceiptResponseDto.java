@@ -17,7 +17,7 @@ public class ReceiptResponseDto {
     private User user;
     private List<Book> books = new ArrayList<>();
     private ReceiptStatus receiptStatus;
-    private Integer ReceiptBookCount;
+    private Integer receiptBookCount;
     private String description;
     private LocalDate createdDate;
     private LocalTime createdTime;
@@ -37,7 +37,7 @@ public class ReceiptResponseDto {
         this.user = user;
         this.books = books;
         this.receiptStatus = receiptStatus;
-        ReceiptBookCount = receiptBookCount;
+        this.receiptBookCount = receiptBookCount;
         this.description = description;
         this.createdDate = createdDate;
         this.createdTime = createdTime;
@@ -111,11 +111,11 @@ public class ReceiptResponseDto {
     }
 
     public Integer getReceiptBookCount() {
-        return ReceiptBookCount;
+        return receiptBookCount;
     }
 
     public ReceiptResponseDto setReceiptBookCount(Integer receiptBookCount) {
-        ReceiptBookCount = receiptBookCount;
+        this.receiptBookCount = receiptBookCount;
         return this;
     }
 

@@ -13,9 +13,28 @@
 <!-- Header -->
 <div class="header">
     <h1>📚 سیستم مدیریت کتاب و کاربران</h1>
+
     <div class="header-info">
         <span id="greetingMessage" class="greeting">🌅 صبح بخیر</span>
         <span id="currentDateTime" class="datetime"></span>
+    </div>
+
+    <!-- مشخصات کاربر لاگین‌شده -->
+    <div class="user-info" style="display: flex; align-items: center; gap: 15px; margin: 0 20px;">
+        <div style="text-align: left; color: white; font-size: 14px;">
+            <div>
+                👤 کاربر:
+                <strong sec:authentication="name">نام کاربری</strong>
+            </div>
+            <div style="margin-top: 3px;">
+                🔑 نقش:
+                <strong>
+                    <span sec:authorize="hasRole('ADMIN')">مدیر سیستم</span>
+                    <span sec:authorize="hasRole('LIBRARIAN')">کتابدار</span>
+                    <span sec:authorize="hasRole('USER')">کاربر عادی</span>
+                </strong>
+            </div>
+        </div>
     </div>
 
     <form th:action="@{/logout}" method="post" style="display:inline;">
@@ -85,7 +104,7 @@
             </div>
         </div>
 
-        <div class="card" sec:authorize="hasRole('ADMIN')">
+        <div class="card" sec:authorize="hasAnyRole('ADMIN', 'USER')">
             <div class="card-icon">🧑‍🤝‍🧑</div>
             <div class="card-content">
                 <h3>مدیریت درخواست های کتاب</h3>

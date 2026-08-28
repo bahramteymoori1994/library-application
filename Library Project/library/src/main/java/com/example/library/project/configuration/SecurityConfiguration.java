@@ -32,6 +32,7 @@ public class SecurityConfiguration {
                             .requestMatchers("/", "/login", "/css/**", "/js/**").permitAll()
                             .requestMatchers("/welcome").hasAnyRole("USER", "ADMIN", "LIBRARIAN")
                             .requestMatchers("/book/**").hasAnyRole("USER", "ADMIN", "LIBRARIAN")
+                            .requestMatchers("/receipt/**").hasAnyRole("USER", "ADMIN", "LIBRARIAN")
                             .requestMatchers("/author/**",
                                     "/authorType/**",
                                     "/bookSubject/**",
@@ -42,7 +43,6 @@ public class SecurityConfiguration {
                                     "/publisher/**",
                                     "/publisherType/**",
                                     "/role/**",
-                                    "/receipt/**",
                                     "/user/**").hasRole("ADMIN")
                             .anyRequest().authenticated();
                 })

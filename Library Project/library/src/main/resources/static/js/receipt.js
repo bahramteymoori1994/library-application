@@ -176,6 +176,12 @@ function renderReceiptsTable(receipts) {
         } else if (r.receiptStatus === 'CANCELED') {
             statusText = 'لغو شده';
             statusClass = 'status-canceled';
+        } else if (r.receiptStatus === 'REJECTED') {
+            statusText = 'رد شده';
+            statusClass = 'status-canceled';
+        } else if (r.receiptStatus === 'RETURNED') {
+            statusText = 'عودت شده';
+            statusClass = 'status-unknown';
         }
 
         const receiptDate = r.receiptDate ? formatDate(r.receiptDate) : '—';
@@ -197,9 +203,20 @@ function renderReceiptsTable(receipts) {
                 <td>${createdDate}</td>
                 <td>${r.createdBy || '—'}</td>
                 <td>
-                    <button class="btn btn-warning btn-sm" data-id="${r.receiptId}" onclick="openEditModal(this)">
-                        ✏️ ویرایش
-                    </button>
+                    <div style="display:flex; gap:5px; flex-wrap:wrap; justify-content:center;">
+                        <button class="btn btn-warning btn-sm" data-id="${r.receiptId}" onclick="openEditModal(this)">
+                            ✏️ ویرایش
+                        </button>
+                        <button class="btn btn-success btn-sm" data-id="${r.receiptId}" onclick="openActionModal(this, 'APPROVE')">
+                            ✅ تأیید
+                        </button>
+                        <button class="btn btn-danger btn-sm" data-id="${r.receiptId}" onclick="openActionModal(this, 'REJECT')">
+                            ❌ رد
+                        </button>
+                        <button class="btn btn-info btn-sm" data-id="${r.receiptId}" onclick="openActionModal(this, 'RETURN')">
+                            ↩️ عودت
+                        </button>
+                    </div>
                 </td>
             </tr>
         `;
@@ -516,6 +533,102 @@ function openEditModal(button) {
 function closeModal() {
     const modal = document.getElementById('receiptModal');
     if (modal) modal.style.display = 'none';
+}
+
+// ============================
+// توابع اکشن‌های تأیید / رد / عودت
+// ============================
+
+function openActionModal(button, actionType) {
+    const receiptId = button.getAttribute('data-id');
+    if (!receiptId) {
+        showMessage('شناسه رسید یافت نشد', 'error');
+        return;
+    }
+
+    document.getElementById('actionReceiptId').value = receiptId;
+    document.getElementById('actionType').value = actionType;
+    document.getElementById('actionDescription').value = '';
+
+    const title = document.getElementById('actionModalTitle');
+    const submitBtn = document.getElementById('actionSubmitBtn');
+
+    if (actionType === 'APPROVE') {
+        title.textContent = '✅ تأیید رسید';
+        submitBtn.textContent = '✅ تأیید';
+        submitBtn.className = 'btn btn-success';
+    } else if (actionType === 'REJECT') {
+        title.textContent = '❌ رد رسید';
+        submitBtn.textContent = '❌ رد';
+        submitBtn.className = 'btn btn-danger';
+    } else if (actionType === 'RETURN') {
+        title.textContent = '↩️ عودت رسید';
+        submitBtn.textContent = '↩️ عودت';
+        submitBtn.className = 'btn btn-info';
+    }
+
+    document.getElementById('actionModal').style.display = 'block';
+    setTimeout(() => document.getElementById('actionDescription').focus(), 100);
+}
+
+function closeActionModal() {
+    document.getElementById('actionModal').style.display = 'none';
+}
+
+function submitAction() {
+    const receiptId = document.getElementById('actionReceiptId').value;
+    const actionType = document.getElementById('actionType').value;
+    const description = document.getElementById('actionDescription').value.trim();
+
+    if (!description) {
+        showMessage('لطفاً توضیحات را وارد کنید', 'error');
+        return;
+    }
+
+    const payload = {
+        receiptId: Number(receiptId),
+        description: description
+    };
+
+    let url = '';
+    if (actionType === 'APPROVE') {
+        url = '/receipt/approve';
+    } else if (actionType === 'REJECT') {
+        url = '/receipt/reject';
+    } else if (actionType === 'RETURN') {
+        url = '/receipt/return';
+    }
+
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+    })
+        .then(response => {
+            if (!response.ok) {
+                return response.text().then(text => { throw new Error(text || 'خطا در انجام عملیات'); });
+            }
+            return response.json().catch(() => ({}));
+        })
+        .then(() => {
+            const msg = actionType === 'APPROVE' ? 'رسید با موفقیت تأیید شد' :
+                actionType === 'REJECT'  ? 'رسید با موفقیت رد شد' :
+                    'رسید با موفقیت عودت داده شد';
+            showMessage(msg, 'success');
+            closeActionModal();
+
+            if (currentUsername) {
+                loadReceiptsByUsername();
+            } else {
+                loadAllReceipts();
+            }
+        })
+        .catch(error => {
+            console.error('Action error:', error);
+            showMessage('خطا در انجام عملیات: ' + error.message, 'error');
+        });
 }
 
 // ============================
