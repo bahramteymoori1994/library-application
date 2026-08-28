@@ -9,6 +9,7 @@ import com.example.library.project.model.entities.User;
 import com.example.library.project.model.enums.ReceiptStatus;
 import com.example.library.project.model.views.ReceiptView;
 import com.example.library.project.repositories.ReceiptRepository;
+import com.example.library.project.services.interfaces.ReceiptLogService;
 import com.example.library.project.services.interfaces.ReceiptService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.core.Authentication;
@@ -23,9 +24,11 @@ import java.util.List;
 public class ReceiptServiceImpl implements ReceiptService {
 
     private final ReceiptRepository receiptRepository;
+    private final ReceiptLogService receiptLogService;
 
-    public ReceiptServiceImpl(ReceiptRepository receiptRepository) {
+    public ReceiptServiceImpl(ReceiptRepository receiptRepository, ReceiptLogService receiptLogService) {
         this.receiptRepository = receiptRepository;
+        this.receiptLogService = receiptLogService;
     }
 
     @Override

@@ -30,8 +30,8 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(request -> {
                     request
                             .requestMatchers("/", "/login", "/css/**", "/js/**").permitAll()
-                            .requestMatchers("/welcome").hasAnyRole("USER", "ADMIN")
-                            .requestMatchers("/book/**").hasAnyRole("USER", "ADMIN")
+                            .requestMatchers("/welcome").hasAnyRole("USER", "ADMIN", "LIBRARIAN")
+                            .requestMatchers("/book/**").hasAnyRole("USER", "ADMIN", "LIBRARIAN")
                             .requestMatchers("/author/**",
                                     "/authorType/**",
                                     "/bookSubject/**",
