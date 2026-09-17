@@ -1,8 +1,6 @@
 package com.example.library.project.services.impl;
 
-import com.example.library.project.dto.requests.ReceiptLogRequestDto;
 import com.example.library.project.dto.requests.ReceiptRequestDto;
-import com.example.library.project.dto.responses.ReceiptLogResponseDto;
 import com.example.library.project.dto.responses.ReceiptResponseDto;
 import com.example.library.project.dto.views.ReceiptViewResponseDto;
 import com.example.library.project.model.entities.Book;
@@ -11,13 +9,14 @@ import com.example.library.project.model.entities.ReceiptLog;
 import com.example.library.project.model.entities.User;
 import com.example.library.project.model.enums.ReceiptStatus;
 import com.example.library.project.model.views.ReceiptView;
+import com.example.library.project.repositories.ReceiptLogRepository;
 import com.example.library.project.repositories.ReceiptRepository;
-import com.example.library.project.services.interfaces.ReceiptLogService;
 import com.example.library.project.services.interfaces.ReceiptService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -27,18 +26,17 @@ import java.util.List;
 public class ReceiptServiceImpl implements ReceiptService {
 
     private final ReceiptRepository receiptRepository;
-    private final ReceiptLogService receiptLogService;
+    private final ReceiptLogRepository receiptLogRepository;
 
-    public ReceiptServiceImpl(ReceiptRepository receiptRepository, ReceiptLogService receiptLogService) {
+    public ReceiptServiceImpl(ReceiptRepository receiptRepository, ReceiptLogRepository receiptLogRepository) {
         this.receiptRepository = receiptRepository;
-        this.receiptLogService = receiptLogService;
+        this.receiptLogRepository = receiptLogRepository;
     }
 
     @Override
     public ReceiptResponseDto save(ReceiptRequestDto receiptRequestDto) throws Exception {
 
         ReceiptResponseDto receiptResponseDto = new ReceiptResponseDto();
-        ReceiptLogRequestDto receiptLogRequestDto = new  ReceiptLogRequestDto();
         Receipt receipt = new Receipt();
         List<Book> books = receiptRequestDto.getBooks();
 
@@ -87,16 +85,6 @@ public class ReceiptServiceImpl implements ReceiptService {
         }
 
         BeanUtils.copyProperties(receiptSaved, receiptResponseDto);
-
-        receiptLogRequestDto
-                .setCreatedBy(receiptResponseDto.getCreatedBy())
-                .setCreatedDate(receiptResponseDto.getCreatedDate())
-                .setReceiptStatus(ReceiptStatus.INIT_REGISTRATION)
-                .setReceipt(receiptSaved)
-                .setCreatedTime(receiptResponseDto.getCreatedTime());
-
-        receiptLogService.save(receiptLogRequestDto);
-
         return receiptResponseDto;
     }
 
@@ -131,7 +119,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         {
             List<Book> bookList = new ArrayList<>();
 
-            books.stream()
+            books
                     .forEach(book ->
                     {
                         Book newBook = new Book();
@@ -240,8 +228,9 @@ public class ReceiptServiceImpl implements ReceiptService {
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             User user = (User) authentication.getPrincipal();
-            ReceiptLogRequestDto receiptLogRequestDto = new ReceiptLogRequestDto();
+            ReceiptLog receiptLog = new ReceiptLog();
             Receipt findReceiptById = receiptRepository.findById(receiptResponseDto.getReceiptId()).orElse(null);
+            Long id = findReceiptById.getReceiptId();
 
             if( findReceiptById == null ){
                 throw new Exception("Receipt id not found");
@@ -254,18 +243,14 @@ public class ReceiptServiceImpl implements ReceiptService {
                             .setDescription(receiptResponseDto.getDescription())
                             .setModifiedBy(user.getUsername());
 
-            Receipt receipt = receiptRepository.save(findReceiptById);
-            ReceiptLogResponseDto findReceiptLogByReceipt = receiptLogService.findReceiptLogByReceipt(receipt.getReceiptId());
-
-            receiptLogRequestDto
-                    .setReceiptLogId(findReceiptLogByReceipt.getReceiptLogId())
-                    .setCreatedDate(LocalDate.now())
-                    .setCreatedTime(LocalTime.now())
-                    .setCreatedBy(user.getUsername())
-                    .setReceipt(receipt)
+            receiptLog
+                    .setCreatedDate(findReceiptById.getCreatedDate())
+                    .setCreatedTime(findReceiptById.getCreatedTime())
+                    .setCreatedBy(findReceiptById.getCreatedBy())
+                    .setReceipt(findReceiptById)
                     .setReceiptStatus(ReceiptStatus.REJECTED);
 
-            receiptLogService.save(receiptLogRequestDto);
+            receiptLogRepository.save(receiptLog);
         }
 
     @Override
