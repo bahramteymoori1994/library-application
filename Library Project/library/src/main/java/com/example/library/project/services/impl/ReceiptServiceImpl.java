@@ -16,7 +16,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -219,42 +218,89 @@ public class ReceiptServiceImpl implements ReceiptService {
     }
 
     @Override
-    public void approveAction(ReceiptResponseDto receiptResponseDto) {
+    public void approveAction(ReceiptResponseDto receiptResponseDto) throws Exception {
 
-    }
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) authentication.getPrincipal();
+        ReceiptLog receiptLog = new ReceiptLog();
+        Receipt findReceiptById = receiptRepository.findById(receiptResponseDto.getReceiptId()).orElse(null);
 
-        @Override
-        public void rejectAction(ReceiptResponseDto receiptResponseDto) throws Exception {
-
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            User user = (User) authentication.getPrincipal();
-            ReceiptLog receiptLog = new ReceiptLog();
-            Receipt findReceiptById = receiptRepository.findById(receiptResponseDto.getReceiptId()).orElse(null);
-            Long id = findReceiptById.getReceiptId();
-
-            if( findReceiptById == null ){
-                throw new Exception("Receipt id not found");
-            }
-
-            findReceiptById
-                            .setReceiptStatus(ReceiptStatus.REJECTED)
-                            .setModifiedDate(LocalDate.now())
-                            .setModifiedTime(LocalTime.now())
-                            .setDescription(receiptResponseDto.getDescription())
-                            .setModifiedBy(user.getUsername());
-
-            receiptLog
-                    .setCreatedDate(findReceiptById.getCreatedDate())
-                    .setCreatedTime(findReceiptById.getCreatedTime())
-                    .setCreatedBy(findReceiptById.getCreatedBy())
-                    .setReceipt(findReceiptById)
-                    .setReceiptStatus(ReceiptStatus.REJECTED);
-
-            receiptLogRepository.save(receiptLog);
+        if( findReceiptById == null ){
+            throw new Exception("Receipt id not found");
         }
 
-    @Override
-    public void returnAction(ReceiptResponseDto receiptResponseDto) {
+        findReceiptById
+                .setReceiptStatus(ReceiptStatus.APPROVED)
+                .setModifiedDate(LocalDate.now())
+                .setModifiedTime(LocalTime.now())
+                .setDescription(receiptResponseDto.getDescription())
+                .setModifiedBy(user.getUsername());
 
+        receiptLog
+                .setCreatedDate(findReceiptById.getModifiedDate())
+                .setCreatedTime(findReceiptById.getModifiedTime())
+                .setCreatedBy(findReceiptById.getModifiedBy())
+                .setReceipt(findReceiptById)
+                .setReceiptStatus(ReceiptStatus.APPROVED);
+
+        receiptLogRepository.save(receiptLog);
+    }
+
+    @Override
+    public void rejectAction(ReceiptResponseDto receiptResponseDto) throws Exception {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) authentication.getPrincipal();
+        ReceiptLog receiptLog = new ReceiptLog();
+        Receipt findReceiptById = receiptRepository.findById(receiptResponseDto.getReceiptId()).orElse(null);
+
+        if( findReceiptById == null ){
+            throw new Exception("Receipt id not found");
+        }
+
+        findReceiptById
+                .setReceiptStatus(ReceiptStatus.REJECTED)
+                .setModifiedDate(LocalDate.now())
+                .setModifiedTime(LocalTime.now())
+                .setDescription(receiptResponseDto.getDescription())
+                .setModifiedBy(user.getUsername());
+
+        receiptLog
+                .setCreatedDate(findReceiptById.getModifiedDate())
+                .setCreatedTime(findReceiptById.getModifiedTime())
+                .setCreatedBy(findReceiptById.getModifiedBy())
+                .setReceipt(findReceiptById)
+                .setReceiptStatus(ReceiptStatus.REJECTED);
+
+        receiptLogRepository.save(receiptLog);
+    }
+
+    @Override
+    public void returnAction(ReceiptResponseDto receiptResponseDto) throws Exception {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) authentication.getPrincipal();
+        ReceiptLog receiptLog = new ReceiptLog();
+        Receipt findReceiptById = receiptRepository.findById(receiptResponseDto.getReceiptId()).orElse(null);
+
+        if( findReceiptById == null ){
+            throw new Exception("Receipt id not found");
+        }
+
+        findReceiptById
+                .setReceiptStatus(ReceiptStatus.RETURNED)
+                .setModifiedDate(LocalDate.now())
+                .setModifiedTime(LocalTime.now())
+                .setDescription(receiptResponseDto.getDescription())
+                .setModifiedBy(user.getUsername());
+
+        receiptLog
+                .setCreatedDate(findReceiptById.getModifiedDate())
+                .setCreatedTime(findReceiptById.getModifiedTime())
+                .setCreatedBy(findReceiptById.getModifiedBy())
+                .setReceipt(findReceiptById)
+                .setReceiptStatus(ReceiptStatus.RETURNED);
+
+        receiptLogRepository.save(receiptLog);
     }
 }

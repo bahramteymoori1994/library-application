@@ -41,10 +41,9 @@ public class ReceiptController {
         List<ReceiptViewResponseDto> receipts;
 
         if (isAdminOrLibrarian) {
-            // ادمین و کتابدار → همه رسیدها
             receipts = receiptService.findAllReceiptsView();
-        } else {
-            // کاربر عادی → فقط رسیدهای خودش
+        }
+        else {
             receipts = receiptService.findAllReceiptsViewByUsername(currentUsername);
         }
 
@@ -113,6 +112,22 @@ public class ReceiptController {
     public ReceiptResponseDto rejectReceipt(@RequestBody ReceiptResponseDto receiptResponseDto) throws Exception {
 
         receiptService.rejectAction(receiptResponseDto);
+        return receiptService.findById(receiptResponseDto.getReceiptId());
+    }
+
+    @PostMapping("/approve")
+    @ResponseBody
+    public ReceiptResponseDto approveReceipt(@RequestBody ReceiptResponseDto receiptResponseDto) throws Exception {
+
+        receiptService.approveAction(receiptResponseDto);
+        return receiptService.findById(receiptResponseDto.getReceiptId());
+    }
+
+    @PostMapping("/return")
+    @ResponseBody
+    public ReceiptResponseDto returnReceipt(@RequestBody ReceiptResponseDto receiptResponseDto) throws Exception {
+
+        receiptService.returnAction(receiptResponseDto);
         return receiptService.findById(receiptResponseDto.getReceiptId());
     }
 }

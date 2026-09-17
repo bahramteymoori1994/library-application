@@ -10,7 +10,7 @@ public interface ReceiptService extends AbstractBaseService<ReceiptRequestDto, R
 
     List<ReceiptViewResponseDto> findAllReceiptsView();
     List<ReceiptViewResponseDto> findAllReceiptsViewByUsername(String username);
-    void approveAction(ReceiptResponseDto receiptResponseDto);
+    void approveAction(ReceiptResponseDto receiptResponseDto) throws Exception;
     void rejectAction(ReceiptResponseDto receiptResponseDto) throws Exception;
-    void returnAction(ReceiptResponseDto receiptResponseDto);
+    void returnAction(ReceiptResponseDto receiptResponseDto) throws Exception;
 }
