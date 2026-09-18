@@ -188,6 +188,9 @@ function renderReceiptsTable(receipts) {
         const receiptTime = r.receiptTime ? formatTime(r.receiptTime) : '—';
         const createdDate = r.createdDate ? formatDate(r.createdDate) : '—';
 
+        // ✅ بررسی وضعیت رد شده - در این حالت همه دکمه‌ها غیرفعال می‌شوند
+        const isRejected = r.receiptStatus === 'REJECTED';
+
         html += `
             <tr>
                 <td><strong>${r.receiptId}</strong></td>
@@ -203,20 +206,48 @@ function renderReceiptsTable(receipts) {
                 <td>${createdDate}</td>
                 <td>${r.createdBy || '—'}</td>
                 <td>
-                    <div style="display:flex; gap:5px; flex-wrap:wrap; justify-content:center;">
-                        <button class="btn btn-warning btn-sm" data-id="${r.receiptId}" onclick="openEditModal(this)">
-                            ✏️ ویرایش
-                        </button>
-                        <button class="btn btn-success btn-sm" data-id="${r.receiptId}" onclick="openActionModal(this, 'APPROVE')">
-                            ✅ تأیید
-                        </button>
-                        <button class="btn btn-danger btn-sm" data-id="${r.receiptId}" onclick="openActionModal(this, 'REJECT')">
-                            ❌ رد
-                        </button>
-                        <button class="btn btn-info btn-sm" data-id="${r.receiptId}" onclick="openActionModal(this, 'RETURN')">
-                            ↩️ عودت
-                        </button>
-                    </div>
+                    ${isRejected ? `
+                        <div style="display:flex; gap:5px; flex-wrap:wrap; justify-content:center;">
+                            <button class="btn btn-warning btn-sm" disabled
+                                    title="رسید رد شده قابل ویرایش نیست"
+                                    style="opacity:0.5; cursor:not-allowed;">
+                                ✏️ ویرایش
+                            </button>
+                            <button class="btn btn-success btn-sm" disabled
+                                    title="رسید رد شده قابل تأیید نیست"
+                                    style="opacity:0.5; cursor:not-allowed;">
+                                ✅ تأیید
+                            </button>
+                            <button class="btn btn-danger btn-sm" disabled
+                                    title="رسید رد شده قابل رد مجدد نیست"
+                                    style="opacity:0.5; cursor:not-allowed;">
+                                ❌ رد
+                            </button>
+                            <button class="btn btn-info btn-sm" disabled
+                                    title="رسید رد شده قابل عودت نیست"
+                                    style="opacity:0.5; cursor:not-allowed;">
+                                ↩️ عودت
+                            </button>
+                        </div>
+                        <div style="font-size:11px; color:#dc3545; margin-top:5px; text-align:center;">
+                            ⛔ عملیات غیرفعال
+                        </div>
+                    ` : `
+                        <div style="display:flex; gap:5px; flex-wrap:wrap; justify-content:center;">
+                            <button class="btn btn-warning btn-sm" data-id="${r.receiptId}" onclick="openEditModal(this)">
+                                ✏️ ویرایش
+                            </button>
+                            <button class="btn btn-success btn-sm" data-id="${r.receiptId}" onclick="openActionModal(this, 'APPROVE')">
+                                ✅ تأیید
+                            </button>
+                            <button class="btn btn-danger btn-sm" data-id="${r.receiptId}" onclick="openActionModal(this, 'REJECT')">
+                                ❌ رد
+                            </button>
+                            <button class="btn btn-info btn-sm" data-id="${r.receiptId}" onclick="openActionModal(this, 'RETURN')">
+                                ↩️ عودت
+                            </button>
+                        </div>
+                    `}
                 </td>
             </tr>
         `;
@@ -482,6 +513,13 @@ function openEditModal(button) {
         return;
     }
 
+    // ✅ محافظت اضافی: بررسی وضعیت رد شده
+    const receipt = allReceipts.find(r => String(r.receiptId) === String(receiptId));
+    if (receipt && receipt.receiptStatus === 'REJECTED') {
+        showMessage('این رسید رد شده است و قابل ویرایش نیست', 'error');
+        return;
+    }
+
     showMessage('در حال بارگذاری اطلاعات رسید...', 'info');
 
     fetch(`/receipt/findReceiptById/${receiptId}`)
@@ -543,6 +581,13 @@ function openActionModal(button, actionType) {
     const receiptId = button.getAttribute('data-id');
     if (!receiptId) {
         showMessage('شناسه رسید یافت نشد', 'error');
+        return;
+    }
+
+    // ✅ محافظت اضافی: بررسی وضعیت رد شده
+    const receipt = allReceipts.find(r => String(r.receiptId) === String(receiptId));
+    if (receipt && receipt.receiptStatus === 'REJECTED') {
+        showMessage('این رسید رد شده است و امکان انجام عملیات وجود ندارد', 'error');
         return;
     }
 
